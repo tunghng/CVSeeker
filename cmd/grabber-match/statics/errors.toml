@@ -1,0 +1,58 @@
+[modules]
+"000" = "common"
+"001" = "authentication"
+"002" = "files"
+"003" = "combat"
+"004" = "payments"
+"005" = "notifications"
+"006" = "discussion"
+"007" = "voucher"
+
+[common]
+"50000001" = "The server encountered an internal error or misconfiguration and was unable to complete your request"
+"40100006" = "Token expired"
+
+[authentication]
+"40000103" = "The account already exists on system please enter a different account"
+"40000113" = "The account already exists on Fa Quiz App, please enter your FA Quiz account"
+"40000114" = "The account already blocked on system"
+"40000104" = "The old password you have entered is incorrect"
+"40000105" = "The new password you entered is the same as the old password. Enter a different password"
+"40000106" = "The otp you entered is invalid or expired"
+"40100103" = "Error validating access token"
+"40000108" = "Try another way to sign in or re-enter email/password"
+"40400104" = "The account dose not exist, please register a new account"
+"40400105" = "The Gmail account dose not exist, please register a new account"
+"40400106" = "The Facebook account dose not exist, please register a new account"
+"40400107" = "The Apple account dose not exist, please register a new account"
+"40400109" = "The account dose not exist, please register a new account"
+"40400100" = "Your account has already been verified"
+"40400101" = "The verification code has already sent to your email"
+
+
+[file]
+"40000201" = "Hãy nhập file upload."
+"40000202" = "Chỉ hỗ trợ 1 file upload."
+"40000203" = "MIME type not valid"
+"40000204" = "Upload image error occur"
+
+[combat]
+"40400301" = "Error happen when opening a combat"
+"40400302" = "Leaderboard is empty"
+
+[payments]
+"40400400" = "Payment service error"
+"40000400" = "You have already enrolled this offer"
+
+[notifications]
+"40000500" = "Notification list is empty"
+"40000501" = "Notification got error bad request"
+
+[discussion]
+"40000600" = "Discussion got error"
+
+[voucher]
+"40000700" = "Mã voucher không đúng"
+"40000701" = "Lỗi khi apply voucher"
+"40000702" = "Mã voucher đang được apply bởi người khác"
+"40000703" = "Vật phẩm không đủ để tiến hành thao tác"
