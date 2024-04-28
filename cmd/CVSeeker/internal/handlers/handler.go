@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
-	"grabber-match/cmd/grabber-match/pkg/utils"
+	"grabber-match/cmd/CVSeeker/pkg/utils"
 	internalDTO "grabber-match/internal/dtos"
 	"grabber-match/internal/ginLogger"
 	"grabber-match/pkg/api"
@@ -11,16 +11,20 @@ import (
 
 // Handlers contains all handlers.
 type Handlers struct {
+	DataProcessingHandler *DataProcessingHandler
 }
 
 // NewHandlersParams contains all dependencies of handlers.
 type handlersParams struct {
 	dig.In
+	DataProcessingHandler *DataProcessingHandler
 }
 
 // NewHandlers returns new instance of Handlers.
 func NewHandlers(params handlersParams) *Handlers {
-	return &Handlers{}
+	return &Handlers{
+		DataProcessingHandler: params.DataProcessingHandler,
+	}
 }
 
 func GetUserContext(c *gin.Context) *string {

@@ -6,490 +6,85 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"grabber-match/pkg/cfg"
-	"io"
-	"mime/multipart"
 	"net/http"
-	"net/url"
-	"os"
-	"path"
-	"path/filepath"
-	"strconv"
 )
 
 type IGptAdaptorClient interface {
-	CreateAssistant(request AssistantRequest) (*AssistantResponse, error)
-	CreateThread() (*ThreadResponse, error)
-	DeleteThread(threadID string) (*DeleteThreadResponse, error)
-	ListMessages(threadID string, limit int, order, after, before string) (*ListMessagesResponse, error)
-	GetRunDetails(threadID, runID string) (*RunResponse, error)
-	CreateRun(threadID string, request CreateRunRequest) (*RunResponse, error)
-	SubmitToolOutputs(threadID, runID string, request SubmitToolOutputsRequest) (*RunResponse, error)
-	CreateMessage(threadID string, request CreateMessageRequest) (*MessageResponse, error)
-	DownloadAndUploadImage(imageURL string) (*UploadFileResponse, error)
+	AskGPT(prompt, model string) (string, error)
 }
 
-type gptAdaptorClient struct {
-	Client *http.Client
-	ApiKey string
+type GptAdaptorClient struct {
+	Client  *http.Client
+	BaseURL string
+	ApiKey  string
 }
 
-func NewGptAdaptorClientClient(cfgReader *viper.Viper) (IGptAdaptorClient, error) {
-	return &gptAdaptorClient{
-		Client: &http.Client{},
-		ApiKey: cfgReader.GetString(cfg.GptApiKey),
+// NewGptAdaptorClient initializes a new client for interacting with GPT models.
+func NewGptAdaptorClient(cfgReader *viper.Viper) (IGptAdaptorClient, error) {
+	return &GptAdaptorClient{
+		Client:  &http.Client{},
+		BaseURL: "https://api.openai.com",
+		ApiKey:  cfgReader.GetString(cfg.GptApiKey),
 	}, nil
 }
 
-func (g *gptAdaptorClient) addCommonHeaders(req *http.Request) {
+// addCommonHeaders adds required headers for API authentication.
+func (g *GptAdaptorClient) addCommonHeaders(req *http.Request) {
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+g.ApiKey)
-	req.Header.Add("OpenAI-Beta", OpenaiAssistantsV1)
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", g.ApiKey))
 }
 
-func (g *gptAdaptorClient) CreateAssistant(request AssistantRequest) (*AssistantResponse, error) {
-	url := AssistantEndpoint
+// AskGPT sends a prompt to the GPT-3.5 API and returns the generated response.
+func (g *GptAdaptorClient) AskGPT(prompt, model string) (string, error) {
+	endpoint := fmt.Sprintf("%s/v1/chat/completions", g.BaseURL)
+	body := map[string]interface{}{
+		"model": model,
+		"messages": []map[string]string{
+			{"role": "user", "content": prompt},
+		},
+		"temperature": 0.7, // Adjust the temperature if needed
+	}
 
-	requestBody, err := json.Marshal(request)
+	bodyBytes, err := json.Marshal(body)
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("could not encode request body: %v", err)
 	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(bodyBytes))
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("could not create request: %v", err)
 	}
+
 	g.addCommonHeaders(req)
 
 	resp, err := g.Client.Do(req)
 	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			return
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	var response AssistantResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) CreateThread() (*ThreadResponse, error) {
-	url := ThreadEndpoint
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			return
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response ThreadResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) DeleteThread(threadID string) (*DeleteThreadResponse, error) {
-	url := fmt.Sprintf("%v/%v", ThreadEndpoint, threadID)
-
-	req, err := http.NewRequest("DELETE", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			return
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response DeleteThreadResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) CreateMessage(threadID string, request CreateMessageRequest) (*MessageResponse, error) {
-	url := fmt.Sprintf("%v/%v/messages", ThreadEndpoint, threadID)
-
-	requestBody, err := json.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, err
-	}
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			return
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-
-	var response MessageResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) ListMessages(threadID string, limit int, order, after, before string) (*ListMessagesResponse, error) {
-	urls := fmt.Sprintf("%v/%v/messages", ThreadEndpoint, threadID)
-
-	// Xây dựng các tham số truy vấn
-	queryParams := url.Values{}
-	if limit > 0 {
-		queryParams.Add("limit", strconv.Itoa(limit))
-	}
-	if order != "" {
-		queryParams.Add("order", order)
-	}
-	if after != "" {
-		queryParams.Add("after", after)
-	}
-	if before != "" {
-		queryParams.Add("before", before)
-	}
-	urls += "?" + queryParams.Encode()
-	req, err := http.NewRequest("GET", urls, nil)
-	if err != nil {
-		return nil, err
-	}
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response ListMessagesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) CreateRun(threadID string, request CreateRunRequest) (*RunResponse, error) {
-	urls := fmt.Sprintf("%v/%v/runs", ThreadEndpoint, threadID)
-
-	requestBody, err := json.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", urls, bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, err
-	}
-
-	// Sử dụng hàm helper để thêm headers chung
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response RunResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) GetRunDetails(threadID, runID string) (*RunResponse, error) {
-	urls := fmt.Sprintf("%v/%v/runs/%v", ThreadEndpoint, threadID, runID)
-
-	req, err := http.NewRequest("GET", urls, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// Sử dụng hàm helper để thêm headers chung
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response RunResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) SubmitToolOutputs(threadID, runID string, request SubmitToolOutputsRequest) (*RunResponse, error) {
-	urls := fmt.Sprintf("%v/%v/runs/%v/submit_tool_outputs", ThreadEndpoint, threadID, runID)
-
-	requestBody, err := json.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", urls, bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, err
-	}
-
-	// Sử dụng hàm helper để thêm headers chung
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response RunResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) DownloadAndUploadImage(imageURL string) (*UploadFileResponse, error) {
-	// Bước 1: Tải ảnh từ URL
-	resp, err := http.Get(imageURL)
-	if err != nil {
-		return nil, fmt.Errorf("Error downloading image: %v", err)
+		return "", fmt.Errorf("could not send request to GPT API: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Bước 2: Lấy tên file từ URL và lưu ảnh vào hệ thống file
-	fileName := path.Base(imageURL) // Lấy tên file từ URL
-	file, err := os.Create(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating file: %v", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	_, err = io.Copy(file, resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("Error saving image: %v", err)
-	}
-
-	// Bước 3: Upload ảnh lên OpenAI
-	uploadResponse, err := g.UploadFile(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error uploading file to OpenAI: %v", err)
-	}
-
-	// Bước 4: Xoá ảnh khỏi hệ thống file cục bộ
-	err = os.Remove(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error deleting file: %v", err)
-	}
-
-	return uploadResponse, nil
-}
-
-func (g *gptAdaptorClient) UploadFile(filePath string) (*UploadFileResponse, error) {
-	// Mở file
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("Error opening file: %v", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	// Tạo multipart form request
-	var buffer bytes.Buffer
-	writer := multipart.NewWriter(&buffer)
-
-	// Thêm field 'purpose'
-	_ = writer.WriteField("purpose", "assistants")
-
-	// Thêm file vào form
-	part, err := writer.CreateFormFile("file", filepath.Base(filePath))
-	if err != nil {
-		return nil, fmt.Errorf("error creating form file: %v", err)
-	}
-	_, err = io.Copy(part, file)
-	if err != nil {
-		return nil, fmt.Errorf("Error copying file to form file: %v", err)
-	}
-
-	// Đóng writer
-	err = writer.Close()
-	if err != nil {
-		return nil, fmt.Errorf("Error closing writer: %v", err)
-	}
-
-	// Tạo và gửi request
-	req, err := http.NewRequest("POST", "https://api.openai.com/v1/files", &buffer)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating request: %v", err)
-	}
-	req.Header.Add("Authorization", "Bearer "+g.ApiKey)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("Error sending request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// Kiểm tra response
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Upload failed with status code: %d", resp.StatusCode)
+		bodyBytes, _ := json.Marshal(body) // assuming error handling omitted for brevity
+		return "", fmt.Errorf("GPT API returned non-OK status code: %d, message: %s", resp.StatusCode, string(bodyBytes))
 	}
 
-	// Decode response
-	var uploadResp UploadFileResponse
-	err = json.NewDecoder(resp.Body).Decode(&uploadResp)
+	var response struct {
+		Choices []struct {
+			Message struct {
+				Role    string `json:"role"`
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		return nil, fmt.Errorf("Error decoding response JSON: %v", err)
+		return "", fmt.Errorf("could not decode response body: %v", err)
 	}
 
-	return &uploadResp, nil
+	if len(response.Choices) > 0 {
+		return response.Choices[0].Message.Content, nil
+	}
+
+	return "", fmt.Errorf("no response found in the API return")
 }

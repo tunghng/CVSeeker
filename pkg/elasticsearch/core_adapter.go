@@ -28,7 +28,7 @@ type CoreElkClient interface {
 	BulkUpdateToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error
 	BulkUpsertToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error
 	BulkDeleteToElasticsearch(ctx context.Context, indexName string, ids []string) error
-	SaveToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error
+	SaveToElasticsearch(ctx context.Context, indexName string, data interface{}) error
 	UpdateToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error
 	UpsertToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error
 	DeleteFromElasticsearch(ctx context.Context, indexName string, id string) error
@@ -167,8 +167,8 @@ func (_this *coreElkClient) BulkDeleteToElasticsearch(ctx context.Context, index
 	return err
 }
 
-func (_this *coreElkClient) SaveToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error {
-	_, err := _this.client.Index().Index(indexName).Id(id).BodyJson(data).Do(ctx)
+func (_this *coreElkClient) SaveToElasticsearch(ctx context.Context, indexName string, data interface{}) error {
+	_, err := _this.client.Index().Index(indexName).BodyJson(data).Do(ctx)
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"grabber-match/cmd/grabber-match/internal/providers"
+	"grabber-match/cmd/CVSeeker/internal/providers"
 	"grabber-match/internal/ginServer"
 	"grabber-match/pkg/cfg"
 	"log"

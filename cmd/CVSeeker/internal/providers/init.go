@@ -1,18 +1,19 @@
 package providers
 
 import (
-	"grabber-match/cmd/grabber-match/internal/cfg"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
+	"grabber-match/cmd/CVSeeker/internal/cfg"
 	"grabber-match/internal/dtos"
 	"grabber-match/internal/errors"
 	"grabber-match/internal/ginServer"
 	"grabber-match/internal/meta"
 	"grabber-match/pkg/api"
 	"grabber-match/pkg/app"
+	"grabber-match/pkg/db"
+	"log"
 	"net/http"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 )
 
 // newServerConfig returns a *server.Config.
@@ -43,7 +44,21 @@ func newGinEngine() *gin.Engine {
 	return r
 }
 
-//------------------------------------------------------------------
+func newMySQLConnection() *db.DB {
+	_db, err := db.Connect(&db.Config{
+		Driver:   db.DriverMySQL,
+		LogDebug: viper.GetBool(cfg.ConfigKeyDBMySQLLogBug),
+		Username: viper.GetString(cfg.ConfigKeyDBMySQLUsername),
+		Password: viper.GetString(cfg.ConfigKeyDBMySQLPassword),
+		Host:     viper.GetString(cfg.ConfigKeyDBMySQLHost),
+		Port:     viper.GetInt64(cfg.ConfigKeyDBMySQLPort),
+		Database: viper.GetString(cfg.ConfigKeyDBMySQLDatabase),
+	})
+	if err != nil {
+		log.Fatalf("Connecting to MySQL DB: %v", err)
+	}
+	return _db
+}
 
 func newApiConfig() *api.Config {
 	return &api.Config{
