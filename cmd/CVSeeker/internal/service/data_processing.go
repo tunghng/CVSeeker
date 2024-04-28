@@ -3,7 +3,9 @@ package services
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"go.uber.org/dig"
+	"grabber-match/cmd/CVSeeker/internal/cfg"
 	"grabber-match/internal/ginLogger"
 	"grabber-match/internal/meta"
 	"grabber-match/internal/models"
@@ -12,6 +14,7 @@ import (
 	"grabber-match/pkg/elasticsearch"
 	"grabber-match/pkg/gpt"
 	"strings"
+	"time"
 )
 
 type IDataProcessingService interface {
@@ -46,13 +49,29 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	prompt := generatePrompt(fullText)
 	model := "gpt-3.5-turbo"
 
-	// Summarize resume text
+	// Summarize resume text by making request to OpenAI
 	responseText, err := _this.gptClient.AskGPT(prompt, model)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to summarize using GPT: %v", err)
 		return nil, err
 	}
 
+	// Document for elasticsearch
+	elkData := map[string]interface{}{
+		"full_text":        fullText,
+		"download_link":    "http://example.com/mockresume.pdf", // Mock download link
+		"vector_embedding": "MockVectorEmbedding123",            // Mock vector embedding
+		"created_at":       time.Now().Format(time.RFC3339),
+		"updated_at":       time.Now().Format(time.RFC3339),
+	}
+
+	// Upload to Elasticsearch
+	err = _this.elkClient.SaveToElasticsearch(c, viper.GetString(cfg.ElasticsearchDocumentIndex), elkData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload resume data to Elasticsearch: %v", err)
+	}
+
+	//
 	resume := &models.Resume{
 		FullText:        fullText,
 		VectorEmbedding: "MockVectorEmbedding123",            // Mock vector embedding

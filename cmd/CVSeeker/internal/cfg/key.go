@@ -32,4 +32,6 @@ const (
 	ConfigKeyGCSBucketCDNRootFolder = "GCS_BUCKET_CDN_ROOT_FOLDER"
 	ConfigKeyCDNUrl                 = "GCS_CDN_URL"
 	URLGoogleStorage                = "URL_GOOGLE_STORAGE"
+
+	ElasticsearchDocumentIndex = "ELK_DOCUMENT_INDEX"
 )
