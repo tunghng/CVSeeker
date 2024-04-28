@@ -1,19 +1,19 @@
 package handlers
 
 import (
+	"CVSeeker/internal/dtos"
+	"CVSeeker/internal/errors"
+	"CVSeeker/internal/ginLogger"
+	"CVSeeker/internal/meta"
+	"CVSeeker/internal/validators"
+	"CVSeeker/pkg/db"
+	pkgUtils "CVSeeker/pkg/utils"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/vi"
 	ut "github.com/go-playground/universal-translator"
 	"go.uber.org/dig"
-	"grabber-match/internal/dtos"
-	"grabber-match/internal/errors"
-	"grabber-match/internal/ginLogger"
-	"grabber-match/internal/meta"
-	"grabber-match/internal/validators"
-	"grabber-match/pkg/db"
-	pkgUtils "grabber-match/pkg/utils"
 	"net/http"
 	"reflect"
 )

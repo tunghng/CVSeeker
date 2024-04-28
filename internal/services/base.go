@@ -1,14 +1,14 @@
 package services
 
 import (
+	"CVSeeker/internal/errors"
+	"CVSeeker/internal/meta"
+	"CVSeeker/internal/validators"
 	"context"
 	"github.com/go-playground/locales/en"
 	"github.com/go-playground/locales/vi"
 	ut "github.com/go-playground/universal-translator"
 	"go.uber.org/dig"
-	"grabber-match/internal/errors"
-	"grabber-match/internal/meta"
-	"grabber-match/internal/validators"
 )
 
 type BaseService interface {

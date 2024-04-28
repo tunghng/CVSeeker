@@ -1,11 +1,11 @@
 package main
 
 import (
+	"CVSeeker/cmd/CVSeeker/internal/providers"
+	"CVSeeker/internal/ginServer"
+	"CVSeeker/pkg/cfg"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"grabber-match/cmd/CVSeeker/internal/providers"
-	"grabber-match/internal/ginServer"
-	"grabber-match/pkg/cfg"
 	"log"
 	"os"
 )

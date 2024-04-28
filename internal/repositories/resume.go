@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"grabber-match/internal/models"
-	"grabber-match/pkg/db"
+	"CVSeeker/internal/models"
+	"CVSeeker/pkg/db"
 	"time"
 )
 

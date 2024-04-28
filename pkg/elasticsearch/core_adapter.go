@@ -1,12 +1,12 @@
 package elasticsearch
 
 import (
+	"CVSeeker/internal/dtos"
+	"CVSeeker/pkg/cfg"
 	"context"
 	"crypto/tls"
 	"github.com/olivere/elastic/v7"
 	"github.com/spf13/viper"
-	"grabber-match/internal/dtos"
-	"grabber-match/pkg/cfg"
 	"net/http"
 )
 

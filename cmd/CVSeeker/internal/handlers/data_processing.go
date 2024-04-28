@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	services "CVSeeker/cmd/CVSeeker/internal/service"
+	"CVSeeker/internal/handlers"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
-	"grabber-match/cmd/CVSeeker/internal/service"
-	"grabber-match/internal/handlers"
 	"io/ioutil"
 )
 

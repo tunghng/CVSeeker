@@ -1,18 +1,18 @@
 package services
 
 import (
+	"CVSeeker/cmd/CVSeeker/internal/cfg"
+	"CVSeeker/internal/ginLogger"
+	"CVSeeker/internal/meta"
+	"CVSeeker/internal/models"
+	"CVSeeker/internal/repositories"
+	"CVSeeker/pkg/db"
+	"CVSeeker/pkg/elasticsearch"
+	"CVSeeker/pkg/gpt"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
-	"grabber-match/cmd/CVSeeker/internal/cfg"
-	"grabber-match/internal/ginLogger"
-	"grabber-match/internal/meta"
-	"grabber-match/internal/models"
-	"grabber-match/internal/repositories"
-	"grabber-match/pkg/db"
-	"grabber-match/pkg/elasticsearch"
-	"grabber-match/pkg/gpt"
 	"strings"
 	"time"
 )
@@ -68,7 +68,8 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	// Upload to Elasticsearch
 	err = _this.elkClient.SaveToElasticsearch(c, viper.GetString(cfg.ElasticsearchDocumentIndex), elkData)
 	if err != nil {
-		return nil, fmt.Errorf("failed to upload resume data to Elasticsearch: %v", err)
+		ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
+		return nil, err
 	}
 
 	//

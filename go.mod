@@ -1,4 +1,4 @@
-module grabber-match
+module CVSeeker
 
 go 1.18
 

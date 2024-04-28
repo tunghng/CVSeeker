@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	"grabber-match/internal/meta"
+	"CVSeeker/internal/meta"
 )
 
 // Response response custom message

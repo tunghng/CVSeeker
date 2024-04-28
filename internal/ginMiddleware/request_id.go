@@ -1,11 +1,11 @@
 package ginMiddleware
 
 import (
+	"CVSeeker/internal/dtos"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	newrelic "github.com/newrelic/go-agent"
-	"grabber-match/internal/dtos"
 )
 
 type key int

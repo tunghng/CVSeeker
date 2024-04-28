@@ -1,11 +1,11 @@
 package gpt
 
 import (
+	"CVSeeker/pkg/cfg"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/viper"
-	"grabber-match/pkg/cfg"
 	"net/http"
 )
 
