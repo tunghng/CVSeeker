@@ -33,6 +33,7 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(newAppConfig)
 		_ = container.Provide(logger.NewLogger)
 		_ = container.Provide(newServerConfig)
+		_ = container.Provide(newMySQLConnection, dig.Name("talentAcquisitionDB"))
 		_ = container.Provide(newErrorParserConfig)
 		_ = container.Provide(elasticsearch.NewCoreElkClient)
 		_ = container.Provide(gpt.NewGptAdaptorClientClient)
