@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/viper"
 	_swaggerFiles "github.com/swaggo/files"
 	_ginSwagger "github.com/swaggo/gin-swagger"
-	"grabber-match/cmd/grabber-match/internal/cfg"
-	"grabber-match/cmd/grabber-match/internal/handlers"
+	"grabber-match/cmd/CVSeeker/internal/cfg"
+	"grabber-match/cmd/CVSeeker/internal/handlers"
 	"grabber-match/internal/ginLogger"
 	commonMiddleware "grabber-match/internal/ginMiddleware"
 	"grabber-match/internal/ginServer"
@@ -28,8 +28,9 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 		baseRoute := router.Group(viper.GetString(cfg.ConfigKeyContextPath))
 		baseRoute.GET("swagger/*any", _ginSwagger.WrapHandler(_swaggerFiles.Handler))
 
-		//faQuiz := baseRoute.Group("/faquiz")
-		//v1FaQuiz := faQuiz.Group("/v1")
-
+		data := baseRoute.Group("/resumes")
+		{
+			data.POST("", hs.DataProcessingHandler.HandleSummarizeResume())
+		}
 	}
 }

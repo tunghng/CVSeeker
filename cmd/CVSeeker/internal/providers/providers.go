@@ -2,10 +2,12 @@ package providers
 
 import (
 	"go.uber.org/dig"
-	"grabber-match/cmd/grabber-match/internal/handlers"
+	"grabber-match/cmd/CVSeeker/internal/handlers"
+	services "grabber-match/cmd/CVSeeker/internal/service"
 	"grabber-match/internal/errors"
 	"grabber-match/internal/ginServer"
 	commonHandler "grabber-match/internal/handlers"
+	"grabber-match/internal/repositories"
 	"grabber-match/pkg/cfg"
 	"grabber-match/pkg/elasticsearch"
 	"grabber-match/pkg/gpt"
@@ -14,7 +16,7 @@ import (
 
 const (
 	// AppName - name of module
-	AppName = "grabber-match"
+	AppName = "CVSeeker"
 )
 
 func init() {
@@ -31,18 +33,27 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(newCfgReader)
 		_ = container.Provide(newApiConfig)
 		_ = container.Provide(newAppConfig)
-		_ = container.Provide(logger.NewLogger)
-		_ = container.Provide(newServerConfig)
-		_ = container.Provide(newMySQLConnection, dig.Name("talentAcquisitionDB"))
-		_ = container.Provide(newErrorParserConfig)
-		_ = container.Provide(elasticsearch.NewCoreElkClient)
-		_ = container.Provide(gpt.NewGptAdaptorClientClient)
 		_ = container.Provide(newGinEngine)
+		_ = container.Provide(setupRouter)
+		_ = container.Provide(newServerConfig)
+		_ = container.Provide(newErrorParserConfig)
+		_ = container.Provide(newMySQLConnection, dig.Name("talentAcquisitionDB"))
+
+		_ = container.Provide(logger.NewLogger)
 		_ = container.Provide(errors.NewErrorParser)
 		_ = container.Provide(ginServer.NewGinServer)
 		_ = container.Provide(commonHandler.NewBaseHandler)
 		_ = container.Provide(handlers.NewHandlers)
-		_ = container.Provide(setupRouter)
+
+		_ = container.Provide(elasticsearch.NewCoreElkClient)
+		_ = container.Provide(gpt.NewGptAdaptorClient)
+
+		_ = container.Provide(repositories.NewResumeRepository)
+
+		_ = container.Provide(services.NewDataProcessingService)
+
+		_ = container.Provide(handlers.NewDataProcessingHandler)
+
 	}
 
 	return container

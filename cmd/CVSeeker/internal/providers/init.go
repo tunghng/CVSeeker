@@ -3,7 +3,7 @@ package providers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"grabber-match/cmd/grabber-match/internal/cfg"
+	"grabber-match/cmd/CVSeeker/internal/cfg"
 	"grabber-match/internal/dtos"
 	"grabber-match/internal/errors"
 	"grabber-match/internal/ginServer"

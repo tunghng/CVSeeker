@@ -29,7 +29,7 @@ type BaseHandler interface {
 // baseHandlerParams contains all dependencies of BaseHandler.
 type baseHandlerParams struct {
 	dig.In
-	DB          *db.DB `name:"faiDB"`
+	DB          *db.DB `name:"talentAcquisitionDB"`
 	ErrorParser errors.ErrorParser
 }
 
