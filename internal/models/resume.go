@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-const TableNameResumes = "resumes"
+const TableNameResume = "resumes"
 
 type Resume struct {
 	ResumeID        int       `gorm:"column:resume_id;PRIMARY_KEY;AUTO_INCREMENT" json:"resumeId"`
@@ -16,5 +16,5 @@ type Resume struct {
 }
 
 func (Resume) TableName() string {
-	return TableNameResumes
+	return TableNameResume
 }

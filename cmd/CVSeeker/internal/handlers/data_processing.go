@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
 	"grabber-match/cmd/CVSeeker/internal/service"
-	"grabber-match/internal/errors"
 	"grabber-match/internal/handlers"
+	"io/ioutil"
 )
 
 type DataProcessingHandler struct {
@@ -27,16 +27,22 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 }
 
 // / HandleSummarizeResume is the Gin handler function to summarize resumes.
-func (_this *DataProcessingHandler) HandleSummarizeResume() gin.HandlerFunc {
+func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fullText := c.Query("fullText")
-
-		if fullText == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
+		fullText := c.PostForm("fullText")
+		file, _, err := c.Request.FormFile("file")
+		if err != nil {
+			_this.RespondError(c, err)
 			return
 		}
 
-		resp, err := _this.dataProcessingService.SummarizeResume(fullText)
+		fileBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			_this.RespondError(c, err)
+			return
+		}
+
+		resp, err := _this.dataProcessingService.ProcessData(c, fullText, fileBytes)
 		_this.HandleResponse(c, resp, err)
 	}
 }

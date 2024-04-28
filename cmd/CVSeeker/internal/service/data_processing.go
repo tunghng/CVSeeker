@@ -2,44 +2,74 @@ package services
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
+	"grabber-match/internal/ginLogger"
 	"grabber-match/internal/meta"
+	"grabber-match/internal/models"
+	"grabber-match/internal/repositories"
+	"grabber-match/pkg/db"
+	"grabber-match/pkg/elasticsearch"
 	"grabber-match/pkg/gpt"
 	"strings"
 )
 
 type IDataProcessingService interface {
-	SummarizeResume(fullText string) (*meta.BasicResponse, error)
+	ProcessData(c *gin.Context, fullText string, file []byte) (*meta.BasicResponse, error)
 }
 
 type DataProcessingService struct {
-	gptClient gpt.IGptAdaptorClient
+	db         *db.DB
+	gptClient  gpt.IGptAdaptorClient
+	resumeRepo repositories.IResumeRepository
+	elkClient  elasticsearch.CoreElkClient
 }
 
 type DataProcessingServiceArgs struct {
 	dig.In
-	GptClient gpt.IGptAdaptorClient
+	DB         *db.DB `name:"talentAcquisitionDB"`
+	GptClient  gpt.IGptAdaptorClient
+	ResumeRepo repositories.IResumeRepository
+	ElkClient  elasticsearch.CoreElkClient
 }
 
 func NewDataProcessingService(args DataProcessingServiceArgs) IDataProcessingService {
 	return &DataProcessingService{
-		gptClient: args.GptClient,
+		db:         args.DB,
+		gptClient:  args.GptClient,
+		resumeRepo: args.ResumeRepo,
+		elkClient:  args.ElkClient,
 	}
 }
 
-func (_this *DataProcessingService) SummarizeResume(fullText string) (*meta.BasicResponse, error) {
+func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string, file []byte) (*meta.BasicResponse, error) {
 	prompt := generatePrompt(fullText)
-	model := "gpt-3.5-turbo" // Or any specific model you wish to use.
+	model := "gpt-3.5-turbo"
 
+	// Summarize resume text
 	responseText, err := _this.gptClient.AskGPT(prompt, model)
 	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to summarize using GPT: %v", err)
+		return nil, err
+	}
+
+	resume := &models.Resume{
+		FullText:        fullText,
+		VectorEmbedding: "MockVectorEmbedding123",            // Mock vector embedding
+		DownloadLink:    "http://example.com/mockresume.pdf", // Mock download link
+	}
+
+	// Create resume in database
+	_, err = _this.resumeRepo.Create(_this.db, resume)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to create resume record: %v", err)
 		return nil, err
 	}
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
 			Code:    200,
-			Message: "Resume summarized successfully",
+			Message: "Resume processed and file uploaded successfully",
 		},
 		Data: responseText,
 	}

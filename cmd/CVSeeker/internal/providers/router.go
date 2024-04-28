@@ -30,7 +30,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 
 		data := baseRoute.Group("/resumes")
 		{
-			data.POST("", hs.DataProcessingHandler.HandleSummarizeResume())
+			data.POST("", hs.DataProcessingHandler.ProcessDataHandler())
 		}
 	}
 }
