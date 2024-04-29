@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"CVSeeker/cmd/CVSeeker/pkg/utils"
+	internalDTO "CVSeeker/internal/dtos"
+	"CVSeeker/internal/ginLogger"
+	"CVSeeker/pkg/api"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
-	"grabber-match/cmd/CVSeeker/pkg/utils"
-	internalDTO "grabber-match/internal/dtos"
-	"grabber-match/internal/ginLogger"
-	"grabber-match/pkg/api"
 )
 
 // Handlers contains all handlers.

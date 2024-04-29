@@ -1,17 +1,17 @@
 package providers
 
 import (
+	"CVSeeker/cmd/CVSeeker/internal/handlers"
+	services "CVSeeker/cmd/CVSeeker/internal/service"
+	"CVSeeker/internal/errors"
+	"CVSeeker/internal/ginServer"
+	commonHandler "CVSeeker/internal/handlers"
+	"CVSeeker/internal/repositories"
+	"CVSeeker/pkg/cfg"
+	"CVSeeker/pkg/elasticsearch"
+	"CVSeeker/pkg/gpt"
+	"CVSeeker/pkg/logger"
 	"go.uber.org/dig"
-	"grabber-match/cmd/CVSeeker/internal/handlers"
-	services "grabber-match/cmd/CVSeeker/internal/service"
-	"grabber-match/internal/errors"
-	"grabber-match/internal/ginServer"
-	commonHandler "grabber-match/internal/handlers"
-	"grabber-match/internal/repositories"
-	"grabber-match/pkg/cfg"
-	"grabber-match/pkg/elasticsearch"
-	"grabber-match/pkg/gpt"
-	"grabber-match/pkg/logger"
 )
 
 const (
@@ -45,7 +45,7 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(commonHandler.NewBaseHandler)
 		_ = container.Provide(handlers.NewHandlers)
 
-		_ = container.Provide(elasticsearch.NewCoreElkClient)
+		_ = container.Provide(elasticsearch.NewElasticsearchClient)
 		_ = container.Provide(gpt.NewGptAdaptorClient)
 
 		_ = container.Provide(repositories.NewResumeRepository)

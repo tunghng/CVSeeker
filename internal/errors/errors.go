@@ -1,9 +1,9 @@
 package errors
 
 import (
+	"CVSeeker/internal/meta"
 	"fmt"
 	"go.uber.org/dig"
-	"grabber-match/internal/meta"
 	"log"
 	"net/http"
 	"path/filepath"

@@ -1,8 +1,8 @@
 package ginMiddleware
 
 import (
+	"CVSeeker/internal/ginLogger"
 	"github.com/gin-gonic/gin"
-	"grabber-match/internal/ginLogger"
 	"log"
 	"net/http"
 	"runtime/debug"

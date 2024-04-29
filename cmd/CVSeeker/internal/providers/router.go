@@ -1,17 +1,17 @@
 package providers
 
 import (
+	"CVSeeker/cmd/CVSeeker/internal/cfg"
+	"CVSeeker/cmd/CVSeeker/internal/handlers"
+	"CVSeeker/internal/ginLogger"
+	commonMiddleware "CVSeeker/internal/ginMiddleware"
+	"CVSeeker/internal/ginServer"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	_swaggerFiles "github.com/swaggo/files"
 	_ginSwagger "github.com/swaggo/gin-swagger"
-	"grabber-match/cmd/CVSeeker/internal/cfg"
-	"grabber-match/cmd/CVSeeker/internal/handlers"
-	"grabber-match/internal/ginLogger"
-	commonMiddleware "grabber-match/internal/ginMiddleware"
-	"grabber-match/internal/ginServer"
 )
 
 // setupRouter setup router.

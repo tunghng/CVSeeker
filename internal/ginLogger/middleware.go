@@ -2,9 +2,9 @@
 package ginLogger
 
 import (
+	"CVSeeker/internal/dtos"
 	"fmt"
 	"github.com/google/uuid"
-	"grabber-match/internal/dtos"
 	"strings"
 	"time"
 

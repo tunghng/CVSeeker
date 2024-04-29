@@ -1,8 +1,8 @@
 package utils_test
 
 import (
+	"CVSeeker/pkg/utils"
 	"github.com/stretchr/testify/assert"
-	"grabber-match/pkg/utils"
 	"testing"
 )
 
