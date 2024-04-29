@@ -10,3 +10,9 @@ type ResumeDTO struct {
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
+
+type ElasticResponse struct {
+	ID      string `json:"id"`
+	Content string `json:"content"`
+	URL     string `json:"url"`
+}

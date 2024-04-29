@@ -27,7 +27,7 @@ func (_this *resumeRepository) Create(db *db.DB, resume *models.Resume) (*models
 
 func (_this *resumeRepository) Update(db *db.DB, resume *models.Resume) error {
 	resume.UpdatedAt = time.Now()
-	return db.DB().Table(models.TableNameResume).Where("resume_id = ?", resume.ResumeID).Updates(resume).Error
+	return db.DB().Table(models.TableNameResume).Where("resume_id = ?", resume.ResumeId).Updates(resume).Error
 }
 
 func (_this *resumeRepository) FindByID(db *db.DB, resumeID int) (*models.Resume, error) {

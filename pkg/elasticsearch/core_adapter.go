@@ -1,204 +1,143 @@
 package elasticsearch
 
 import (
-	"CVSeeker/internal/dtos"
-	"CVSeeker/pkg/cfg"
+	"bytes"
 	"context"
 	"crypto/tls"
-	"github.com/olivere/elastic/v7"
+	"encoding/json"
+	"fmt"
+	"github.com/elastic/elastic-transport-go/v8/elastictransport"
+	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 	"github.com/spf13/viper"
 	"net/http"
+	"os"
+
+	"CVSeeker/pkg/cfg"
 )
 
-const (
-	OpTypeIndex = "index"
-	PostIndex   = "post_index_v4"
-	VideIndex   = "fa_class_video"
-)
-
-type CoreElkClient interface {
-	Search(ctx context.Context, indexNameOrAlias string, query elastic.Query, pretty bool) (*elastic.SearchResult, error)
-	SearchPagination(ctx context.Context, indexNameOrAlias string, query elastic.Query, pagingParams dtos.PaginationFilter, pretty bool) (*elastic.SearchResult, error)
-	CheckIndexExist(ctx context.Context, indexName string) (bool, error)
-	CreateIndex(ctx context.Context, indexName string, alias *string) error
-	CreateIndexIfNotExist(ctx context.Context, indexName string, alias *string) error
-	DeleteIndex(ctx context.Context, indexName string) error
-	DeleteIndexIfExist(ctx context.Context, indexName string) error
-	BulkSaveToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error
-	BulkUpdateToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error
-	BulkUpsertToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error
-	BulkDeleteToElasticsearch(ctx context.Context, indexName string, ids []string) error
-	SaveToElasticsearch(ctx context.Context, indexName string, data interface{}) error
-	UpdateToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error
-	UpsertToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error
-	DeleteFromElasticsearch(ctx context.Context, indexName string, id string) error
+type ElasticsearchClient interface {
+	AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error
+	KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error)
+	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error)
 }
 
-type coreElkClient struct {
-	client *elastic.Client
+type elasticsearchClient struct {
+	client *elasticsearch.TypedClient
 }
 
-func NewCoreElkClient(cfgReader *viper.Viper) (CoreElkClient, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	httpClient := &http.Client{Transport: tr}
+func NewElasticsearchClient(cfgReader *viper.Viper) (ElasticsearchClient, error) {
 	url := cfgReader.GetString(cfg.ElasticsearchUrl)
-	userName := cfgReader.GetString(cfg.ElasticsearchUserName)
+	username := cfgReader.GetString(cfg.ElasticsearchUserName)
 	password := cfgReader.GetString(cfg.ElasticsearchPassword)
-	client, err := elastic.NewClient(
-		elastic.SetURL(url),
-		elastic.SetHttpClient(httpClient),
-		elastic.SetBasicAuth(userName, password),
-		elastic.SetSniff(false),
-		elastic.SetHealthcheck(false))
+
+	customTransport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // or configure as needed
+	}
+
+	es, err := elasticsearch.NewTypedClient(elasticsearch.Config{
+		Addresses: []string{url},
+		Username:  username,
+		Password:  password,
+		Transport: customTransport, // Using custom transport
+		Logger:    &elastictransport.ColorLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true},
+	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create elasticsearch client: %w", err)
 	}
 
-	return &coreElkClient{
-		client: client,
-	}, nil
+	return &elasticsearchClient{client: es}, nil
 }
 
-func (_this *coreElkClient) Search(ctx context.Context, indexNameOrAlias string, query elastic.Query, pretty bool) (*elastic.SearchResult, error) {
-	return _this.client.Search().Index(indexNameOrAlias).Query(query).Pretty(pretty).Do(ctx)
-}
-
-func (_this *coreElkClient) SearchPagination(ctx context.Context, indexNameOrAlias string, query elastic.Query, pagingParams dtos.PaginationFilter, pretty bool) (*elastic.SearchResult, error) {
-	return _this.client.Search().Index(indexNameOrAlias).Query(query).From(int(pagingParams.PageOffset)).Size(int(pagingParams.PageSize)).Pretty(pretty).Do(ctx)
-}
-
-func (_this *coreElkClient) CheckIndexExist(ctx context.Context, indexName string) (bool, error) {
-	return elastic.NewIndicesExistsService(_this.client).Index([]string{indexName}).Do(ctx)
-}
-
-func (_this *coreElkClient) CreateIndex(ctx context.Context, indexName string, alias *string) error {
-	_, err := _this.client.CreateIndex(indexName).Do(ctx)
+// AddDocument adds a new document to the specified index
+func (ec *elasticsearchClient) AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error {
+	docJSON, err := json.Marshal(document)
 	if err != nil {
-		return err
+		return fmt.Errorf("error marshaling document: %w", err)
 	}
-	if alias != nil && *alias != "" {
-		_, err := _this.client.Alias().Add(indexName, *alias).Do(ctx)
-		if err != nil {
-			return err
-		}
+
+	// Prepare the request with the specified index, document ID and document body
+	req := esapi.IndexRequest{
+		Index:      indexName,
+		DocumentID: documentId,
+		Body:       bytes.NewReader(docJSON),
+		Refresh:    "true", // or use esapi.RefreshTrue if available
 	}
+
+	// Perform the request with the given context
+	res, err := req.Do(ctx, ec.client)
+	if err != nil {
+		return fmt.Errorf("error indexing document: %w", err)
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		return fmt.Errorf("error response from Elasticsearch: %s", res.String())
+	}
+
 	return nil
 }
 
-func (_this *coreElkClient) CreateIndexIfNotExist(ctx context.Context, indexName string, alias *string) error {
-	exists, err := _this.CheckIndexExist(ctx, indexName)
+func (ec *elasticsearchClient) KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error) {
+	res, err := ec.client.Search().
+		Index(indexName).
+		Query(&types.Query{
+			Match: map[string]types.MatchQuery{
+				"content": {Query: term},
+			},
+		}).
+		Do(ctx)
+
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("keyword search failed: %w", err)
 	}
-	if exists {
-		return nil
-	}
-	return _this.CreateIndex(ctx, indexName, alias)
+
+	return ConvertHitsToElasticResponses(res.Hits.Hits)
 }
 
-func (_this *coreElkClient) DeleteIndex(ctx context.Context, indexName string) error {
-	_, err := _this.client.DeleteIndex(indexName).Do(ctx)
-	return err
+func (ec *elasticsearchClient) VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error) {
+	res, err := ec.client.Search().
+		Index(indexName).
+		Knn(types.KnnQuery{
+			Field:       "embedding",
+			QueryVector: vector,
+			K:           10,
+		}).
+		Do(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("vector search failed: %w", err)
+	}
+
+	return ConvertHitsToElasticResponses(res.Hits.Hits)
 }
 
-func (_this *coreElkClient) DeleteIndexIfExist(ctx context.Context, indexName string) error {
-	exists, err := _this.CheckIndexExist(ctx, indexName)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return nil
-	}
-	return _this.DeleteIndex(ctx, indexName)
-}
+func ConvertHitsToElasticResponses(hits []types.Hit) ([]ElasticResponse, error) {
+	var responses []ElasticResponse
+	for _, hit := range hits {
+		var source map[string][]string // Assuming each field like "content" is an array of strings
+		if err := json.Unmarshal(hit.Source_, &source); err != nil {
+			return nil, fmt.Errorf("an error occurred while unmarshaling hit: %w", err)
+		}
 
-func (_this *coreElkClient) BulkSaveToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error {
-	bulk := _this.client.Bulk()
-	for id, object := range data {
-		bulk = bulk.Add(elastic.NewBulkIndexRequest().OpType(OpTypeIndex).Index(indexName).Id(id).Doc(object))
-	}
-	_, err := bulk.Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
-}
+		content := ""
+		if len(source["content"]) > 0 {
+			content = source["content"][0] // Assuming the first element is the main content
+		}
 
-func (_this *coreElkClient) BulkUpdateToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error {
-	bulk := _this.client.Bulk()
-	for id, object := range data {
-		bulk = bulk.Add(elastic.NewBulkUpdateRequest().Index(indexName).Id(id).Doc(object))
-	}
-	_, err := bulk.Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
-}
+		url := ""
+		if len(source["url"]) > 0 {
+			url = source["url"][0] // Assuming the first element is the main URL
+		}
 
-func (_this *coreElkClient) BulkUpsertToElasticsearch(ctx context.Context, indexName string, data map[string]interface{}) error {
-	bulk := _this.client.Bulk()
-	for id, object := range data {
-		bulk = bulk.Add(elastic.NewBulkUpdateRequest().Index(indexName).Id(id).Doc(object).DocAsUpsert(true))
+		response := ElasticResponse{
+			ID:      hit.Id_,
+			Content: content,
+			URL:     url,
+		}
+		responses = append(responses, response)
 	}
-	_, err := bulk.Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
-}
-
-func (_this *coreElkClient) BulkDeleteToElasticsearch(ctx context.Context, indexName string, ids []string) error {
-	bulk := _this.client.Bulk()
-	for _, id := range ids {
-		bulk = bulk.Add(elastic.NewBulkDeleteRequest().Index(indexName).Id(id))
-	}
-	_, err := bulk.Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
-}
-
-func (_this *coreElkClient) SaveToElasticsearch(ctx context.Context, indexName string, data interface{}) error {
-	_, err := _this.client.Index().Index(indexName).BodyJson(data).Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
-}
-
-func (_this *coreElkClient) UpdateToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error {
-	_, err := _this.client.Update().Index(indexName).Id(id).Doc(data).Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
-}
-
-func (_this *coreElkClient) UpsertToElasticsearch(ctx context.Context, indexName string, id string, data interface{}) error {
-	_, err := _this.client.Update().Index(indexName).Id(id).Doc(data).DocAsUpsert(true).Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
-}
-
-func (_this *coreElkClient) DeleteFromElasticsearch(ctx context.Context, indexName string, id string) error {
-	_, err := _this.client.Delete().Index(indexName).Id(id).Do(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = _this.client.Flush().Index(indexName).Do(ctx)
-	return err
+	return responses, nil
 }

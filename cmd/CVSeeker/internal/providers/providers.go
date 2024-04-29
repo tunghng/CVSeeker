@@ -45,7 +45,7 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(commonHandler.NewBaseHandler)
 		_ = container.Provide(handlers.NewHandlers)
 
-		_ = container.Provide(elasticsearch.NewCoreElkClient)
+		_ = container.Provide(elasticsearch.NewElasticsearchClient)
 		_ = container.Provide(gpt.NewGptAdaptorClient)
 
 		_ = container.Provide(repositories.NewResumeRepository)

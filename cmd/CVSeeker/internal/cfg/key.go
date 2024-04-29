@@ -34,4 +34,5 @@ const (
 	URLGoogleStorage                = "URL_GOOGLE_STORAGE"
 
 	ElasticsearchDocumentIndex = "ELK_DOCUMENT_INDEX"
+	ChatGptModel               = "CHAT_GPT_MODEL"
 )
