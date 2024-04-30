@@ -10,6 +10,7 @@ import (
 	"CVSeeker/pkg/cfg"
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/gpt"
+	"CVSeeker/pkg/huggingface"
 	"CVSeeker/pkg/logger"
 	"go.uber.org/dig"
 )
@@ -47,6 +48,7 @@ func BuildContainer() *dig.Container {
 
 		_ = container.Provide(elasticsearch.NewElasticsearchClient)
 		_ = container.Provide(gpt.NewGptAdaptorClient)
+		_ = container.Provide(huggingface.NewHuggingFaceClient)
 
 		_ = container.Provide(repositories.NewResumeRepository)
 

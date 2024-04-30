@@ -17,18 +17,18 @@ import (
 	"CVSeeker/pkg/cfg"
 )
 
-type ElasticsearchClient interface {
+type IElasticsearchClient interface {
 	AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error
 	KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error)
 	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error)
 	HybridSearchWithBoost(ctx context.Context, indexName, term string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error)
 }
 
-type elasticsearchClient struct {
+type ElasticsearchClient struct {
 	client *elasticsearch.TypedClient
 }
 
-func NewElasticsearchClient(cfgReader *viper.Viper) (ElasticsearchClient, error) {
+func NewElasticsearchClient(cfgReader *viper.Viper) (IElasticsearchClient, error) {
 	url := cfgReader.GetString(cfg.ElasticsearchUrl)
 	username := cfgReader.GetString(cfg.ElasticsearchUserName)
 	password := cfgReader.GetString(cfg.ElasticsearchPassword)
@@ -49,11 +49,11 @@ func NewElasticsearchClient(cfgReader *viper.Viper) (ElasticsearchClient, error)
 		return nil, fmt.Errorf("failed to create elasticsearch client: %w", err)
 	}
 
-	return &elasticsearchClient{client: es}, nil
+	return &ElasticsearchClient{client: es}, nil
 }
 
 // AddDocument adds a new document to the specified index
-func (ec *elasticsearchClient) AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error {
+func (ec *ElasticsearchClient) AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error {
 	docJSON, err := json.Marshal(document)
 	if err != nil {
 		return fmt.Errorf("error marshaling document: %w", err)
@@ -81,7 +81,7 @@ func (ec *elasticsearchClient) AddDocument(ctx context.Context, indexName string
 	return nil
 }
 
-func (ec *elasticsearchClient) KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error) {
 	res, err := ec.client.Search().
 		Index(indexName).
 		Query(&types.Query{
@@ -98,7 +98,7 @@ func (ec *elasticsearchClient) KeywordSearch(ctx context.Context, indexName stri
 	return ConvertHitsToElasticResponses(res.Hits.Hits)
 }
 
-func (ec *elasticsearchClient) VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error) {
 	res, err := ec.client.Search().
 		Index(indexName).
 		Knn(types.KnnQuery{
@@ -115,7 +115,7 @@ func (ec *elasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 	return ConvertHitsToElasticResponses(res.Hits.Hits)
 }
 
-func (ec *elasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, term string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, term string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error) {
 	queryBoost := 1.0 - knnBoost
 
 	// Generate a query vector for the term, replace this with your actual model vector generation

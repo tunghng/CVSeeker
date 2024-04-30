@@ -39,6 +39,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1
 	github.com/elastic/elastic-transport-go/v8 v8.5.0
 	github.com/elastic/go-elasticsearch/v8 v8.13.1
+	github.com/hupe1980/go-huggingface v0.0.15
 )
 
 require (
