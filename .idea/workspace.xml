@@ -5,17 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="952c3a99-17bd-435c-aaab-a749a4bcd867" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/cfg/key.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/cfg/key.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/handler.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/providers.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/providers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/data_processing.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/cfg/keys.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/cfg/keys.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/elasticsearch/core_adapter.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/elasticsearch/core_adapter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/huggingface/huggingface_adaptor.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/huggingface/huggingface_adaptor.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/gpt/dtos.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

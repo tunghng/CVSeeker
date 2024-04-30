@@ -32,5 +32,10 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 		{
 			data.POST("", hs.DataProcessingHandler.ProcessDataHandler())
 		}
+
+		search := baseRoute.Group("/search")
+		{
+			search.GET("", hs.SearchHandler.HybridSearchHandler())
+		}
 	}
 }

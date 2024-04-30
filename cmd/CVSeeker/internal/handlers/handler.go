@@ -12,18 +12,21 @@ import (
 // Handlers contains all handlers.
 type Handlers struct {
 	DataProcessingHandler *DataProcessingHandler
+	SearchHandler         *SearchHandler
 }
 
 // NewHandlersParams contains all dependencies of handlers.
 type handlersParams struct {
 	dig.In
 	DataProcessingHandler *DataProcessingHandler
+	SearchHandler         *SearchHandler
 }
 
 // NewHandlers returns new instance of Handlers.
 func NewHandlers(params handlersParams) *Handlers {
 	return &Handlers{
 		DataProcessingHandler: params.DataProcessingHandler,
+		SearchHandler:         params.SearchHandler,
 	}
 }
 

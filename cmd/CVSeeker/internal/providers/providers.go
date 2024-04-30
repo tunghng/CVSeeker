@@ -56,6 +56,7 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(services.NewSearchService)
 
 		_ = container.Provide(handlers.NewDataProcessingHandler)
+		_ = container.Provide(handlers.NewSearchHandler)
 
 	}
 

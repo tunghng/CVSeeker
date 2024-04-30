@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
 	"io/ioutil"
+	"strings"
 )
 
 type DataProcessingHandler struct {
@@ -29,7 +30,7 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 // / HandleSummarizeResume is the Gin handler function to summarize resumes.
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fullText := c.PostForm("fullText")
+		fullText := strings.TrimSpace(c.Query("fullText"))
 		file, _, err := c.Request.FormFile("file")
 		if err != nil {
 			_this.RespondError(c, err)
