@@ -149,19 +149,24 @@ func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexN
 func ConvertHitsToElasticResponses(hits []types.Hit) ([]ElasticResponse, error) {
 	var responses []ElasticResponse
 	for _, hit := range hits {
-		var source map[string][]string // Assuming each field like "content" is an array of strings
+		var source map[string]interface{} // Use interface{} to accept any data type
 		if err := json.Unmarshal(hit.Source_, &source); err != nil {
 			return nil, fmt.Errorf("an error occurred while unmarshaling hit: %w", err)
 		}
 
-		content := ""
-		if len(source["content"]) > 0 {
-			content = source["content"][0] // Assuming the first element is the main content
+		var content, url string
+		// Check if content is a string or a slice and assign accordingly
+		if contentVal, ok := source["content"].([]interface{}); ok && len(contentVal) > 0 {
+			content, _ = contentVal[0].(string) // Safely assert to string
+		} else if contentStr, ok := source["content"].(string); ok {
+			content = contentStr
 		}
 
-		url := ""
-		if len(source["url"]) > 0 {
-			url = source["url"][0] // Assuming the first element is the main URL
+		// Check if url is a string or a slice and assign accordingly
+		if urlVal, ok := source["url"].([]interface{}); ok && len(urlVal) > 0 {
+			url, _ = urlVal[0].(string) // Safely assert to string
+		} else if urlStr, ok := source["url"].(string); ok {
+			url = urlStr
 		}
 
 		response := ElasticResponse{

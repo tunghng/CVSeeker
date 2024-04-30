@@ -6,11 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="952c3a99-17bd-435c-aaab-a749a4bcd867" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/providers.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/providers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/gpt/dtos.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/search.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/search.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,5 +91,21 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go</url>
+          <line>40</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/pkg/elasticsearch/core_adapter.go</url>
+          <line>149</line>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

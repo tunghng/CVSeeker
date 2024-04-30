@@ -31,14 +31,14 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 func (_this *SearchHandler) HybridSearchHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve search term and other parameters from the query string
-		term := strings.TrimSpace(c.Query("term"))
+		query := strings.TrimSpace(c.Query("query"))
 		// Get knnBoost with a default value
 		knnBoost, _ := strconv.ParseFloat(c.DefaultQuery("knnBoost", "0.5"), 32)
 		// Get numResults with a default value
 		numResults, _ := strconv.Atoi(c.DefaultQuery("numResults", "10"))
 
 		// Call the search service
-		resp, err := _this.searchService.HybridSearch(c, term, float32(knnBoost), numResults)
+		resp, err := _this.searchService.HybridSearch(c, query, float32(knnBoost), numResults)
 		_this.HandleResponse(c, resp, err)
 	}
 }
