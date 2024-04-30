@@ -35,4 +35,5 @@ const (
 
 	ElasticsearchDocumentIndex = "ELK_DOCUMENT_INDEX"
 	ChatGptModel               = "CHAT_GPT_MODEL"
+	HuggingfaceModel           = "HUGGINGFACE_MODEL"
 )

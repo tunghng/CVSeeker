@@ -7,5 +7,7 @@ const (
 	ElasticsearchUserName = "ELK_USERNAME"
 	ElasticsearchPassword = "ELK_PASSWORD"
 
+	HuggingfaceApiKey = "HUGGINGFACE_API_KEY"
+
 	GptApiKey = "GPT_API_KEY"
 )
