@@ -21,6 +21,7 @@ type ElasticsearchClient interface {
 	AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error
 	KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error)
 	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error)
+	HybridSearchWithBoost(ctx context.Context, indexName, term string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error)
 }
 
 type elasticsearchClient struct {
@@ -109,6 +110,37 @@ func (ec *elasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 
 	if err != nil {
 		return nil, fmt.Errorf("vector search failed: %w", err)
+	}
+
+	return ConvertHitsToElasticResponses(res.Hits.Hits)
+}
+
+func (ec *elasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, term string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error) {
+	queryBoost := 1.0 - knnBoost
+
+	// Generate a query vector for the term, replace this with your actual model vector generation
+	res, err := ec.client.Search().
+		Index(indexName).
+		Size(numResults).
+		Knn(types.KnnQuery{
+			Field:         "embedding", // Ensure this field matches your schema
+			QueryVector:   queryVector,
+			Boost:         &knnBoost,
+			K:             10,
+			NumCandidates: 100, // Adjust the number of candidates as needed
+		}).
+		Query(&types.Query{
+			Match: map[string]types.MatchQuery{
+				"content": {
+					Query: term,
+					Boost: &queryBoost,
+				},
+			},
+		}).
+		Do(ctx)
+
+	if err != nil {
+		return nil, fmt.Errorf("hybrid search failed: %w", err)
 	}
 
 	return ConvertHitsToElasticResponses(res.Hits.Hits)

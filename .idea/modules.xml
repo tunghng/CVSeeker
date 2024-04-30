@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/grabber-match.iml" filepath="$PROJECT_DIR$/.idea/grabber-match.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/CVSeeker-server.iml" filepath="$PROJECT_DIR$/.idea/CVSeeker-server.iml" />
     </modules>
   </component>
 </project>
