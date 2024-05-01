@@ -5,9 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="952c3a99-17bd-435c-aaab-a749a4bcd867" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CVSeeker-server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CVSeeker-server.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/statics/config.default.toml" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/statics/config.default.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/search.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/search.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/elasticsearch/core_adapter.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/elasticsearch/core_adapter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/gpt/gpt_adaptor.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/gpt/gpt_adaptor.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,10 +34,10 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2fmCv0ow3dodAouqhoANuPosAfp" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -47,7 +53,7 @@
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "go__codebase__branch",
+    "git-widget-placeholder": "main",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "/Users/htungg",
@@ -91,5 +97,16 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/pkg/gpt/gpt_adaptor.go</url>
+          <line>12</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

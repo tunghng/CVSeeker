@@ -28,7 +28,7 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 	}
 }
 
-// / HandleSummarizeResume is the Gin handler function to summarize resumes.
+// ProcessDataHandler is the Gin handler processing the resume
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fullText := strings.TrimSpace(c.Query("fullText"))

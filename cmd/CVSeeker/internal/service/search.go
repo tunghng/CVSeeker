@@ -13,6 +13,7 @@ import (
 
 type SearchService interface {
 	HybridSearch(c *gin.Context, query string, knnBoost float32, numResults int) (*meta.BasicResponse, error)
+	GetDocumentByID(c *gin.Context, documentID string) (*meta.BasicResponse, error)
 }
 
 type searchServiceImpl struct {
@@ -57,6 +58,27 @@ func (_this *searchServiceImpl) HybridSearch(c *gin.Context, query string, knnBo
 			Message: "Search completed successfully",
 		},
 		Data: results,
+	}
+
+	return response, nil
+}
+
+func (_this *searchServiceImpl) GetDocumentByID(c *gin.Context, documentID string) (*meta.BasicResponse, error) {
+	indexName := viper.GetString(cfg.ElasticsearchDocumentIndex) // Ensure your index name is configured in viper settings
+
+	// Retrieve the document by ID using the Elasticsearch client
+	document, err := _this.elasticClient.GetDocumentByID(c, indexName, documentID)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to get document by ID: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "Document retrieval successful",
+		},
+		Data: document,
 	}
 
 	return response, nil

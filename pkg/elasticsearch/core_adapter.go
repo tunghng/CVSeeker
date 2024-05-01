@@ -19,9 +19,10 @@ import (
 
 type IElasticsearchClient interface {
 	AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error
-	KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error)
+	KeywordSearch(ctx context.Context, indexName string, query string) ([]ElasticResponse, error)
 	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error)
-	HybridSearchWithBoost(ctx context.Context, indexName, term string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error)
+	HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error)
+	GetDocumentByID(ctx context.Context, indexName, documentId string) (*ElasticResponse, error)
 }
 
 type ElasticsearchClient struct {
@@ -81,12 +82,40 @@ func (ec *ElasticsearchClient) AddDocument(ctx context.Context, indexName string
 	return nil
 }
 
-func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName string, term string) ([]ElasticResponse, error) {
+// GetDocumentByID retrieves a document by its ID from a specific index and converts it to an ElasticResponse.
+func (ec *ElasticsearchClient) GetDocumentByID(ctx context.Context, indexName string, documentID string) (*ElasticResponse, error) {
+	// Create the Get request to Elasticsearch
+	req := esapi.GetRequest{
+		Index:      indexName,
+		DocumentID: documentID,
+	}
+
+	// Perform the request with the provided context
+	res, err := req.Do(ctx, ec.client)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving document: %w", err)
+	}
+	defer res.Body.Close() // Ensure body is closed after the operation
+
+	// Check if the request was not successful
+	if !res.IsError() {
+		var hit types.Hit
+		if err := json.NewDecoder(res.Body).Decode(&hit); err != nil {
+			return nil, fmt.Errorf("error decoding response body: %w", err)
+		}
+		// Convert the hit to an ElasticResponse
+		return ConvertHitToElasticResponse(&hit)
+	} else {
+		return nil, fmt.Errorf("error response from Elasticsearch: %s", res.String())
+	}
+}
+
+func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName string, query string) ([]ElasticResponse, error) {
 	res, err := ec.client.Search().
 		Index(indexName).
 		Query(&types.Query{
 			Match: map[string]types.MatchQuery{
-				"content": {Query: term},
+				"content": {Query: query},
 			},
 		}).
 		Do(ctx)
@@ -115,7 +144,8 @@ func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 	return ConvertHitsToElasticResponses(res.Hits.Hits)
 }
 
-func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, term string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error) {
+// HybridSearchWithBoost perform search combining both semantic and lexiacal search
+func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error) {
 	queryBoost := 1.0 - knnBoost
 
 	// Generate a query vector for the term, replace this with your actual model vector generation
@@ -132,7 +162,7 @@ func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexN
 		Query(&types.Query{
 			Match: map[string]types.MatchQuery{
 				"content": {
-					Query: term,
+					Query: query,
 					Boost: &queryBoost,
 				},
 			},
@@ -149,32 +179,42 @@ func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexN
 func ConvertHitsToElasticResponses(hits []types.Hit) ([]ElasticResponse, error) {
 	var responses []ElasticResponse
 	for _, hit := range hits {
-		var source map[string]interface{} // Use interface{} to accept any data type
-		if err := json.Unmarshal(hit.Source_, &source); err != nil {
-			return nil, fmt.Errorf("an error occurred while unmarshaling hit: %w", err)
+		response, err := ConvertHitToElasticResponse(&hit)
+		if err != nil {
+			return nil, err
 		}
-
-		var content, url string
-		// Check if content is a string or a slice and assign accordingly
-		if contentVal, ok := source["content"].([]interface{}); ok && len(contentVal) > 0 {
-			content, _ = contentVal[0].(string) // Safely assert to string
-		} else if contentStr, ok := source["content"].(string); ok {
-			content = contentStr
-		}
-
-		// Check if url is a string or a slice and assign accordingly
-		if urlVal, ok := source["url"].([]interface{}); ok && len(urlVal) > 0 {
-			url, _ = urlVal[0].(string) // Safely assert to string
-		} else if urlStr, ok := source["url"].(string); ok {
-			url = urlStr
-		}
-
-		response := ElasticResponse{
-			ID:      hit.Id_,
-			Content: content,
-			URL:     url,
-		}
-		responses = append(responses, response)
+		responses = append(responses, *response)
 	}
 	return responses, nil
+}
+
+// ConvertHitToElasticResponse converts a single Elasticsearch hit to an ElasticResponse.
+func ConvertHitToElasticResponse(hit *types.Hit) (*ElasticResponse, error) {
+	var source map[string]interface{}
+	if err := json.Unmarshal(hit.Source_, &source); err != nil {
+		return nil, fmt.Errorf("an error occurred while unmarshaling hit: %w", err)
+	}
+
+	var content, url string
+	// Handle content field based on its data type in the source
+	if contentVal, ok := source["content"].([]interface{}); ok && len(contentVal) > 0 {
+		content, _ = contentVal[0].(string) // Safely assert to string
+	} else if contentStr, ok := source["content"].(string); ok {
+		content = contentStr
+	}
+
+	// Handle url field based on its data type in the source
+	if urlVal, ok := source["url"].([]interface{}); ok && len(urlVal) > 0 {
+		url, _ = urlVal[0].(string) // Safely assert to string
+	} else if urlStr, ok := source["url"].(string); ok {
+		url = urlStr
+	}
+
+	response := &ElasticResponse{
+		ID:      hit.Id_,
+		Content: content,
+		URL:     url,
+	}
+
+	return response, nil
 }

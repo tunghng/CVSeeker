@@ -42,7 +42,7 @@ func (g *GptAdaptorClient) AskGPT(prompt, model string) (string, error) {
 		"messages": []map[string]string{
 			{"role": "user", "content": prompt},
 		},
-		"temperature": 0.7, // Adjust the temperature if needed
+		"temperature": 0.0, // Adjust the temperature if needed
 	}
 
 	bodyBytes, err := json.Marshal(body)
