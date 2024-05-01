@@ -1,0 +1,3 @@
+llama-index 
+docx2txt
+llama_index.finetuning
