@@ -69,7 +69,7 @@ A step-by-step guide to setting up a development environment:
 1. Clone the repository:
    ```bash
    git clone https://github.com/tunghng/CVSeeker-server.git
-   cd CVSeeker-server
+   cd CVSeeker
    ```
 
 2. Install dependencies:

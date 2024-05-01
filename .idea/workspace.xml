@@ -5,15 +5,128 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="952c3a99-17bd-435c-aaab-a749a4bcd867" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CVSeeker-server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CVSeeker-server.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/search.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/search.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/service/search.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/elasticsearch/core_adapter.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/elasticsearch/core_adapter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/gpt/gpt_adaptor.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/gpt/gpt_adaptor.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/cfg/key.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/handlers/data_processing.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/handlers/handler.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/handlers/search.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/providers/init.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/providers/providers.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/providers/router.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/service/data_processing.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/internal/service/search.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/pkg/utils/utils.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/statics/config.default.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker/statics/errors.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/dtos/header.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/dtos/response.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/errors/error_code.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/errors/errors.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/ginLogger/logger.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/ginLogger/middleware.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/ginMiddleware/recovery.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/ginMiddleware/request_id.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/ginServer/gin.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/ginServer/server.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/handlers/base.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/handlers/forwarder.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/meta/meta.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/meta/response.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/models/resume.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/models/session.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/models/session_activity.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/models/session_resume.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/internal/repositories/resume.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/api/api.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/aws/s3_adapter.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/cfg/const.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/cfg/keys.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/cfg/viper.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/db/db.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/elasticsearch/core_adapter.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/elasticsearch/dtos.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/gpt/gpt_adaptor.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/huggingface/huggingface_adaptor.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/logger/gcpzap.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/logger/logger.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/logger/zap.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/common.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/common_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/file.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/float_zero.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/gpt.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/http.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/time.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/time_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/utils.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/variable.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../CVSeeker/backend/pkg/utils/variable_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/.env.example" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../CVSeeker/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../CVSeeker/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/cfg/key.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/handlers/data_processing.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/handlers/handler.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/handlers/search.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/providers/init.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/providers/providers.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/providers/router.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/service/data_processing.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/internal/service/search.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/main.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/pkg/utils/utils.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/statics/config.default.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/cmd/CVSeeker/statics/errors.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/go.mod" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/go.sum" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/dtos/header.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/dtos/response.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/errors/error_code.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/errors/errors.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/ginLogger/logger.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/ginLogger/middleware.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/ginMiddleware/recovery.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/ginMiddleware/request_id.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/ginServer/gin.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/ginServer/server.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/handlers/base.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/handlers/forwarder.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/meta/meta.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/meta/response.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/models/resume.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/models/session.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/models/session_activity.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/models/session_resume.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/internal/repositories/resume.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/api/api.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/aws/s3_adapter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/cfg/const.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/cfg/keys.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/cfg/viper.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/db/db.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/elasticsearch/core_adapter.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/elasticsearch/dtos.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/gpt/gpt_adaptor.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/huggingface/huggingface_adaptor.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/logger/gcpzap.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/logger/logger.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/logger/zap.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/common.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/common_test.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/file.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/float_zero.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/gpt.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/http.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/time.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/time_test.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/utils.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/variable.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../CVSeeker/pkg/utils/variable_test.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,7 +166,7 @@
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "<unknown>",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "/Users/htungg",
@@ -62,10 +175,24 @@
     "nodejs_package_manager_path": "npm"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/../CVSeeker" />
+      <recent name="$PROJECT_DIR$/../CVSeeker/backend" />
+    </key>
+  </component>
   <component name="RunManager">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="CVSeeker" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build CVSeeker/cmd/CVSeeker" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
-      <module name="CVSeeker-server" />
-      <working_directory value="$PROJECT_DIR$/cmd/CVSeeker" />
+      <module name="CVSeeker" />
+      <working_directory value="$PROJECT_DIR$/../CVSeeker/backend/cmd/CVSeeker" />
       <EXTENSION ID="net.ashald.envfile">
         <option name="IS_ENABLED" value="true" />
         <option name="IS_SUBST" value="false" />
@@ -74,13 +201,22 @@
         <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
         <ENTRIES>
           <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
-          <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH=".env" />
+          <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="$PROJECT_DIR$/../CVSeeker/backend/.env" />
         </ENTRIES>
       </EXTENSION>
       <kind value="PACKAGE" />
       <package value="CVSeeker/cmd/CVSeeker" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="CVSeeker" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
       <method v="2" />
     </configuration>
   </component>
@@ -102,7 +238,7 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/pkg/gpt/gpt_adaptor.go</url>
+          <url>file://$PROJECT_DIR$/../CVSeeker/backend/pkg/gpt/gpt_adaptor.go</url>
           <line>12</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
