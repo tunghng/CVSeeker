@@ -3,16 +3,10 @@ package handlers
 import (
 	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/errors"
-	"CVSeeker/internal/ginLogger"
 	"CVSeeker/internal/meta"
-	"CVSeeker/internal/validators"
 	"CVSeeker/pkg/db"
-	pkgUtils "CVSeeker/pkg/utils"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/locales/en"
-	"github.com/go-playground/locales/vi"
-	ut "github.com/go-playground/universal-translator"
 	"go.uber.org/dig"
 	"net/http"
 	"reflect"
@@ -20,10 +14,8 @@ import (
 
 // BaseHandler is common handler for handlers or middlewares.
 type BaseHandler interface {
-	Validate(c *gin.Context, data interface{}) error
 	RespondError(c *gin.Context, err error)
 	HandleResponse(c *gin.Context, data interface{}, err error)
-	BindData(c *gin.Context, data interface{}) bool
 }
 
 // baseHandlerParams contains all dependencies of BaseHandler.
@@ -78,30 +70,6 @@ func (_this *baseHandler) HandleResponse(c *gin.Context, data interface{}, err e
 	c.Next()
 }
 
-// Validate struct
-func (_this *baseHandler) Validate(c *gin.Context, dataRequest interface{}) error {
-	english := en.New()
-	uni := ut.New(english, vi.New())
-	trans, _ := uni.GetTranslator("vi")
-	validate := validators.NewValidatorV10(trans)
-	return validate.ValidateStruct(dataRequest)
-}
-
-// Validate struct
-func (_this *baseHandler) BindData(c *gin.Context, params interface{}) bool {
-	if err := c.ShouldBindJSON(params); err != nil {
-		ginLogger.Gin(c).Errorf("Failed to c.ShouldBindJSON error: %v", err)
-		_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-		return false
-	}
-	if err := _this.Validate(c, params); err != nil {
-		ginLogger.Gin(c).Errorf("Failed to Validate error: %v", err)
-		_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-		return false
-	}
-	return true
-}
-
 func (_this *baseHandler) processError(c *gin.Context, err error, overrideHttpStatus bool) {
 	statusCode, data := _this.errorParser.Parse(err)
 	contextResponse, err := json.Marshal(data)
@@ -122,8 +90,4 @@ func (_this *baseHandler) processError(c *gin.Context, err error, overrideHttpSt
 		c.JSON(adapterStatusCode, data)
 	}
 	c.JSON(statusCode, data)
-}
-
-func (_this *baseHandler) cleanUnsafeField(data interface{}) string {
-	return pkgUtils.Struct2JSON(data)
 }

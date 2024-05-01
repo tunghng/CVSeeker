@@ -33,7 +33,7 @@ func BuildContainer() *dig.Container {
 	{
 		_ = container.Provide(newCfgReader)
 		_ = container.Provide(newApiConfig)
-		_ = container.Provide(newAppConfig)
+		//_ = container.Provide(newAppConfig)
 		_ = container.Provide(newGinEngine)
 		_ = container.Provide(setupRouter)
 		_ = container.Provide(newServerConfig)
