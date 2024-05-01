@@ -5,22 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="952c3a99-17bd-435c-aaab-a749a4bcd867" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/docs.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/handlers/data_processing.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/init.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/init.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/providers.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/internal/providers/providers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/statics/config.default.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/statics/errors.toml" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/statics/errors.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/errors/error_code.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/errors/error_code.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/handlers/base.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/handlers/base.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/services/base.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/validators/init.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/validators/validator.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/app/app.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/database/db.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/CVSeeker/statics/config.default.toml" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/CVSeeker/statics/config.default.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
