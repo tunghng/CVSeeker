@@ -2,10 +2,12 @@ package handlers
 
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
+	"CVSeeker/internal/errors"
 	"CVSeeker/internal/handlers"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
-	"io/ioutil"
+	"io"
+	"strings"
 )
 
 type DataProcessingHandler struct {
@@ -29,14 +31,14 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 // / HandleSummarizeResume is the Gin handler function to summarize resumes.
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fullText := c.PostForm("fullText")
+		fullText := strings.TrimSpace(c.Query("fullText"))
 		file, _, err := c.Request.FormFile("file")
 		if err != nil {
-			_this.RespondError(c, err)
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
 			return
 		}
 
-		fileBytes, err := ioutil.ReadAll(file)
+		fileBytes, err := io.ReadAll(file)
 		if err != nil {
 			_this.RespondError(c, err)
 			return

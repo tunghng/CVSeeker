@@ -7,7 +7,6 @@ import (
 	"CVSeeker/internal/ginServer"
 	"CVSeeker/internal/meta"
 	"CVSeeker/pkg/api"
-	"CVSeeker/pkg/app"
 	"CVSeeker/pkg/db"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -65,17 +64,6 @@ func newApiConfig() *api.Config {
 		DefaultPageSize: viper.GetInt64(cfg.ConfigApiDefaultPageSize),
 		MinPageSize:     viper.GetInt64(cfg.ConfigApiMinPageSize),
 		MaxPageSize:     viper.GetInt64(cfg.ConfigApiMaxPageSize),
-	}
-}
-
-func newAppConfig() *app.Config {
-	return &app.Config{
-		DirectoryTemp:    viper.GetString(cfg.ConfigKeyFolderTmp),
-		BucketName:       viper.GetString(cfg.ConfigKeyGCSBucket),
-		CdnBucketName:    viper.GetString(cfg.ConfigKeyGCSBucketCDN),
-		CdnRootFolder:    viper.GetString(cfg.ConfigKeyGCSBucketCDNRootFolder),
-		CdnURL:           viper.GetString(cfg.ConfigKeyCDNUrl),
-		URLGoogleStorage: viper.GetString(cfg.URLGoogleStorage),
 	}
 }
 
