@@ -9,11 +9,10 @@ export default {
             colors: {
                 'primary': '#0D6EFD',
                 'primary-hover': '#045adb',
-                'primary-subtle': '#75ADFF',
-                'primary-light': '#CFE2FF',
+                'primary-subtle': '#CFE2FF',
+                'secondary-subtle': '#DEE2E6',
 
                 'disable-light': '#E9ECEF',
-                'disable-dark': '#E9ECEF',
 
                 'border': '#DEE2E6',
 
