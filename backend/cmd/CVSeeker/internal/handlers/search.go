@@ -3,7 +3,6 @@ package handlers
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
 	"CVSeeker/internal/errors"
-	"CVSeeker/internal/handlers"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
 	"strconv"
@@ -11,13 +10,13 @@ import (
 )
 
 type SearchHandler struct {
-	handlers.BaseHandler
+	BaseHandler
 	searchService services.SearchService
 }
 
 type SearchHandlerParams struct {
 	dig.In
-	BaseHandler   handlers.BaseHandler
+	BaseHandler   BaseHandler
 	SearchService services.SearchService
 }
 

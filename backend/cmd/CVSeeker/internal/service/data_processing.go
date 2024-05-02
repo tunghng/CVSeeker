@@ -6,6 +6,7 @@ import (
 	"CVSeeker/internal/meta"
 	"CVSeeker/internal/models"
 	"CVSeeker/internal/repositories"
+	"CVSeeker/pkg/aws"
 	"CVSeeker/pkg/db"
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/gpt"
@@ -15,6 +16,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
 	"strings"
+	"time"
 )
 
 type IDataProcessingService interface {
@@ -27,6 +29,7 @@ type DataProcessingService struct {
 	resumeRepo    repositories.IResumeRepository
 	elasticClient elasticsearch.IElasticsearchClient
 	hfClient      huggingface.IHuggingFaceClient
+	s3Client      *aws.S3Client
 }
 
 type DataProcessingServiceArgs struct {
@@ -36,6 +39,7 @@ type DataProcessingServiceArgs struct {
 	ResumeRepo    repositories.IResumeRepository
 	ElasticClient elasticsearch.IElasticsearchClient
 	HfClient      huggingface.IHuggingFaceClient
+	S3Client      *aws.S3Client
 }
 
 func NewDataProcessingService(args DataProcessingServiceArgs) IDataProcessingService {
@@ -45,6 +49,7 @@ func NewDataProcessingService(args DataProcessingServiceArgs) IDataProcessingSer
 		resumeRepo:    args.ResumeRepo,
 		elasticClient: args.ElasticClient,
 		hfClient:      args.HfClient,
+		s3Client:      args.S3Client,
 	}
 }
 
@@ -53,8 +58,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	model := viper.GetString(cfg.ChatGptModel)
 	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 	textEmbeddingModel := viper.GetString(cfg.HuggingfaceModel)
-
-	mockDownloadLink := "http://example.com/mockresume.pdf"
+	awsBucketName := viper.GetString(cfg.AwsBucket)
 
 	// Summarize resume text by making request to OpenAI
 	responseText, err := _this.gptClient.AskGPT(prompt, model)
@@ -63,10 +67,18 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 		return nil, err
 	}
 
+	// Upload file to S3 and get the URL
+	key := fmt.Sprintf("%d.docx", time.Now().Unix())
+	fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, file)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
+		return nil, err
+	}
+
 	// Prepare resume for database
 	resume := &models.Resume{
 		FullText:     responseText,
-		DownloadLink: mockDownloadLink,
+		DownloadLink: fileURL,
 	}
 
 	// Create resume in database
@@ -87,7 +99,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	elkResume := map[string]interface{}{
 		"content":   responseText,
 		"embedding": vectorEmbedding,
-		"url":       databaseResume.DownloadLink,
+		"url":       fileURL,
 	}
 
 	// Index resume in Elasticsearch

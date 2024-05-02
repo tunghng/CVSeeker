@@ -9,7 +9,6 @@ Example error code is 5000102:
 
 - 02 is actual error code, just auto increment and start at 1
 */
-const ERR_3RD string = "3rd-code"
 
 var (
 	// Errors of module common
