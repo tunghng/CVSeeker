@@ -80,14 +80,6 @@ func (_this *baseHandler) processError(c *gin.Context, err error, overrideHttpSt
 	if overrideHttpStatus {
 		statusCode = http.StatusOK
 	}
-	// longpv2 - fwd 3rd status code as it is
-	switch statusCode {
-	case 50001101, 50001102, 50001201, 50001301, 50001501:
-		adapterStatusCode := c.GetInt(errors.ERR_3RD)
-		if adapterStatusCode == 0 {
-			adapterStatusCode = http.StatusInternalServerError
-		}
-		c.JSON(adapterStatusCode, data)
-	}
+
 	c.JSON(statusCode, data)
 }

@@ -19,21 +19,9 @@ const (
 	ConfigApiMinPageSize     = "API_MIN_PAGE_SIZE"
 	ConfigApiMaxPageSize     = "API_MAX_PAGE_SIZE"
 
-	JWTSecretKey           = "JWT_SECRET_KEY"
-	JWTTokenExpireInMinute = "JWT_TOKEN_EXPIRE_IN_MINUTE"
-	JWTPublicKeyFile       = "JWT_PUBLIC_KEY_FILE"
-	JWTPrivateKeyFile      = "JWT_PRIVATE_KEY_FILE"
-
-	KeyJwtExpiredTime = "JWT_EXPIRED_TIME"
-
-	ConfigKeyFolderTmp              = "FOLDER_TMP"
-	ConfigKeyGCSBucket              = "GCS_BUCKET"
-	ConfigKeyGCSBucketCDN           = "GCS_BUCKET_CDN"
-	ConfigKeyGCSBucketCDNRootFolder = "GCS_BUCKET_CDN_ROOT_FOLDER"
-	ConfigKeyCDNUrl                 = "GCS_CDN_URL"
-	URLGoogleStorage                = "URL_GOOGLE_STORAGE"
-
 	ElasticsearchDocumentIndex = "ELK_DOCUMENT_INDEX"
 	ChatGptModel               = "CHAT_GPT_MODEL"
 	HuggingfaceModel           = "HUGGINGFACE_MODEL"
+
+	AwsBucket = "AWS_BUCKET"
 )

@@ -1,27 +1,39 @@
 package aws
 
 import (
+	"CVSeeker/pkg/cfg"
 	"bytes"
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"time"
+	"github.com/spf13/viper"
 )
 
 type IS3Client interface {
-	UploadFile(bucket, key string, fileData []byte) (string, error)
+	UploadFile(ctx context.Context, bucket, key string, fileData []byte) (string, error)
 }
 
 type S3Client struct {
 	Client *s3.Client
 }
 
-// NewS3Client creates a new S3 client using default AWS configuration
-func NewS3Client() (*S3Client, error) {
+// NewS3Client creates a new S3 client using AWS configuration loaded from environment variables or config files
+func NewS3Client(cfgReader *viper.Viper) (*S3Client, error) {
+	awsRegion := cfgReader.GetString(cfg.AwsRegion)
+	awsAccessKeyID := cfgReader.GetString(cfg.AwsAccessKey)
+	awsSecretAccessKey := cfgReader.GetString(cfg.AwsSecretKey)
+
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion("us-west-2"), // Specify the region here
+		config.WithRegion(awsRegion),
+		config.WithCredentialsProvider(aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
+			return aws.Credentials{
+				AccessKeyID:     awsAccessKeyID,
+				SecretAccessKey: awsSecretAccessKey,
+				Source:          "Custom Viper Source",
+			}, nil
+		})),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load SDK config, %v", err)
@@ -34,12 +46,9 @@ func NewS3Client() (*S3Client, error) {
 }
 
 // UploadFile uploads file data to the specified S3 bucket and returns the URL of the uploaded file
-func (c *S3Client) UploadFile(bucket, key string, fileData []byte) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Creating an uploader with the session and default options
-	_, err := c.Client.PutObject(ctx, &s3.PutObjectInput{
+func (aw *S3Client) UploadFile(ctx context.Context, bucket, key string, fileData []byte) (string, error) {
+	// Directly use the provided ctx which is expected to be managed by the caller
+	_, err := aw.Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(fileData),

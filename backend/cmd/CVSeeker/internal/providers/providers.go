@@ -5,8 +5,8 @@ import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
 	"CVSeeker/internal/errors"
 	"CVSeeker/internal/ginServer"
-	commonHandler "CVSeeker/internal/handlers"
 	"CVSeeker/internal/repositories"
+	"CVSeeker/pkg/aws"
 	"CVSeeker/pkg/cfg"
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/gpt"
@@ -33,7 +33,6 @@ func BuildContainer() *dig.Container {
 	{
 		_ = container.Provide(newCfgReader)
 		_ = container.Provide(newApiConfig)
-		//_ = container.Provide(newAppConfig)
 		_ = container.Provide(newGinEngine)
 		_ = container.Provide(setupRouter)
 		_ = container.Provide(newServerConfig)
@@ -43,12 +42,13 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(logger.NewLogger)
 		_ = container.Provide(errors.NewErrorParser)
 		_ = container.Provide(ginServer.NewGinServer)
-		_ = container.Provide(commonHandler.NewBaseHandler)
+		_ = container.Provide(handlers.NewBaseHandler)
 		_ = container.Provide(handlers.NewHandlers)
 
 		_ = container.Provide(elasticsearch.NewElasticsearchClient)
 		_ = container.Provide(gpt.NewGptAdaptorClient)
 		_ = container.Provide(huggingface.NewHuggingFaceClient)
+		_ = container.Provide(aws.NewS3Client)
 
 		_ = container.Provide(repositories.NewResumeRepository)
 

@@ -10,4 +10,8 @@ const (
 	HuggingfaceApiKey = "HUGGINGFACE_API_KEY"
 
 	GptApiKey = "GPT_API_KEY"
+
+	AwsAccessKey = "AWS_ACCESS_KEY"
+	AwsSecretKey = "AWS_SECRET_KEY"
+	AwsRegion    = "AWS_REGION"
 )
