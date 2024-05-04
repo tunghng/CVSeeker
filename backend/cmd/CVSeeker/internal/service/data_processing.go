@@ -69,19 +69,19 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 
 	// Upload file to S3 and get the URL
 	key := fmt.Sprintf("%d.docx", time.Now().Unix())
+
 	fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, file)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
 		return nil, err
 	}
 
-	// Prepare resume for database
+	// Create resume in database
 	resume := &models.Resume{
 		FullText:     responseText,
 		DownloadLink: fileURL,
 	}
 
-	// Create resume in database
 	databaseResume, err := _this.resumeRepo.Create(_this.db, resume)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to create resume record: %v", err)
@@ -95,14 +95,13 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 		return nil, err
 	}
 
-	// Prepare document for Elasticsearch, including the database resumeId
+	// Index resume in Elasticsearch
 	elkResume := map[string]interface{}{
 		"content":   responseText,
 		"embedding": vectorEmbedding,
 		"url":       fileURL,
 	}
 
-	// Index resume in Elasticsearch
 	err = _this.elasticClient.AddDocument(c, elasticDocumentName, fmt.Sprintf("%d", databaseResume.ResumeId), elkResume)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
