@@ -113,7 +113,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 			Code:    200,
 			Message: "Resume processed and file uploaded successfully",
 		},
-		Data: responseText,
+		Data: nil,
 	}
 
 	return response, nil

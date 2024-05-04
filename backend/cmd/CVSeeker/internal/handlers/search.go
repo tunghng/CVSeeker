@@ -27,7 +27,18 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 	}
 }
 
-// HybridSearch handles search requests and interacts with the SearchService.
+// HybridSearch
+// @Summary SearchHandler - HybridSearch
+// @Description Executes a search combining keyword and vector-based queries with customizable boosting on the vector component.
+// @Tags Search
+// @Accept json
+// @Produce json
+// @Param query query string true "Search query"
+// @Param knnBoost query float64 false "Boost factor for the KNN component" default(0.5)
+// @Param numResults query int false "Number of search results to return" default(10)
+// @Success 200 {object} meta.BasicResponse
+// @Failure 400,401,404,500 {object} meta.Error
+// @Router /search [GET]
 func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve search term and other parameters from the query string
@@ -47,7 +58,16 @@ func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 	}
 }
 
-// GetDocumentByID handles requests to retrieve a document by its ID.
+// GetDocumentByID
+// @Summary SearchHandler - GetDocumentByID
+// @Description Retrieves a document by its ID from the Elasticsearch index.
+// @Tags Search
+// @Accept json
+// @Produce json
+// @Param id path string true "Document ID"
+// @Success 200 {object} meta.BasicResponse
+// @Failure 400,401,404,500 {object} meta.Error
+// @Router /{id} [GET]
 func (_this *SearchHandler) GetDocumentByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get document ID from query parameters or path parameters
