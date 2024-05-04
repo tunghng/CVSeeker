@@ -9,8 +9,8 @@ import (
 	"CVSeeker/pkg/aws"
 	"CVSeeker/pkg/db"
 	"CVSeeker/pkg/elasticsearch"
-	"CVSeeker/pkg/gpt"
 	"CVSeeker/pkg/huggingface"
+	"CVSeeker/pkg/summarizer"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -25,7 +25,7 @@ type IDataProcessingService interface {
 
 type DataProcessingService struct {
 	db            *db.DB
-	gptClient     gpt.IGptAdaptorClient
+	gptClient     summarizer.ISummarizerAdaptorClient
 	resumeRepo    repositories.IResumeRepository
 	elasticClient elasticsearch.IElasticsearchClient
 	hfClient      huggingface.IHuggingFaceClient
@@ -35,7 +35,7 @@ type DataProcessingService struct {
 type DataProcessingServiceArgs struct {
 	dig.In
 	DB            *db.DB `name:"talentAcquisitionDB"`
-	GptClient     gpt.IGptAdaptorClient
+	GptClient     summarizer.ISummarizerAdaptorClient
 	ResumeRepo    repositories.IResumeRepository
 	ElasticClient elasticsearch.IElasticsearchClient
 	HfClient      huggingface.IHuggingFaceClient

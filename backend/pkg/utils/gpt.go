@@ -48,7 +48,7 @@ func AskChatGptForSummarizeVideo(title, transcriptJson, t string) (string, error
 
 	payload := ChatPayload{
 		Messages: messages,
-		Model:    "gpt-3.5-turbo",
+		Model:    "summarizer-3.5-turbo",
 	}
 
 	response, err := callChatGPTAPI(payload)
@@ -75,7 +75,7 @@ func AskChatGptToVerifyTranslation(original, translation, t string) (string, err
 
 	payload := ChatPayload{
 		Messages: messages,
-		Model:    "gpt-3.5-turbo",
+		Model:    "summarizer-3.5-turbo",
 	}
 
 	response, err := callChatGPTAPI(payload)

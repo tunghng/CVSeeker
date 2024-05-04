@@ -33,6 +33,8 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 			data.POST("", hs.DataProcessingHandler.ProcessDataHandler())
 			data.GET("/search", hs.SearchHandler.HybridSearch())
 			data.GET("/:id", hs.SearchHandler.GetDocumentByID())
+			data.POST("/chat/start", hs.ChatbotHandler.StartChatSession())
+			data.POST("/chat/:threadId/send", hs.ChatbotHandler.SendMessage())
 		}
 
 	}
