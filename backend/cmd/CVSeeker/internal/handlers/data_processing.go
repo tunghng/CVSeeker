@@ -27,10 +27,10 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 	}
 }
 
-// ProcessDataHandler godoc
+// ProcessDataHandler
 // @Summary Processes resume data
 // @Description Processes uploaded resume files and associated metadata
-// @Tags processing
+// @Tags Data Processing
 // @Accept multipart/form-data
 // @Produce json
 // @Param fullText query string true "Full text of the resume"

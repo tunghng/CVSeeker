@@ -51,7 +51,8 @@ func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"
-// @Param content body string true "Message content"
+// @Param content query string true "Message content"
+// @Param idList query string true "Id List"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /thread/{threadId}/send [POST]
@@ -69,15 +70,21 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 			return
 		}
 
-		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, message)
+		idList := strings.TrimSpace(c.Query("idList"))
+		if idList == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, message, idList)
 		_this.HandleResponse(c, resp, err)
 	}
 }
 
 // ListMessage
-// @Summary GptHandler - ListMessage
+// @Summary List messages belonging to a thread
 // @Description Get a list of messages for a thread.
-// @Tags Gpt
+// @Tags Chatbot
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"

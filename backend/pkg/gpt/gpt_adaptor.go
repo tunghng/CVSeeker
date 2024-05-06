@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -24,9 +23,7 @@ type IGptAdaptorClient interface {
 	ListMessages(threadID string, limit int, order, after, before string) (*ListMessagesResponse, error)
 	GetRunDetails(threadID, runID string) (*RunResponse, error)
 	CreateRun(threadID string, request CreateRunRequest) (*RunResponse, error)
-	SubmitToolOutputs(threadID, runID string, request SubmitToolOutputsRequest) (*RunResponse, error)
 	CreateMessage(threadID string, request CreateMessageRequest) (*MessageResponse, error)
-	DownloadAndUploadImage(imageURL string) (*UploadFileResponse, error)
 	WaitForRunCompletion(threadID, runID string) (*RunResponse, error)
 }
 
@@ -342,92 +339,6 @@ func (g *gptAdaptorClient) GetRunDetails(threadID, runID string) (*RunResponse, 
 	}
 
 	return &response, nil
-}
-
-func (g *gptAdaptorClient) SubmitToolOutputs(threadID, runID string, request SubmitToolOutputsRequest) (*RunResponse, error) {
-	urls := fmt.Sprintf("%v/%v/runs/%v/submit_tool_outputs", ThreadEndpoint, threadID, runID)
-
-	requestBody, err := json.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", urls, bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, err
-	}
-
-	// Sử dụng hàm helper để thêm headers chung
-	g.addCommonHeaders(req)
-
-	resp, err := g.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response RunResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (g *gptAdaptorClient) DownloadAndUploadImage(imageURL string) (*UploadFileResponse, error) {
-	// Bước 1: Tải ảnh từ URL
-	resp, err := http.Get(imageURL)
-	if err != nil {
-		return nil, fmt.Errorf("Error downloading image: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// Bước 2: Lấy tên file từ URL và lưu ảnh vào hệ thống file
-	fileName := path.Base(imageURL) // Lấy tên file từ URL
-	file, err := os.Create(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error creating file: %v", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	_, err = io.Copy(file, resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("Error saving image: %v", err)
-	}
-
-	// Bước 3: Upload ảnh lên OpenAI
-	uploadResponse, err := g.UploadFile(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error uploading file to OpenAI: %v", err)
-	}
-
-	// Bước 4: Xoá ảnh khỏi hệ thống file cục bộ
-	err = os.Remove(fileName)
-	if err != nil {
-		return nil, fmt.Errorf("Error deleting file: %v", err)
-	}
-
-	return uploadResponse, nil
 }
 
 func (g *gptAdaptorClient) UploadFile(filePath string) (*UploadFileResponse, error) {

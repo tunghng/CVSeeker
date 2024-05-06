@@ -28,7 +28,7 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 }
 
 // HybridSearch
-// @Summary SearchHandler - HybridSearch
+// @Summary Perform hybridsearch on elasticsearch
 // @Description Executes a search combining keyword and vector-based queries with customizable boosting on the vector component.
 // @Tags Search
 // @Accept json
@@ -76,7 +76,7 @@ func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 }
 
 // GetDocumentByID
-// @Summary SearchHandler - GetDocumentByID
+// @Summary Get Document By Id
 // @Description Retrieves a document by its ID from the Elasticsearch index.
 // @Tags Search
 // @Accept json

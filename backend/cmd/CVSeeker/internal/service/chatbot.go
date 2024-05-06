@@ -1,22 +1,20 @@
 package services
 
 import (
+	"CVSeeker/cmd/CVSeeker/internal/cfg"
 	"CVSeeker/internal/ginLogger"
 	"CVSeeker/internal/meta"
 	"CVSeeker/pkg/gpt"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"go.uber.org/dig"
 	"net/http"
 )
 
-const (
-	DefaultAssistant = "asst_zIkxsuNW2nhjWJZhUiTV6Vp9"
-	RoleUser         = "user"
-)
-
 type IChatbotService interface {
 	StartChatSession(c *gin.Context) (*meta.BasicResponse, error)
-	SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error)
+	SendMessageToChat(c *gin.Context, threadID, message string, idList string) (*meta.BasicResponse, error)
 	ListMessage(c *gin.Context, request gpt.ListMessageRequest) (*meta.BasicResponse, error)
 }
 
@@ -36,6 +34,7 @@ func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
 }
 
 func (_this *ChatbotService) StartChatSession(c *gin.Context) (*meta.BasicResponse, error) {
+	// Create a conversation thread
 	thread, err := _this.assistantClient.CreateThread()
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to create thread: %v", err)
@@ -53,11 +52,16 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context) (*meta.BasicRespon
 	return response, nil
 }
 
-func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error) {
+func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message string, idList string) (*meta.BasicResponse, error) {
+	DefaultAssistant := viper.GetString(cfg.DefaultAssistant)
+
 	// Create a message with the user's input
+
+	idPrompt := fmt.Sprintf(" Your answer will be restricted to resumes with the following Ids: %s", idList)
+
 	messageRequest := gpt.CreateMessageRequest{
-		Content: message,
-		Role:    RoleUser,
+		Content: message + idPrompt,
+		Role:    "user",
 	}
 
 	_, err := _this.assistantClient.CreateMessage(threadID, messageRequest)
