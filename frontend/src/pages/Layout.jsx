@@ -6,6 +6,7 @@ import Header from '../components/Header/Header'
 import Sidebar from '../components/Sidebar/Sidebar'
 
 const Layout = () => {
+    // ====== State Management ======
     const [showSidebar, setShowSidebar] = useState(true)
 
     return (
@@ -18,7 +19,7 @@ const Layout = () => {
                 <Sidebar showSidebar={showSidebar} />
 
                 {/* ====== Child route rendering ====== */}
-                <div className={`${showSidebar && 'md:ml-60'} flex-1 h-full bg-background overflow-y-scroll transition-all duration-700 ease-in-out`}>
+                <div className={`${showSidebar && 'md:ml-64'} flex-1 h-full bg-background overflow-y-scroll transition-all duration-700 ease-in-out`}>
                     <Outlet />
                 </div>
             </div>
