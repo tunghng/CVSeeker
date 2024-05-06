@@ -34,27 +34,44 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 // @Accept json
 // @Produce json
 // @Param query query string true "Search query"
-// @Param knnBoost query float64 false "Boost factor for the KNN component" default(0.5)
-// @Param numResults query int false "Number of search results to return" default(10)
+// @Param knnBoost query float32 false "Boost factor for the KNN component" default(0.5)
+// @Param from query int false "Start index for search results" default(0)
+// @Param size query int false "Number of search results to return" default(10)
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,401,404,500 {object} meta.Error
 // @Router /search [GET]
 func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Retrieve search term and other parameters from the query string
 		query := strings.TrimSpace(c.Query("query"))
 		if query == "" {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
-		// Get knnBoost with a default value
-		knnBoost, _ := strconv.ParseFloat(c.DefaultQuery("knnBoost", "0.5"), 32)
-		// Get numResults with a default value
-		numResults, _ := strconv.Atoi(c.DefaultQuery("numResults", "10"))
 
-		// Call the search service
-		resp, err := _this.searchService.HybridSearch(c, query, float32(knnBoost), numResults)
-		_this.HandleResponse(c, resp, err)
+		knnBoost, err := strconv.ParseFloat(c.DefaultQuery("knnBoost", "0.5"), 32)
+		if err != nil {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		from, err := strconv.Atoi(c.DefaultQuery("from", "0"))
+		if err != nil {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		size, err := strconv.Atoi(c.DefaultQuery("size", "10"))
+		if err != nil {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		resp, err := _this.searchService.HybridSearch(c, query, from, size, float32(knnBoost))
+		if err != nil {
+			_this.HandleResponse(c, nil, err)
+			return
+		}
+		_this.HandleResponse(c, resp, nil)
 	}
 }
 
@@ -72,7 +89,6 @@ func (_this *SearchHandler) GetDocumentByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get document ID from query parameters or path parameters
 		documentID := c.Param("id") // Assuming the ID is passed as a URL parameter
-
 		if documentID == "" {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return

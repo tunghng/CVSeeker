@@ -12,7 +12,7 @@ import (
 )
 
 type SearchService interface {
-	HybridSearch(c *gin.Context, query string, knnBoost float32, numResults int) (*meta.BasicResponse, error)
+	HybridSearch(c *gin.Context, query string, from, size int, knnBoost float32) (*meta.BasicResponse, error)
 	GetDocumentByID(c *gin.Context, documentID string) (*meta.BasicResponse, error)
 }
 
@@ -34,7 +34,7 @@ func NewSearchService(args SearchServiceArgs) SearchService {
 	}
 }
 
-func (_this *searchServiceImpl) HybridSearch(c *gin.Context, query string, knnBoost float32, numResults int) (*meta.BasicResponse, error) {
+func (_this *searchServiceImpl) HybridSearch(c *gin.Context, query string, from, size int, knnBoost float32) (*meta.BasicResponse, error) {
 	textEmbeddingModel := viper.GetString(cfg.HuggingfaceModel)
 	indexName := viper.GetString(cfg.ElasticsearchDocumentIndex) // Ensure you configure your index name in viper settings
 
@@ -45,8 +45,8 @@ func (_this *searchServiceImpl) HybridSearch(c *gin.Context, query string, knnBo
 		return nil, err
 	}
 
-	// Conduct the hybrid search
-	results, err := _this.elasticClient.HybridSearchWithBoost(c, indexName, query, vectorEmbedding, knnBoost, numResults)
+	// Conduct the hybrid search with pagination
+	results, err := _this.elasticClient.HybridSearchWithBoost(c, indexName, query, vectorEmbedding, from, size, knnBoost)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to conduct hybrid search: %v", err)
 		return nil, err

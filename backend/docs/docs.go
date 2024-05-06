@@ -205,9 +205,16 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "default": 0,
+                        "description": "Start index for search results",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "default": 10,
                         "description": "Number of search results to return",
-                        "name": "numResults",
+                        "name": "size",
                         "in": "query"
                     }
                 ],

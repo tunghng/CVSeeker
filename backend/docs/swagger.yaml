@@ -191,10 +191,15 @@ paths:
         in: query
         name: knnBoost
         type: number
+      - default: 0
+        description: Start index for search results
+        in: query
+        name: from
+        type: integer
       - default: 10
         description: Number of search results to return
         in: query
-        name: numResults
+        name: size
         type: integer
       produces:
       - application/json

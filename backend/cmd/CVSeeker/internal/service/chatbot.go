@@ -9,6 +9,11 @@ import (
 	"go.uber.org/dig"
 )
 
+const (
+	DefaultAssistant = "asst_zIkxsuNW2nhjWJZhUiTV6Vp9"
+	RoleUser         = "user"
+)
+
 type IChatbotService interface {
 	StartChatSession(c *gin.Context) (*meta.BasicResponse, error)
 	SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error)
@@ -30,14 +35,6 @@ func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
 }
 
 func (_this *ChatbotService) StartChatSession(c *gin.Context) (*meta.BasicResponse, error) {
-	assistantRequest := gpt.AssistantRequest{
-		Model: "gpt-3.5-turbo",
-	}
-	assistant, err := _this.assistantClient.CreateAssistant(assistantRequest)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create gpt: %v", err)
-	}
-
 	thread, err := _this.assistantClient.CreateThread()
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to create thread: %v", err)
@@ -47,25 +44,49 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context) (*meta.BasicRespon
 	return &meta.BasicResponse{
 		Meta: meta.Meta{Code: 200},
 		Data: map[string]string{
-			"assistant_id": assistant.ID,
-			"thread_id":    thread.ID,
+			"thread_id": thread.ID,
 		},
 	}, nil
 }
 
 func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error) {
+	// Create a message with the user's input
 	messageRequest := gpt.CreateMessageRequest{
 		Content: message,
-		Role:    "user",
+		Role:    RoleUser,
 	}
-	response, err := _this.assistantClient.CreateMessage(threadID, messageRequest)
+
+	_, err := _this.assistantClient.CreateMessage(threadID, messageRequest)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to send message: %v", err)
 		return nil, err
 	}
 
+	// Create a run to process the user's message
+	runRequest := gpt.CreateRunRequest{
+		AssistantID: DefaultAssistant,
+	}
+	runResponse, err := _this.assistantClient.CreateRun(threadID, runRequest)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to create run: %v", err)
+		return nil, err
+	}
+
+	// Wait for the completion of the run to get the response from the assistant
+	completedRun, err := _this.assistantClient.WaitForRunCompletion(threadID, runResponse.ID)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to wait for run completion: %v", err)
+		return nil, err
+	}
+
+	if completedRun.Status != "completed" {
+		ginLogger.Gin(c).Errorf("run did not complete successfully")
+		return nil, fmt.Errorf("run did not complete successfully")
+	}
+
+	// Return the result of the completed run
 	return &meta.BasicResponse{
 		Meta: meta.Meta{Code: 200},
-		Data: response,
+		Data: completedRun,
 	}, nil
 }

@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 type IGptAdaptorClient interface {
@@ -26,6 +27,7 @@ type IGptAdaptorClient interface {
 	SubmitToolOutputs(threadID, runID string, request SubmitToolOutputsRequest) (*RunResponse, error)
 	CreateMessage(threadID string, request CreateMessageRequest) (*MessageResponse, error)
 	DownloadAndUploadImage(imageURL string) (*UploadFileResponse, error)
+	WaitForRunCompletion(threadID, runID string) (*RunResponse, error)
 }
 
 type gptAdaptorClient struct {
@@ -492,4 +494,39 @@ func (g *gptAdaptorClient) UploadFile(filePath string) (*UploadFileResponse, err
 	}
 
 	return &uploadResp, nil
+}
+
+func (g *gptAdaptorClient) WaitForRunCompletion(threadID, runID string) (*RunResponse, error) {
+	timeout := time.NewTimer(2 * time.Minute) // Sets a timer for 2 minutes.
+	ticker := time.NewTicker(5 * time.Second) // Checks every 5 seconds.
+	defer func() {
+		timeout.Stop()
+		ticker.Stop()
+	}()
+
+	for {
+		select {
+		case <-timeout.C:
+			fmt.Println("Timeout reached. Final status unknown.")
+			return nil, fmt.Errorf("timeout reached. Final status unknown")
+
+		case <-ticker.C:
+			runResponse, err := g.GetRunDetails(threadID, runID)
+			if err != nil {
+				fmt.Println("Error fetching run details:", err)
+				return nil, fmt.Errorf("error fetching run details: %v", err)
+			}
+
+			fmt.Printf("Checking run status: %s\n", runResponse.Status)
+
+			if runResponse.Status == "completed" {
+				fmt.Println("Run completed successfully.")
+				return runResponse, nil
+			} else if runResponse.Status == "failed" {
+				fmt.Println("Run failed.")
+				return runResponse, fmt.Errorf("run failed with status: %s", runResponse.Status)
+			}
+			// Continues to poll until the run completes or fails.
+		}
+	}
 }
