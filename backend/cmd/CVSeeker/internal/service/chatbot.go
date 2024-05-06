@@ -4,9 +4,9 @@ import (
 	"CVSeeker/internal/ginLogger"
 	"CVSeeker/internal/meta"
 	"CVSeeker/pkg/gpt"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
+	"net/http"
 )
 
 const (
@@ -17,6 +17,7 @@ const (
 type IChatbotService interface {
 	StartChatSession(c *gin.Context) (*meta.BasicResponse, error)
 	SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error)
+	ListMessage(c *gin.Context, request gpt.ListMessageRequest) (*meta.BasicResponse, error)
 }
 
 type ChatbotService struct {
@@ -41,12 +42,15 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context) (*meta.BasicRespon
 		return nil, err
 	}
 
-	return &meta.BasicResponse{
-		Meta: meta.Meta{Code: 200},
-		Data: map[string]string{
-			"thread_id": thread.ID,
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "Session started successfully",
 		},
-	}, nil
+		Data: thread,
+	}
+
+	return response, nil
 }
 
 func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error) {
@@ -81,12 +85,44 @@ func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message
 
 	if completedRun.Status != "completed" {
 		ginLogger.Gin(c).Errorf("run did not complete successfully")
-		return nil, fmt.Errorf("run did not complete successfully")
+		return nil, err
+	}
+
+	//Get current list message
+	listMessageResponse, err := _this.assistantClient.ListMessages(threadID, 2, "", "", "")
+	if err != nil {
+		ginLogger.Gin(c).Errorf("Error when list message: %v", err)
+		return nil, err
+	}
+	if len(listMessageResponse.Data) == 0 {
+		ginLogger.Gin(c).Errorf("Error when get list message: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "Response retrieved successfully",
+		},
+		Data: listMessageResponse,
 	}
 
 	// Return the result of the completed run
-	return &meta.BasicResponse{
-		Meta: meta.Meta{Code: 200},
-		Data: completedRun,
-	}, nil
+	return response, nil
+}
+
+func (_this *ChatbotService) ListMessage(c *gin.Context, request gpt.ListMessageRequest) (*meta.BasicResponse, error) {
+	resp, err := _this.assistantClient.ListMessages(request.ThreadId, request.Limit, request.Order, request.After, request.Before)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("Error when create assistant: %v", err)
+		return nil, err
+	}
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    http.StatusOK,
+			Message: "Success",
+		},
+		Data: resp,
+	}
+	return response, nil
 }

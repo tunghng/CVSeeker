@@ -2,7 +2,9 @@ package handlers
 
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
+	"CVSeeker/cmd/CVSeeker/pkg/utils"
 	"CVSeeker/internal/errors"
+	"CVSeeker/pkg/gpt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
 	"strings"
@@ -34,7 +36,7 @@ func NewChatbotHandler(params ChatbotHandlerParams) *ChatbotHandler {
 // @Produce json
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
-// @Router /chat/start [POST]
+// @Router /thread/start [POST]
 func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		resp, err := _this.chatbotService.StartChatSession(c)
@@ -48,11 +50,11 @@ func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 // @Tags Chatbot
 // @Accept json
 // @Produce json
-// @Param thread_id path string true "Thread ID"
+// @Param threadId path string true "Thread ID"
 // @Param content body string true "Message content"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
-// @Router /chat/{thread_id}/send [POST]
+// @Router /thread/{threadId}/send [POST]
 func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
@@ -68,6 +70,38 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 		}
 
 		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, message)
+		_this.HandleResponse(c, resp, err)
+	}
+}
+
+// ListMessage
+// @Summary GptHandler - ListMessage
+// @Description Get a list of messages for a thread.
+// @Tags Gpt
+// @Accept json
+// @Produce json
+// @Param threadId path string true "Thread ID"
+// @Success  200  {object}  meta.BasicResponse
+// @Failure   400,401,404,500  {object}  meta.Error
+// @Security  BearerAuth
+// @Router /thread/{threadId}/messages [GET]
+func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		threadId := strings.TrimSpace(c.Param("threadId"))
+		if threadId == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+		limit := utils.Str2StrInt64(c.Query("limit"), true)
+		after := strings.TrimSpace(c.Query("after"))
+		before := strings.TrimSpace(c.Query("before"))
+
+		var request gpt.ListMessageRequest
+		request.ThreadId = threadId
+		request.Limit = int(limit)
+		request.After = after
+		request.Before = before
+		resp, err := _this.chatbotService.ListMessage(c, request)
 		_this.HandleResponse(c, resp, err)
 	}
 }
