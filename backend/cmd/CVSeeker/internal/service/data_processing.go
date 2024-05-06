@@ -9,8 +9,8 @@ import (
 	"CVSeeker/pkg/aws"
 	"CVSeeker/pkg/db"
 	"CVSeeker/pkg/elasticsearch"
-	"CVSeeker/pkg/gpt"
 	"CVSeeker/pkg/huggingface"
+	"CVSeeker/pkg/summarizer"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -25,7 +25,7 @@ type IDataProcessingService interface {
 
 type DataProcessingService struct {
 	db            *db.DB
-	gptClient     gpt.IGptAdaptorClient
+	gptClient     summarizer.ISummarizerAdaptorClient
 	resumeRepo    repositories.IResumeRepository
 	elasticClient elasticsearch.IElasticsearchClient
 	hfClient      huggingface.IHuggingFaceClient
@@ -35,7 +35,7 @@ type DataProcessingService struct {
 type DataProcessingServiceArgs struct {
 	dig.In
 	DB            *db.DB `name:"talentAcquisitionDB"`
-	GptClient     gpt.IGptAdaptorClient
+	GptClient     summarizer.ISummarizerAdaptorClient
 	ResumeRepo    repositories.IResumeRepository
 	ElasticClient elasticsearch.IElasticsearchClient
 	HfClient      huggingface.IHuggingFaceClient
@@ -69,19 +69,19 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 
 	// Upload file to S3 and get the URL
 	key := fmt.Sprintf("%d.docx", time.Now().Unix())
+
 	fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, file)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
 		return nil, err
 	}
 
-	// Prepare resume for database
+	// Create resume in database
 	resume := &models.Resume{
 		FullText:     responseText,
 		DownloadLink: fileURL,
 	}
 
-	// Create resume in database
 	databaseResume, err := _this.resumeRepo.Create(_this.db, resume)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to create resume record: %v", err)
@@ -95,14 +95,13 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 		return nil, err
 	}
 
-	// Prepare document for Elasticsearch, including the database resumeId
+	// Index resume in Elasticsearch
 	elkResume := map[string]interface{}{
 		"content":   responseText,
 		"embedding": vectorEmbedding,
 		"url":       fileURL,
 	}
 
-	// Index resume in Elasticsearch
 	err = _this.elasticClient.AddDocument(c, elasticDocumentName, fmt.Sprintf("%d", databaseResume.ResumeId), elkResume)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
@@ -114,7 +113,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 			Code:    200,
 			Message: "Resume processed and file uploaded successfully",
 		},
-		Data: responseText,
+		Data: nil,
 	}
 
 	return response, nil

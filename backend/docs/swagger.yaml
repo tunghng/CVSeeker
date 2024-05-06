@@ -1,0 +1,276 @@
+basePath: /cvseeker/resumes
+definitions:
+  meta.BasicResponse:
+    properties:
+      data: {}
+      meta:
+        $ref: '#/definitions/meta.Meta'
+      plan: {}
+    type: object
+  meta.Error:
+    properties:
+      meta:
+        $ref: '#/definitions/meta.Meta'
+    type: object
+  meta.Meta:
+    properties:
+      code:
+        type: integer
+      extra: {}
+      message:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is the server for api endpoints related to the CVSeeker application
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: CVSeeker Server
+  version: "1.0"
+paths:
+  /:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Processes uploaded resume files and associated metadata
+      parameters:
+      - description: Full text of the resume
+        in: query
+        name: fullText
+        required: true
+        type: string
+      - description: Upload file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Processes resume data
+      tags:
+      - Data Processing
+  /{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a document by its ID from the Elasticsearch index.
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Get Document By Id
+      tags:
+      - Search
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: Executes a search combining keyword and vector-based queries with
+        customizable boosting on the vector component.
+      parameters:
+      - description: Search query
+        in: query
+        name: query
+        required: true
+        type: string
+      - default: 0.5
+        description: Boost factor for the KNN component
+        in: query
+        name: knnBoost
+        type: number
+      - default: 0
+        description: Start index for search results
+        in: query
+        name: from
+        type: integer
+      - default: 10
+        description: Number of search results to return
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Perform hybridsearch on elasticsearch
+      tags:
+      - Search
+  /thread/{threadId}/messages:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of messages for a thread.
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      security:
+      - BearerAuth: []
+      summary: List messages belonging to a thread
+      tags:
+      - Chatbot
+  /thread/{threadId}/send:
+    post:
+      consumes:
+      - application/json
+      description: Sends a message to the specified chat session.
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      - description: Message content
+        in: query
+        name: content
+        required: true
+        type: string
+      - description: Id List
+        in: query
+        name: idList
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Send a message to a chat session
+      tags:
+      - Chatbot
+  /thread/start:
+    post:
+      consumes:
+      - application/json
+      description: Starts a new chat session by creating an gpt and a thread.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Start a new chat session
+      tags:
+      - Chatbot
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

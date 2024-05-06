@@ -21,7 +21,7 @@ type IElasticsearchClient interface {
 	AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error
 	KeywordSearch(ctx context.Context, indexName string, query string) ([]ElasticResponse, error)
 	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error)
-	HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error)
+	HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ElasticResponse, error)
 	GetDocumentByID(ctx context.Context, indexName, documentId string) (*ElasticResponse, error)
 }
 
@@ -145,19 +145,20 @@ func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 }
 
 // HybridSearchWithBoost perform search combining both semantic and lexiacal search
-func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, knnBoost float32, numResults int) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ElasticResponse, error) {
 	queryBoost := 1.0 - knnBoost
 
 	// Generate a query vector for the term, replace this with your actual model vector generation
 	res, err := ec.client.Search().
 		Index(indexName).
-		Size(numResults).
+		From(from).
+		Size(size).
 		Knn(types.KnnQuery{
 			Field:         "embedding", // Ensure this field matches your schema
 			QueryVector:   queryVector,
 			Boost:         &knnBoost,
-			K:             10,
-			NumCandidates: 100, // Adjust the number of candidates as needed
+			K:             100,
+			NumCandidates: 100, // Adj	ust the number of candidates as needed
 		}).
 		Query(&types.Query{
 			Match: map[string]types.MatchQuery{

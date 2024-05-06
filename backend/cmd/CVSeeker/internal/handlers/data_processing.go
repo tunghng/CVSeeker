@@ -27,7 +27,17 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 	}
 }
 
-// ProcessDataHandler is the Gin handler processing the resume
+// ProcessDataHandler
+// @Summary Processes resume data
+// @Description Processes uploaded resume files and associated metadata
+// @Tags Data Processing
+// @Accept multipart/form-data
+// @Produce json
+// @Param fullText query string true "Full text of the resume"
+// @Param file formData file true "Upload file"
+// @Success 200 {object} meta.BasicResponse
+// @Failure 400,401,404,500 {object} meta.Error
+// @Router / [post]
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fullText := strings.TrimSpace(c.Query("fullText"))
