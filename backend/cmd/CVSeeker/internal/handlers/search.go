@@ -39,7 +39,7 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 // @Param size query int false "Number of search results to return" default(10)
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,401,404,500 {object} meta.Error
-// @Router /search [GET]
+// @Router /cvseeker/resumes/search [GET]
 func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		query := strings.TrimSpace(c.Query("query"))
@@ -84,7 +84,7 @@ func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 // @Param id path string true "Document ID"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,401,404,500 {object} meta.Error
-// @Router /{id} [GET]
+// @Router /cvseeker/resumes/{id} [GET]
 func (_this *SearchHandler) GetDocumentByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get document ID from query parameters or path parameters

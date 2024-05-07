@@ -30,16 +30,23 @@ func NewChatbotHandler(params ChatbotHandlerParams) *ChatbotHandler {
 
 // StartChatSession
 // @Summary Start a new chat session
-// @Description Starts a new chat session by creating an gpt and a thread.
+// @Description Starts a new chat session by creating an assistant and a thread, using specified documents.
 // @Tags Chatbot
 // @Accept json
 // @Produce json
+// @Param ids query string true "Comma-separated list of document IDs"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
-// @Router /thread/start [POST]
+// @Router /cvseeker/resumes/thread/start [POST]
 func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		resp, err := _this.chatbotService.StartChatSession(c)
+		ids := c.Query("ids")
+		if ids == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		resp, err := _this.chatbotService.StartChatSession(c, ids)
 		_this.HandleResponse(c, resp, err)
 	}
 }
@@ -52,10 +59,9 @@ func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 // @Produce json
 // @Param threadId path string true "Thread ID"
 // @Param content query string true "Message content"
-// @Param idList query string true "Id List"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
-// @Router /thread/{threadId}/send [POST]
+// @Router /cvseeker/resumes/thread/{threadId}/send [POST]
 func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
@@ -70,13 +76,7 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 			return
 		}
 
-		idList := strings.TrimSpace(c.Query("idList"))
-		if idList == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-			return
-		}
-
-		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, message, idList)
+		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, message)
 		_this.HandleResponse(c, resp, err)
 	}
 }
@@ -91,7 +91,7 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 // @Success  200  {object}  meta.BasicResponse
 // @Failure   400,401,404,500  {object}  meta.Error
 // @Security  BearerAuth
-// @Router /thread/{threadId}/messages [GET]
+// @Router /cvseeker/resumes/thread/{threadId}/messages [GET]
 func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadId := strings.TrimSpace(c.Param("threadId"))

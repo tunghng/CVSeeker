@@ -103,10 +103,13 @@ type DeleteThreadResponse struct {
 	Deleted bool   `json:"deleted"`
 }
 
+type CreateThreadRequest struct {
+	Messages []CreateMessageRequest `json:"messages"`
+}
+
 type CreateMessageRequest struct {
-	Role    string   `json:"role"`
-	Content string   `json:"content"`
-	FileIds []string `json:"file_ids,omitempty"`
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 type MessageContent struct {

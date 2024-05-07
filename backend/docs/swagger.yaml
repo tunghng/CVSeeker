@@ -1,4 +1,3 @@
-basePath: /cvseeker/resumes
 definitions:
   meta.BasicResponse:
     properties:
@@ -37,49 +36,7 @@ info:
   title: CVSeeker Server
   version: "1.0"
 paths:
-  /:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Processes uploaded resume files and associated metadata
-      parameters:
-      - description: Full text of the resume
-        in: query
-        name: fullText
-        required: true
-        type: string
-      - description: Upload file
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/meta.BasicResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/meta.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/meta.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/meta.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/meta.Error'
-      summary: Processes resume data
-      tags:
-      - Data Processing
-  /{id}:
+  /cvseeker/resumes/{id}:
     get:
       consumes:
       - application/json
@@ -116,7 +73,7 @@ paths:
       summary: Get Document By Id
       tags:
       - Search
-  /search:
+  /cvseeker/resumes/search:
     get:
       consumes:
       - application/json
@@ -169,7 +126,7 @@ paths:
       summary: Perform hybridsearch on elasticsearch
       tags:
       - Search
-  /thread/{threadId}/messages:
+  /cvseeker/resumes/thread/{threadId}/messages:
     get:
       consumes:
       - application/json
@@ -208,7 +165,7 @@ paths:
       summary: List messages belonging to a thread
       tags:
       - Chatbot
-  /thread/{threadId}/send:
+  /cvseeker/resumes/thread/{threadId}/send:
     post:
       consumes:
       - application/json
@@ -222,11 +179,6 @@ paths:
       - description: Message content
         in: query
         name: content
-        required: true
-        type: string
-      - description: Id List
-        in: query
-        name: idList
         required: true
         type: string
       produces:
@@ -247,11 +199,18 @@ paths:
       summary: Send a message to a chat session
       tags:
       - Chatbot
-  /thread/start:
+  /cvseeker/resumes/thread/start:
     post:
       consumes:
       - application/json
-      description: Starts a new chat session by creating an gpt and a thread.
+      description: Starts a new chat session by creating an assistant and a thread,
+        using specified documents.
+      parameters:
+      - description: Comma-separated list of document IDs
+        in: query
+        name: ids
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -270,6 +229,48 @@ paths:
       summary: Start a new chat session
       tags:
       - Chatbot
+  /cvseeker/resumes/update:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Processes uploaded resume files and associated metadata
+      parameters:
+      - description: Full text of the resume
+        in: query
+        name: fullText
+        required: true
+        type: string
+      - description: Upload file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Processes resume data
+      tags:
+      - Data Processing
 securityDefinitions:
   BasicAuth:
     type: basic

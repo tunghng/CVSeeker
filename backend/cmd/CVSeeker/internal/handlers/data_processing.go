@@ -37,7 +37,7 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 // @Param file formData file true "Upload file"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,401,404,500 {object} meta.Error
-// @Router / [post]
+// @Router /cvseeker/resumes/update [post]
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fullText := strings.TrimSpace(c.Query("fullText"))
