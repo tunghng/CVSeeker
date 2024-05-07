@@ -4,13 +4,14 @@
 
 @font-face {
     font-family: 'Quicksand';
-    src: url('./assets/fonts/Quicksand.ttf') format('truetype');
+    src: url('./assets/fonts/Quicksand.woff2') format('woff2'),
+         url('./assets/fonts/Quicksand.woff') format('woff');
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Quicksand', 'Trebuchet MS', 'Arial', sans-serif;
     font-weight: 500;
 }
