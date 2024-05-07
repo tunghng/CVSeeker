@@ -2,13 +2,10 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 
 import App from './App.jsx'
-import './styles/my-button.css'
-import './styles/my-container.css'
-import './styles/my-animation.css'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    // <React.StrictMode>
+    <React.StrictMode>
         <App />
-    // </React.StrictMode>,
+    </React.StrictMode>,
 )

@@ -1,11 +1,14 @@
 
 import { useEffect, useRef } from 'react';
+import FeatherIcon from 'feather-icons-react'
 
 const IndeterminateCheckbox = ({ checked, indeterminate, onChange }) => {
     const checkboxRef = useRef(null);
 
     useEffect(() => {
-        checkboxRef.current.indeterminate = indeterminate;
+        if (checkboxRef.current) {
+            checkboxRef.current.indeterminate = indeterminate;
+        }        
     }, [indeterminate]);
 
     return (
@@ -21,8 +24,8 @@ const IndeterminateCheckbox = ({ checked, indeterminate, onChange }) => {
                         checked:bg-primary checked:border-primary
                         '
             />
-            <svg className='feather feather-check absolute top-[1px] left-[1px] w-[18px] h-[18px] text-white hidden peer-checked:block pointer-events-none' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <svg className='feather feather-minus absolute top-[1px] left-[1px] w-[18px] h-[18px] text-white hidden peer-indeterminate:block pointer-events-none' xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <FeatherIcon icon="check" className=" absolute top-[1px] left-[1px] w-[18px] h-[18px] text-white hidden peer-checked:block pointer-events-none" strokeWidth={3}/>
+            <FeatherIcon icon="minus" className=" absolute top-[1px] left-[1px] w-[18px] h-[18px] text-white hidden peer-indeterminate:block pointer-events-none" strokeWidth={3}/>
         </div>
     );
 

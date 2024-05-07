@@ -1,14 +1,20 @@
 
 import { useRef, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import FeatherIcon from 'feather-icons-react'
 
 import logocvseeker from '../assets/images/logo.png'
 import IndeterminateCheckbox from "../components/IndeterminateCheckbox/IndeterminateCheckbox"
 
+const ViewMode = {
+    GRID: 'grid',
+    LIST: 'list'
+};
+
 const SearchPage = () => {
     // ====== State Management ======
     const { id } = useParams()
-    const [viewMode, setViewMode] = useState('grid')
+    const [viewMode, setViewMode] = useState(ViewMode.LIST)
     const [searchItems, setSearchItems] = useState([
         { id: 1, name: 'File 1', selected: false },
         { id: 2, name: 'File 2', selected: false },
@@ -48,7 +54,7 @@ const SearchPage = () => {
                         disabled
                     />
                     <Link to={`/search/${id}`} className="absolute right-10 sm:right-14 text-subtitle pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <FeatherIcon icon="search" className="w-6 h-6"/>
                     </Link>
                 </div>
 
@@ -73,16 +79,16 @@ const SearchPage = () => {
                         <div className="flex items-center">
                             <p className="mr-2">View as</p>
                             <button 
-                                className={`my-button my-button-outline-secondary px-3 rounded-l-full ${viewMode === 'list' && 'bg-primary-subtle hover:bg-primary-subtle'}`}
-                                onClick={() => setViewMode('list')}
+                                className={`my-button my-button-outline-secondary px-3 rounded-l-full ${viewMode === ViewMode.LIST && 'bg-primary-subtle hover:bg-primary-subtle'}`}
+                                onClick={() => setViewMode(ViewMode.LIST)}
                                 >
-                                <svg className="feather feather-list" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                                <FeatherIcon icon="list" className="w-5 h-5"/>
                             </button>
                             <button
-                                className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${viewMode === 'grid' && 'bg-primary-subtle hover:bg-primary-subtle'}`}
-                                onClick={() => setViewMode('grid')}
+                                className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${viewMode === ViewMode.GRID && 'bg-primary-subtle hover:bg-primary-subtle'}`}
+                                onClick={() => setViewMode(ViewMode.GRID)}
                                 >
-                                <svg className="feather feather-grid" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                <FeatherIcon icon="grid" className="w-5 h-5"/>
                             </button>
                         </div>
                     </div>
@@ -127,7 +133,7 @@ const SearchPage = () => {
                         className="flex-1 px-2 py-2 rounded-lg text-text text-base outline-none border-2 border-border focus:border-primary transition-all duration-300 ease-in-out"
                     />
                     <button className="my-button my-button-subtle">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        <FeatherIcon icon="send" className="w-6 h-6"/>
                     </button>
                 </div>
             </div>

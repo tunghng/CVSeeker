@@ -1,11 +1,17 @@
 
 import { useRef, useState } from "react"
+import FeatherIcon from 'feather-icons-react'
 
 import IndeterminateCheckbox from "../components/IndeterminateCheckbox/IndeterminateCheckbox"
 
+const ViewMode = {
+    GRID: 'grid',
+    LIST: 'list'
+};
+
 const SavedPage = () => {
     // ====== State Management ======
-    const [viewMode, setViewMode] = useState('list')
+    const [viewMode, setViewMode] = useState(ViewMode.LIST)
     const [saveItems, setSaveItems] = useState([
         { id: 1, name: 'File 1', selected: false },
         { id: 2, name: 'File 2', selected: false },
@@ -54,16 +60,16 @@ const SavedPage = () => {
                     <div className="flex items-center">
                         <p className="mr-2">View as</p>
                         <button 
-                            className={`my-button my-button-outline-secondary px-3 rounded-l-full ${viewMode === 'list' && 'bg-primary-subtle hover:bg-primary-subtle'}`}
-                            onClick={() => setViewMode('list')}
+                            className={`my-button my-button-outline-secondary px-3 rounded-l-full ${viewMode === ViewMode.LIST && 'bg-primary-subtle hover:bg-primary-subtle'}`}
+                            onClick={() => setViewMode(ViewMode.LIST)}
                             >
-                            <svg className="feather feather-list" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                            <FeatherIcon icon="list" className="w-5 h-5"/>
                         </button>
                         <button
-                            className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${viewMode === 'grid' && 'bg-primary-subtle hover:bg-primary-subtle'}`}
-                            onClick={() => setViewMode('grid')}
+                            className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${viewMode === ViewMode.GRID && 'bg-primary-subtle hover:bg-primary-subtle'}`}
+                            onClick={() => setViewMode(ViewMode.GRID)}
                             >
-                            <svg className="feather feather-grid" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                            <FeatherIcon icon="grid" className="w-5 h-5"/>
                         </button>
                     </div>
                 </div>
