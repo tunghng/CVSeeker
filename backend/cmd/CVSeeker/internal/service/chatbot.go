@@ -4,6 +4,9 @@ import (
 	"CVSeeker/cmd/CVSeeker/internal/cfg"
 	"CVSeeker/internal/ginLogger"
 	"CVSeeker/internal/meta"
+	"CVSeeker/internal/models"
+	"CVSeeker/internal/repositories"
+	"CVSeeker/pkg/db"
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/gpt"
 	"github.com/gin-gonic/gin"
@@ -17,32 +20,45 @@ type IChatbotService interface {
 	StartChatSession(c *gin.Context, ids string) (*meta.BasicResponse, error)
 	SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error)
 	ListMessage(c *gin.Context, request gpt.ListMessageRequest) (*meta.BasicResponse, error)
+	GetAllThreadIDs(c *gin.Context) (*meta.BasicResponse, error)
+	GetResumeIDsByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error)
 }
 
 type ChatbotService struct {
-	assistantClient gpt.IGptAdaptorClient
-	elasticClient   elasticsearch.IElasticsearchClient
+	db               *db.DB
+	assistantClient  gpt.IGptAdaptorClient
+	elasticClient    elasticsearch.IElasticsearchClient
+	threadRepo       repositories.IThreadRepository
+	threadResumeRepo repositories.IThreadResumeRepository
 }
 
 type ChatbotServiceArgs struct {
 	dig.In
-	AssistantClient gpt.IGptAdaptorClient
-	ElasticClient   elasticsearch.IElasticsearchClient
+	DB               *db.DB `name:"talentAcquisitionDB"`
+	AssistantClient  gpt.IGptAdaptorClient
+	ElasticClient    elasticsearch.IElasticsearchClient
+	ThreadRepo       repositories.IThreadRepository
+	ThreadResumeRepo repositories.IThreadResumeRepository
 }
 
 func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
 	return &ChatbotService{
-		assistantClient: args.AssistantClient,
-		elasticClient:   args.ElasticClient,
+		db:               args.DB,
+		assistantClient:  args.AssistantClient,
+		elasticClient:    args.ElasticClient,
+		threadRepo:       args.ThreadRepo,
+		threadResumeRepo: args.ThreadResumeRepo,
 	}
 }
 
 func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string) (*meta.BasicResponse, error) {
+	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
+
 	// Parse the IDs from the string
 	idArray := strings.Split(ids, ", ")
 
 	// Fetch documents from Elasticsearch
-	documents, err := _this.elasticClient.FetchDocumentsByIDs(c, "your_index_name", idArray)
+	documents, err := _this.elasticClient.FetchDocumentsByIDs(c, elasticDocumentName, idArray)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to fetch documents: %v", err)
 		return nil, err
@@ -72,6 +88,29 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string) (*meta
 		return nil, err
 	}
 
+	// Create a new thread instance in the database
+	newThread := &models.Thread{
+		ID: thread.ID,
+	}
+
+	_, err = _this.threadRepo.Create(_this.db, newThread)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to create new thread record: %v", err)
+		return nil, err
+	}
+
+	var threadResumes []models.ThreadResume
+
+	// Create new thread_resume instances in the database
+	for _, id := range idArray {
+		threadResume := models.ThreadResume{
+			ThreadID: thread.ID,
+			ResumeID: id,
+		}
+		threadResumes = append(threadResumes, threadResume)
+	}
+	err = _this.threadResumeRepo.CreateBulkThreadResume(_this.db, threadResumes)
+
 	// Prepare the response with the thread information
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
@@ -87,6 +126,7 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string) (*meta
 func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error) {
 	DefaultAssistant := viper.GetString(cfg.DefaultAssistant)
 
+	// Create message and add to thread
 	messageRequest := gpt.CreateMessageRequest{
 		Content: message,
 		Role:    "user",
@@ -98,6 +138,7 @@ func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message
 		return nil, err
 	}
 
+	// Create run for assistant and thread
 	runRequest := gpt.CreateRunRequest{
 		AssistantID: DefaultAssistant,
 	}
@@ -149,12 +190,47 @@ func (_this *ChatbotService) ListMessage(c *gin.Context, request gpt.ListMessage
 		ginLogger.Gin(c).Errorf("Error when create assistant: %v", err)
 		return nil, err
 	}
+
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
 			Code:    http.StatusOK,
 			Message: "Success",
 		},
 		Data: resp,
+	}
+	return response, nil
+}
+
+func (_this *ChatbotService) GetAllThreadIDs(c *gin.Context) (*meta.BasicResponse, error) {
+	threadIDs, err := _this.threadRepo.GetAllThreadIDs(_this.db)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to get all thread IDs: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "All thread IDs retrieved successfully",
+		},
+		Data: threadIDs,
+	}
+	return response, nil
+}
+
+func (_this *ChatbotService) GetResumeIDsByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error) {
+	resumeIDs, err := _this.threadResumeRepo.GetResumeIDsByThreadID(_this.db, threadID)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to fetch resume IDs by thread ID: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "Resume IDs retrieved successfully for the thread",
+		},
+		Data: resumeIDs,
 	}
 	return response, nil
 }

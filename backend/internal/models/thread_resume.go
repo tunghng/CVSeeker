@@ -4,13 +4,13 @@ import (
 	"time"
 )
 
-const TableNameThreadResume = "thread_resume"
+const TableNameThreadResume = "thread_resumes"
 
+// ThreadResume represents the relationship between a thread and resumes.
 type ThreadResume struct {
-	ThreadId  string    `gorm:"column:thread_id;primaryKey" json:"threadId"`
-	ResumeId  int       `gorm:"column:resume_id;primaryKey" json:"resumeId"`
+	ThreadID  string    `gorm:"primaryKey;column:thread_id;type:varchar(100)" json:"threadId"`
+	ResumeID  string    `gorm:"primaryKey;column:resume_id" json:"resumeId"`
 	CreatedAt time.Time `gorm:"column:created_at" json:"createdAt"`
-	UpdatedAt time.Time `gorm:"column:updated_at" json:"updatedAt"`
 }
 
 func (ThreadResume) TableName() string {

@@ -3,6 +3,7 @@ package handlers
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
 	"CVSeeker/cmd/CVSeeker/pkg/utils"
+	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/errors"
 	"CVSeeker/pkg/gpt"
 	"github.com/gin-gonic/gin"
@@ -53,12 +54,12 @@ func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 
 // SendMessage
 // @Summary Send a message to a chat session
-// @Description Sends a message to the specified chat session.
+// @Description Sends a message to the specified chat session using message content provided in the request body.
 // @Tags Chatbot
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"
-// @Param content query string true "Message content"
+// @Param body body MessageContent true "Message content"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/{threadId}/send [POST]
@@ -66,17 +67,22 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
 		if threadID == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest, "Missing thread ID"))
 			return
 		}
 
-		message := strings.TrimSpace(c.Query("content"))
-		if message == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+		var msgContent dtos.QueryContent
+		if err := c.ShouldBindJSON(&msgContent); err != nil {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest, "Invalid or missing message content"))
 			return
 		}
 
-		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, message)
+		if strings.TrimSpace(msgContent.Content) == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest, "Message content cannot be empty"))
+			return
+		}
+
+		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, msgContent.Content)
 		_this.HandleResponse(c, resp, err)
 	}
 }
@@ -109,6 +115,44 @@ func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 		request.After = after
 		request.Before = before
 		resp, err := _this.chatbotService.ListMessage(c, request)
+		_this.HandleResponse(c, resp, err)
+	}
+}
+
+// GetAllThreadIDs
+// @Summary Get all thread IDs
+// @Description Retrieves all thread IDs from the database.
+// @Tags Chatbot
+// @Accept json
+// @Produce json
+// @Success 200 {object} meta.BasicResponse
+// @Failure 400,500 {object} meta.Error
+// @Router /cvseeker/resumes/thread [GET]
+func (_this *ChatbotHandler) GetAllThreadIDs() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		resp, err := _this.chatbotService.GetAllThreadIDs(c)
+		_this.HandleResponse(c, resp, err)
+	}
+}
+
+// GetResumeIDsByThreadID
+// @Summary Get resume IDs by thread ID
+// @Description Retrieves all resume IDs associated with a given thread ID.
+// @Tags Chatbot
+// @Accept json
+// @Produce json
+// @Param threadId path string true "Thread ID"
+// @Success 200 {object} meta.BasicResponse
+// @Failure 400,500 {object} meta.Error
+// @Router /cvseeker/resumes/thread/{threadId} [GET]
+func (_this *ChatbotHandler) GetResumeIDsByThreadID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		threadID := strings.TrimSpace(c.Param("threadId"))
+		if threadID == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+		resp, err := _this.chatbotService.GetResumeIDsByThreadID(c, threadID)
 		_this.HandleResponse(c, resp, err)
 	}
 }
