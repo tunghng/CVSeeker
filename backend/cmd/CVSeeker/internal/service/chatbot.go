@@ -18,7 +18,7 @@ import (
 )
 
 type IChatbotService interface {
-	StartChatSession(c *gin.Context, ids string) (*meta.BasicResponse, error)
+	StartChatSession(c *gin.Context, ids string, threadName string) (*meta.BasicResponse, error)
 	SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error)
 	ListMessage(c *gin.Context, request gpt.ListMessageRequest) (*meta.BasicResponse, error)
 	GetAllThreads(c *gin.Context) (*meta.BasicResponse, error)
@@ -52,7 +52,7 @@ func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
 	}
 }
 
-func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string) (*meta.BasicResponse, error) {
+func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, threadName string) (*meta.BasicResponse, error) {
 	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 
 	// Parse the IDs from the string
@@ -91,7 +91,8 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string) (*meta
 
 	// Create a new thread instance in the database
 	newThread := &models.Thread{
-		ID: thread.ID,
+		ID:   thread.ID,
+		Name: threadName,
 	}
 
 	_, err = _this.threadRepo.Create(_this.db, newThread)
@@ -220,6 +221,7 @@ func (_this *ChatbotService) GetAllThreads(c *gin.Context) (*meta.BasicResponse,
 	for i, modelThread := range modelThreads {
 		threadDTOs[i] = dtos.Thread{
 			ID:        modelThread.ID,
+			Name:      modelThread.Name,
 			UpdatedAt: modelThread.UpdatedAt.Unix(),
 		}
 	}

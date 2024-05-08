@@ -35,24 +35,24 @@ func NewChatbotHandler(params ChatbotHandlerParams) *ChatbotHandler {
 // @Tags Chatbot
 // @Accept json
 // @Produce json
-// @Param body body dtos.IdsRequest true "Comma-separated list of document IDs"
+// @Param body body dtos.StartChatRequest true "Comma-separated list of document IDs"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/start [POST]
 func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var idList dtos.IdsRequest
-		if err := c.ShouldBindJSON(&idList); err != nil {
+		var chatRequest dtos.StartChatRequest
+		if err := c.ShouldBindJSON(&chatRequest); err != nil {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		if strings.TrimSpace(idList.Ids) == "" {
+		if strings.TrimSpace(chatRequest.Ids) == "" {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		resp, err := _this.chatbotService.StartChatSession(c, idList.Ids)
+		resp, err := _this.chatbotService.StartChatSession(c, chatRequest.Ids, chatRequest.ThreadName)
 		_this.HandleResponse(c, resp, err)
 	}
 }
@@ -72,7 +72,7 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
 		if threadID == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
 			return
 		}
 
@@ -107,7 +107,7 @@ func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadId := strings.TrimSpace(c.Param("threadId"))
 		if threadId == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
 			return
 		}
 		limit := utils.Str2StrInt64(c.Query("limit"), true)
@@ -154,7 +154,7 @@ func (_this *ChatbotHandler) GetResumesByThreadID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
 		if threadID == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
 			return
 		}
 		resp, err := _this.chatbotService.GetResumesByThreadID(c, threadID)

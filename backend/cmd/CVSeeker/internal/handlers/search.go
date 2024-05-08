@@ -2,11 +2,11 @@ package handlers
 
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
+	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/errors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
 	"strconv"
-	"strings"
 )
 
 type SearchHandler struct {
@@ -33,7 +33,7 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 // @Tags Search
 // @Accept json
 // @Produce json
-// @Param query query string true "Search query"
+// @Param body body dtos.QueryRequest true "Message content"
 // @Param knnBoost query float32 false "Boost factor for the KNN component" default(0.5)
 // @Param from query int false "Start index for search results" default(0)
 // @Param size query int false "Number of search results to return" default(10)
@@ -42,8 +42,8 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 // @Router /cvseeker/resumes/search [GET]
 func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		query := strings.TrimSpace(c.Query("query"))
-		if query == "" {
+		var request dtos.QueryRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
@@ -66,7 +66,7 @@ func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 			return
 		}
 
-		resp, err := _this.searchService.HybridSearch(c, query, from, size, float32(knnBoost))
+		resp, err := _this.searchService.HybridSearch(c, request.Content, from, size, float32(knnBoost))
 		if err != nil {
 			_this.HandleResponse(c, nil, err)
 			return
