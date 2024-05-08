@@ -1,0 +1,11 @@
+
+@tailwind components;
+
+@layer components {
+    .my-container-medium {
+        @apply w-full max-w-[50rem] mx-auto px-6 sm:px-10;
+    }
+    .my-container-small {
+        @apply w-full max-w-[44rem] mx-auto px-6 sm:px-10;
+    }
+}
