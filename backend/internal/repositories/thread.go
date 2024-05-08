@@ -10,7 +10,8 @@ type IThreadRepository interface {
 	Create(db *db.DB, thread *models.Thread) (*models.Thread, error)
 	Update(db *db.DB, thread *models.Thread) error
 	FindByID(db *db.DB, threadID string) (*models.Thread, error)
-	GetAllThreadIDs(db *db.DB) ([]string, error)
+	GetAllThreads(db *db.DB) ([]models.Thread, error)
+	UpdateUpdatedAt(db *db.DB, threadID string) error
 }
 
 type threadRepository struct{}
@@ -41,10 +42,14 @@ func (_this *threadRepository) FindByID(db *db.DB, threadID string) (*models.Thr
 	return &thread, nil
 }
 
-func (_this *threadRepository) GetAllThreadIDs(db *db.DB) ([]string, error) {
-	var ids []string
-	if err := db.DB().Table(models.TableNameThread).Pluck("id", &ids).Error; err != nil {
+func (_this *threadRepository) GetAllThreads(db *db.DB) ([]models.Thread, error) {
+	var threads []models.Thread
+	if err := db.DB().Table(models.TableNameThread).Scan(&threads).Error; err != nil {
 		return nil, err
 	}
-	return ids, nil
+	return threads, nil
+}
+
+func (_this *threadRepository) UpdateUpdatedAt(db *db.DB, threadID string) error {
+	return db.DB().Table(models.TableNameThread).Where("id = ?", threadID).Update("updated_at", time.Now()).Error
 }

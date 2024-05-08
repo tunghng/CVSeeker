@@ -35,19 +35,24 @@ func NewChatbotHandler(params ChatbotHandlerParams) *ChatbotHandler {
 // @Tags Chatbot
 // @Accept json
 // @Produce json
-// @Param ids query string true "Comma-separated list of document IDs"
+// @Param body body dtos.IdsRequest true "Comma-separated list of document IDs"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/start [POST]
 func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ids := c.Query("ids")
-		if ids == "" {
+		var idList dtos.IdsRequest
+		if err := c.ShouldBindJSON(&idList); err != nil {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		resp, err := _this.chatbotService.StartChatSession(c, ids)
+		if strings.TrimSpace(idList.Ids) == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		resp, err := _this.chatbotService.StartChatSession(c, idList.Ids)
 		_this.HandleResponse(c, resp, err)
 	}
 }
@@ -59,7 +64,7 @@ func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"
-// @Param body body dtos.QueryContent true "Message content"
+// @Param body body dtos.QueryRequest true "Message content"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/{threadId}/send [POST]
@@ -67,18 +72,18 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
 		if threadID == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest, "Missing thread ID"))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		var msgContent dtos.QueryContent
+		var msgContent dtos.QueryRequest
 		if err := c.ShouldBindJSON(&msgContent); err != nil {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest, "Invalid or missing message content"))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
 		if strings.TrimSpace(msgContent.Content) == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest, "Message content cannot be empty"))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
@@ -119,7 +124,7 @@ func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 	}
 }
 
-// GetAllThreadIDs
+// GetAllThreads
 // @Summary Get all thread IDs
 // @Description Retrieves all thread IDs from the database.
 // @Tags Chatbot
@@ -128,14 +133,14 @@ func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread [GET]
-func (_this *ChatbotHandler) GetAllThreadIDs() gin.HandlerFunc {
+func (_this *ChatbotHandler) GetAllThreads() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		resp, err := _this.chatbotService.GetAllThreadIDs(c)
+		resp, err := _this.chatbotService.GetAllThreads(c)
 		_this.HandleResponse(c, resp, err)
 	}
 }
 
-// GetResumeIDsByThreadID
+// GetResumesByThreadID
 // @Summary Get resume IDs by thread ID
 // @Description Retrieves all resume IDs associated with a given thread ID.
 // @Tags Chatbot
@@ -145,14 +150,14 @@ func (_this *ChatbotHandler) GetAllThreadIDs() gin.HandlerFunc {
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/{threadId} [GET]
-func (_this *ChatbotHandler) GetResumeIDsByThreadID() gin.HandlerFunc {
+func (_this *ChatbotHandler) GetResumesByThreadID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
 		if threadID == "" {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
-		resp, err := _this.chatbotService.GetResumeIDsByThreadID(c, threadID)
+		resp, err := _this.chatbotService.GetResumesByThreadID(c, threadID)
 		_this.HandleResponse(c, resp, err)
 	}
 }

@@ -30,7 +30,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 
 		data := baseRoute.Group("/resumes")
 		{
-			data.POST("/update", hs.DataProcessingHandler.ProcessDataHandler())
+			data.POST("/upload", hs.DataProcessingHandler.ProcessDataHandler())
 
 			data.GET("/search", hs.SearchHandler.HybridSearch())
 			data.GET("/:id", hs.SearchHandler.GetDocumentByID())
@@ -38,8 +38,8 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 			data.POST("/thread/start", hs.ChatbotHandler.StartChatSession())
 			data.POST("/thread/:threadId/send", hs.ChatbotHandler.SendMessage())
 			data.GET("/thread/:threadId/messages", hs.ChatbotHandler.ListMessage())
-			data.GET("/thread", hs.ChatbotHandler.GetAllThreadIDs())
-			data.GET("/thread/:threadId", hs.ChatbotHandler.GetResumeIDsByThreadID())
+			data.GET("/thread", hs.ChatbotHandler.GetAllThreads())
+			data.GET("/thread/:threadId", hs.ChatbotHandler.GetResumesByThreadID())
 		}
 
 	}

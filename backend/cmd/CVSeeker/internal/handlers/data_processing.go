@@ -2,10 +2,11 @@ package handlers
 
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
+	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/errors"
+	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
-	"io"
 	"strings"
 )
 
@@ -29,31 +30,36 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 
 // ProcessDataHandler
 // @Summary Processes resume data
-// @Description Processes uploaded resume files and associated metadata
+// @Description Processes uploaded resume files and associated metadata as JSON
 // @Tags Data Processing
-// @Accept multipart/form-data
+// @Accept json
 // @Produce json
-// @Param fullText query string true "Full text of the resume"
-// @Param file formData file true "Upload file"
+// @Param request body dtos.ResumeRequest true "Resume data including file bytes"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,401,404,500 {object} meta.Error
-// @Router /cvseeker/resumes/update [post]
+// @Router /cvseeker/resumes/upload [post]
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fullText := strings.TrimSpace(c.Query("fullText"))
-		file, _, err := c.Request.FormFile("file")
-		if err != nil {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
+		var requestData dtos.ResumeRequest
+		if err := c.ShouldBindJSON(&requestData); err != nil {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		fileBytes, err := io.ReadAll(file)
-		if err != nil {
-			_this.RespondError(c, err)
+		if strings.TrimSpace(requestData.Content) == "" || strings.TrimSpace(requestData.FileBytes) == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		resp, err := _this.dataProcessingService.ProcessData(c, fullText, fileBytes)
+		// Decode base64 file bytes
+		fileBytes, err := base64.StdEncoding.DecodeString(requestData.FileBytes)
+		if err != nil {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		// Process data (example function call, replace with actual processing logic)
+		resp, err := _this.dataProcessingService.ProcessData(c, requestData.Content, fileBytes)
 		_this.HandleResponse(c, resp, err)
 	}
 }

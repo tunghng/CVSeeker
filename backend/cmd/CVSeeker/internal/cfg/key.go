@@ -21,8 +21,7 @@ const (
 
 	ElasticsearchDocumentIndex = "ELK_DOCUMENT_INDEX"
 	ChatGptModel               = "CHAT_GPT_MODEL"
-	DefaultAssistant           = "DEFAULT_ASSISTANT"
-	DefaultFile                = "DEFAULT_FILE"
+	DefaultOpenAIAssistant     = "DEFAULT_OPENAI_ASSISTANT"
 
 	HuggingfaceModel = "HUGGINGFACE_MODEL"
 	AwsBucket        = "AWS_BUCKET"
