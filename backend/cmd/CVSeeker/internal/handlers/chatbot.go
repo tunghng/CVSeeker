@@ -59,7 +59,7 @@ func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"
-// @Param body body MessageContent true "Message content"
+// @Param body body dtos.QueryContent true "Message content"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/{threadId}/send [POST]
