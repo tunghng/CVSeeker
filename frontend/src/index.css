@@ -8,6 +8,22 @@
          url('./assets/fonts/Quicksand.woff') format('woff');
 }
 
+:root {
+    --primary-color: #0D6EFD;
+    --primary-hover-color: #045adb;
+    --primary-subtle-color: #CFE2FF;
+    --secondary-subtle-color: #DEE2E6;
+    
+    --disable-light-color: #E9ECEF;
+    --border-color: #DEE2E6;
+
+    --title-color: #222222;
+    --subtitle-color: #878787;
+    --text-color: #444444;
+
+    --background-color: #F9F9F9;
+}
+
 * {
     margin: 0;
     padding: 0;
