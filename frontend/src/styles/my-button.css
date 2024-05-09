@@ -25,4 +25,8 @@
         @apply bg-white text-title border-2 border-subtitle
                hover:bg-disable-light
     }
+
+    .selected-item-stack-button {
+        @apply h-4 w-1 bg-primary rounded-full transform  transition-transform duration-300;
+    }
 }

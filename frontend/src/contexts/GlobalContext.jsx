@@ -15,7 +15,18 @@ function GlobalProvider({ children }) {
     // ====== Search Slider value state
     const [sliderValue, setSliderValue] = useState(0.5);
 
+    // ====== Selected Stack state
+    const [showSelectedItemsStack, setShowSelectedItemsStack] = useState(false);
+    
+    const toggleSelectedItemsStack = () => {
+        setShowSelectedItemsStack(!showSelectedItemsStack);
+    }
 
+    const [selectedItemsStack, setSelectedItemsStack] = useState([]);
+    
+    const pushToSelectedStack = (item) => {
+        setSelectedItemsStack([...selectedItemsStack, ...item]);
+    }
 
 
     const value = {
@@ -24,6 +35,13 @@ function GlobalProvider({ children }) {
 
         sliderValue,
         setSliderValue,
+
+        showSelectedItemsStack,
+        toggleSelectedItemsStack,
+
+        selectedItemsStack,
+        setSelectedItemsStack,
+        pushToSelectedStack,
     }
 
     return (
