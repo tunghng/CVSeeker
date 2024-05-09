@@ -102,14 +102,16 @@ const SearchPage = () => {
             </div>
 
             {/* ====== Selected Items Stack ====== */}
-            <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} w-full max-w-72 h-[calc(100%-3rem)] fixed  right-0 flex flex-col bg-background px-3 py-3 border-l-2 border-border transition-all duration-700 ease-in-out`}>
+            <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} w-full max-w-72 h-[calc(100%-3rem)] fixed  right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
                 <h1 className="text-lg font-semibold">Selected items ({globalContext.selectedItemsStack.length})</h1>
 
                 <div className="flex-1">
                     {
                         globalContext.selectedItemsStack.map(item => (
                             <div key={item.id}>
-                                <p>{item.name}</p>
+                                <p onClick={() => globalContext.popFromSelectedStack(item.id)}>
+                                    {item.name}
+                                </p>
                             </div>
                         ))
                     }

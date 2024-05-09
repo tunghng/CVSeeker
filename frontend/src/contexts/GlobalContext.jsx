@@ -24,9 +24,17 @@ function GlobalProvider({ children }) {
 
     const [selectedItemsStack, setSelectedItemsStack] = useState([]);
     
-    const pushToSelectedStack = (item) => {
-        setSelectedItemsStack([...selectedItemsStack, ...item]);
+    const pushToSelectedStack = (selectItems) => {
+        const uniqueItems = selectItems.filter(item => !selectedItemsStack.some(existingItem => existingItem.id === item.id));
+        setSelectedItemsStack([...selectedItemsStack, ...uniqueItems]);
     }
+    
+    const popFromSelectedStack = (itemId) => {
+        const newStack = selectedItemsStack.filter(item => item.id !== itemId);
+        setSelectedItemsStack(newStack);
+    }
+    
+    
 
 
     const value = {
@@ -42,6 +50,7 @@ function GlobalProvider({ children }) {
         selectedItemsStack,
         setSelectedItemsStack,
         pushToSelectedStack,
+        popFromSelectedStack,
     }
 
     return (
