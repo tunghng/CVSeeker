@@ -1,22 +1,38 @@
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState, useContext, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom"
+import { GlobalContext } from "../../contexts/GlobalContext"
+
 import FeatherIcon from 'feather-icons-react';
 
 const SearchInput = () => {
     // ====== State Management ======
-    const [searchInput, setSearchInput] = useState('')
+    const globalContext = useContext(GlobalContext);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchInput, setSearchInput] = useState('');
+    const [searchLevel, setSearchLevel] = useState(0.5);
+
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const query = searchParams.get('query') || '';
+        const level = searchParams.get('level') || 0.5;
+        setSearchInput(query);
+        setSearchLevel(level);
+    }, [searchParams]);
 
     // ====== Event Handlers ======
     const searchKeyDownHandler = (e) => {
-        if (e.key === 'Enter' && searchInput.trim() !== ''){
-            navigate(`/search/${searchInput}`)
+        if (e.key === 'Enter' 
+            && searchInput.trim() !== '' 
+            && (searchInput.trim() !== searchParams.get('query') || globalContext.sliderValue !== searchLevel)) {
+            navigate(`/search?query=${searchInput.trim()}&level=${globalContext.sliderValue}`);
         }
     }
     const searchClickHandler = () => {
-        if (searchInput.trim() !== ''){
-            navigate(`/search/${searchInput}`)
+        if (searchInput.trim() !== '' 
+            && (searchInput.trim() !== searchParams.get('query') || globalContext.sliderValue !== searchLevel)) {
+            navigate(`/search?query=${searchInput.trim()}&level=${globalContext.sliderValue}`);
         }
     }
 

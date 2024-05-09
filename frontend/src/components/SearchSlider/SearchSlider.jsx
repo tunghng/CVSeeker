@@ -1,12 +1,22 @@
 
-import { useState } from "react";
+import { useContext, useEffect } from "react";
+import { useSearchParams } from "react-router-dom"
+import { GlobalContext } from "../../contexts/GlobalContext"
+
 import { Tooltip } from "react-tooltip";
 
 import './SearchSlider.css';
 
 const SearchSlider = () => {
     // ====== State Management ======
-    const [sliderValue, setSliderValue] = useState(0.5);
+    const globalContext = useContext(GlobalContext);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    useEffect(() => {
+        const level = searchParams.get('level') || globalContext.sliderValue;
+        globalContext.setSliderValue(level);
+    }, [searchParams, globalContext.setSliderValue]);
+    
     const valueScripts = {
         0: "Search simply using keywords",
         0.25: "Searching mainly using keywords",
@@ -26,7 +36,7 @@ const SearchSlider = () => {
             >
                 Keyword
             </span>
-            <Tooltip id="keyword-tooltip" />
+            <Tooltip id="keyword-tooltip"  style={{ width: "14rem" }}/>
 
             <input
                 type="range"
@@ -34,25 +44,24 @@ const SearchSlider = () => {
                 min="0"
                 max="1"
                 step="0.25"
-                value={sliderValue}
-                onChange={(e) => setSliderValue(e.target.value)}
+                value={globalContext.sliderValue}
+                onChange={(e) => globalContext.setSliderValue(e.target.value)}
                 data-tooltip-id="slider-tooltip"
-                data-tooltip-content={valueScripts[sliderValue]}
+                data-tooltip-content={valueScripts[globalContext.sliderValue]}
                 data-tooltip-place="bottom"
             />
-            <Tooltip id="slider-tooltip" />
-
+            <Tooltip id="slider-tooltip" style={{ width: "12rem" }}/>
 
             <span
                 data-tooltip-id="context-tooltip"
-                data-tooltip-content="Context-based search: The search method considers the context or situation to find relevant information"
+                data-tooltip-content="Context-based search: The search method considers the context to find relevant information"
                 data-tooltip-place="bottom"
                 data-tooltip-delay-show={200}
                 className="cursor-default"
             >
                 Context
             </span>
-            <Tooltip id="context-tooltip" />
+            <Tooltip id="context-tooltip" style={{ width: "14rem" }}/>
         </div>
     );
 };

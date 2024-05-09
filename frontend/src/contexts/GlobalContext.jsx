@@ -12,11 +12,18 @@ function GlobalProvider({ children }) {
         setShowSidebar(!showSidebar);
     }
 
+    // ====== Search Slider value state
+    const [sliderValue, setSliderValue] = useState(0.5);
+
+
 
 
     const value = {
         showSidebar,
-        toggleSidebar
+        toggleSidebar,
+
+        sliderValue,
+        setSliderValue,
     }
 
     return (

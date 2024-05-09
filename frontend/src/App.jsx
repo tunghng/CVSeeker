@@ -21,7 +21,7 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<Layout />}>
                         <Route index element={<HomePage />} />
-                        <Route path="search/:id" element={<SearchPage />} />
+                        <Route path="search" element={<SearchPage />} />
                         <Route path="upload" element={<UploadPage />} />
                         <Route path="saved" element={<SavedPage />} />
                         <Route path="*" element={<h1>Not Found</h1>} />
