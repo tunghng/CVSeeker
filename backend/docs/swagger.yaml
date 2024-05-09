@@ -1,7 +1,22 @@
 definitions:
-  dtos.QueryContent:
+  dtos.QueryRequest:
     properties:
       content:
+        type: string
+    type: object
+  dtos.ResumeRequest:
+    properties:
+      content:
+        type: string
+      fileBytes:
+        description: base64 encoded string of the file
+        type: string
+    type: object
+  dtos.StartChatRequest:
+    properties:
+      ids:
+        type: string
+      threadName:
         type: string
     type: object
   meta.BasicResponse:
@@ -85,11 +100,12 @@ paths:
       description: Executes a search combining keyword and vector-based queries with
         customizable boosting on the vector component.
       parameters:
-      - description: Search query
-        in: query
-        name: query
+      - description: Message content
+        in: body
+        name: body
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/dtos.QueryRequest'
       - default: 0.5
         description: Boost factor for the KNN component
         in: query
@@ -239,7 +255,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/dtos.QueryContent'
+          $ref: '#/definitions/dtos.QueryRequest'
       produces:
       - application/json
       responses:
@@ -266,10 +282,11 @@ paths:
         using specified documents.
       parameters:
       - description: Comma-separated list of document IDs
-        in: query
-        name: ids
+        in: body
+        name: body
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/dtos.StartChatRequest'
       produces:
       - application/json
       responses:
@@ -288,22 +305,18 @@ paths:
       summary: Start a new chat session
       tags:
       - Chatbot
-  /cvseeker/resumes/update:
+  /cvseeker/resumes/upload:
     post:
       consumes:
-      - multipart/form-data
-      description: Processes uploaded resume files and associated metadata
+      - application/json
+      description: Processes uploaded resume files and associated metadata as JSON
       parameters:
-      - description: Full text of the resume
-        in: query
-        name: fullText
+      - description: Resume data including file bytes
+        in: body
+        name: request
         required: true
-        type: string
-      - description: Upload file
-        in: formData
-        name: file
-        required: true
-        type: file
+        schema:
+          $ref: '#/definitions/dtos.ResumeRequest'
       produces:
       - application/json
       responses:
