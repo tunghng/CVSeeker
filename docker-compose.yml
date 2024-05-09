@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.2.0
+    ports:
+      - ${DB_MYSQL_PORT}:${DB_MYSQL_PORT}
+    expose:
+      - ${DB_MYSQL_PORT}
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_MYSQL_PASSWORD}
+      - MYSQL_USER=${DB_MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${DB_MYSQL_DATABASE}
+      - MYSQL_TCP_PORT= ${DB_MYSQL_PORT}
+    command: --port ${DB_MYSQL_PORT}
+    volumes:
+      - ./${DB_LOCAL_DIR}:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+
