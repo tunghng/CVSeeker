@@ -12,7 +12,6 @@ import { GlobalProvider } from "./contexts/GlobalContext";
 
 import './styles/my-button.css';
 import './styles/my-container.css';
-import './styles/my-animation.css';
 import 'react-tooltip/dist/react-tooltip.css'
 
 export default function App() {

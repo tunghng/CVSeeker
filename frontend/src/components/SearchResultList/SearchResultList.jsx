@@ -3,6 +3,7 @@ import SearchResultItem from "../SearchResultItem/SearchResultItem";
 
 const SearchResultList = ({ searchResults, setSearchResults, viewMode }) => {
 
+    // ====== Event Handlers ======
     const handleItemClick = (id) => {
         const updatedResults = searchResults.map(item =>
             item.id === id ? { ...item, selected: !item.selected } : item
@@ -11,7 +12,7 @@ const SearchResultList = ({ searchResults, setSearchResults, viewMode }) => {
     }
 
     return (
-        <div className="w-full mt-4">
+        <div className="w-full">
             <div className="h-10 flex border-b border-border">
                 <div className="w-10"></div>
                 <div className="flex-1 flex items-center text-left font-bold">Name</div>

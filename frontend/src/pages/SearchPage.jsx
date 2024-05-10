@@ -100,7 +100,7 @@ const SearchPage = () => {
                 </div>
 
                 {/* ====== Search Results ====== */}
-                <div className="my-container-medium">
+                <div className="my-container-medium mt-4">
                     <SearchResultList
                         searchResults={searchResults}
                         setSearchResults={setSearchResults}
@@ -108,6 +108,7 @@ const SearchPage = () => {
                     />
                 </div>
             </div>
+
 
             {/* ====== Selected Items Stack ====== */}
             <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} w-full max-w-72 h-[calc(100%-3rem)] fixed  right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
@@ -124,7 +125,7 @@ const SearchPage = () => {
                 <button
                     className="my-button my-button-primary py-2"
                     data-tooltip-id="start-chat-tooltip"
-                    data-tooltip-content="Start Chat Session with selected items..."
+                    data-tooltip-content="Interact with AI chatbot in just a click!"
                     data-tooltip-place="top"
                     data-tooltip-delay-show={200}>
                     Start Chat Session

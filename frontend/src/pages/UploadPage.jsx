@@ -18,7 +18,6 @@ const UploadPage = () => {
     // ====== Event Handlers ======
     const handleChange = (file) => {
         setFile(file);
-        console.log(file);
     };
 
     const handleDragStateChange = (dragging) => {
@@ -30,6 +29,7 @@ const UploadPage = () => {
             <div className="my-container-medium py-6">
                 <h1 className="text-2xl font-bold">Upload profile</h1>
 
+                {/* ====== Upload by link profile ====== */}
                 <h2 className="mt-4 text-lg text-text">Upload profile by Linkedin Url</h2>
                 <input
                     type="text"
@@ -42,7 +42,8 @@ const UploadPage = () => {
                 />
 
 
-                <h2 className="mt-6 text-lg text-text">Upload profile by Linkedin Url</h2>
+                {/* ====== Upload PDF file ====== */}
+                <h2 className="mt-6 text-lg text-text">Upload PDF file</h2>
                 <FileUploader
                     handleChange={handleChange}
                     name="file"
@@ -57,6 +58,19 @@ const UploadPage = () => {
                     <p>Maximum size: 1MB</p>
                 </div>
 
+                {/* ====== Uploaded files ====== */}
+                <div>
+                    {file && (
+                        <div className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">
+                            <FeatherIcon icon="file" className="w-8 h-8 text-text " strokeWidth={1.8} />
+                            <div className="ml-2">
+                                <h3 className="text-lg text-text">{file.name}</h3>
+                                <p className="text-subtitle">{file.size} bytes</p>
+                            </div>
+                            <FeatherIcon icon="x" className="ml-auto w-6 h-6 text-text cursor-pointer" strokeWidth={1.8} onClick={() => setFile(null)} />
+                        </div>
+                    )}
+                </div>
 
             </div>
         </main>
@@ -70,7 +84,6 @@ function CustomFileUploader({ isDragging }) {
                 <img src={fileicon} alt="file icon" className="w-20 " />
                 <FeatherIcon icon="upload" className={`absolute -right-3 -bottom-2 w-8 h-8 p-1.5 rounded-full ${isDragging ? 'bg-primary' : 'bg-title'} text-white transition-all duration-300 ease-in-out`} strokeWidth={1.9} />
             </div>
-
 
             <h1 className="mt-6">Drag and drop file here or
                 <span className="ml-1 underline cursor-pointer underline-offset-2">Choose file</span>
