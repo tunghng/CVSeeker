@@ -23,7 +23,6 @@ type IElasticsearchClient interface {
 	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error)
 	HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ElasticResponse, error)
 	GetDocumentByID(ctx context.Context, indexName, documentId string) (*ElasticResponse, error)
-	FetchDocumentsByIDs(ctx context.Context, indexName string, documentIDs []string) ([]ElasticResponse, error)
 }
 
 type ElasticsearchClient struct {
@@ -109,63 +108,6 @@ func (ec *ElasticsearchClient) GetDocumentByID(ctx context.Context, indexName st
 	} else {
 		return nil, fmt.Errorf("error response from Elasticsearch: %s", res.String())
 	}
-}
-
-func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexName string, documentIDs []string) ([]ElasticResponse, error) {
-	// Construct the request body for the multi-get API
-	docs := make([]map[string]interface{}, len(documentIDs))
-	for i, id := range documentIDs {
-		docs[i] = map[string]interface{}{
-			"_id": id,
-		}
-	}
-	requestBody, err := json.Marshal(map[string]interface{}{"docs": docs})
-	if err != nil {
-		return nil, fmt.Errorf("error marshaling request body: %w", err)
-	}
-
-	// Perform the multi-get request
-	req := esapi.MgetRequest{
-		Index: indexName,
-		Body:  bytes.NewReader(requestBody),
-	}
-
-	res, err := req.Do(ctx, ec.client)
-	if err != nil {
-		return nil, fmt.Errorf("error performing mget request: %w", err)
-	}
-	defer res.Body.Close()
-
-	if res.IsError() {
-		return nil, fmt.Errorf("error response from Elasticsearch: %s", res.String())
-	}
-
-	// Decode the response
-	var mgetResp struct {
-		Docs []struct {
-			Found  bool                   `json:"found"`
-			Source map[string]interface{} `json:"_source"`
-			ID     string                 `json:"_id"`
-		} `json:"docs"`
-	}
-	if err := json.NewDecoder(res.Body).Decode(&mgetResp); err != nil {
-		return nil, fmt.Errorf("error decoding response body: %w", err)
-	}
-
-	// Convert the results to ElasticResponse
-	responses := make([]ElasticResponse, 0, len(mgetResp.Docs))
-	for _, doc := range mgetResp.Docs {
-		if doc.Found {
-			response := ElasticResponse{
-				ID:      doc.ID,
-				Content: fmt.Sprintf("%v", doc.Source["content"]),
-				URL:     fmt.Sprintf("%v", doc.Source["url"]),
-			}
-			responses = append(responses, response)
-		}
-	}
-
-	return responses, nil
 }
 
 func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName string, query string) ([]ElasticResponse, error) {

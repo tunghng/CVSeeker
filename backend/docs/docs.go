@@ -24,7 +24,70 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cvseeker/resumes/search": {
+        "/": {
+            "post": {
+                "description": "Processes uploaded resume files and associated metadata",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Processing"
+                ],
+                "summary": "Processes resume data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Full text of the resume",
+                        "name": "fullText",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/meta.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/search": {
             "get": {
                 "description": "Executes a search combining keyword and vector-based queries with customizable boosting on the vector component.",
                 "consumes": [
@@ -101,44 +164,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/cvseeker/resumes/thread": {
-            "get": {
-                "description": "Retrieves all thread IDs from the database.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Chatbot"
-                ],
-                "summary": "Get all thread IDs",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/cvseeker/resumes/thread/start": {
+        "/thread/start": {
             "post": {
-                "description": "Starts a new chat session by creating an assistant and a thread, using specified documents.",
+                "description": "Starts a new chat session by creating an gpt and a thread.",
                 "consumes": [
                     "application/json"
                 ],
@@ -149,15 +177,6 @@ const docTemplate = `{
                     "Chatbot"
                 ],
                 "summary": "Start a new chat session",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Comma-separated list of document IDs",
-                        "name": "ids",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -180,51 +199,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cvseeker/resumes/thread/{threadId}": {
-            "get": {
-                "description": "Retrieves all resume IDs associated with a given thread ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Chatbot"
-                ],
-                "summary": "Get resume IDs by thread ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Thread ID",
-                        "name": "threadId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/cvseeker/resumes/thread/{threadId}/messages": {
+        "/thread/{threadId}/messages": {
             "get": {
                 "security": [
                     {
@@ -285,9 +260,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/cvseeker/resumes/thread/{threadId}/send": {
+        "/thread/{threadId}/send": {
             "post": {
-                "description": "Sends a message to the specified chat session using message content provided in the request body.",
+                "description": "Sends a message to the specified chat session.",
                 "consumes": [
                     "application/json"
                 ],
@@ -307,63 +282,17 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Message content",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dtos.QueryContent"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    }
-                }
-            }
-        },
-        "/cvseeker/resumes/update": {
-            "post": {
-                "description": "Processes uploaded resume files and associated metadata",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Data Processing"
-                ],
-                "summary": "Processes resume data",
-                "parameters": [
-                    {
                         "type": "string",
-                        "description": "Full text of the resume",
-                        "name": "fullText",
+                        "description": "Message content",
+                        "name": "content",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "file",
-                        "description": "Upload file",
-                        "name": "file",
-                        "in": "formData",
+                        "type": "string",
+                        "description": "Id List",
+                        "name": "idList",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -380,18 +309,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/meta.Error"
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/meta.Error"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -401,7 +318,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cvseeker/resumes/{id}": {
+        "/{id}": {
             "get": {
                 "description": "Retrieves a document by its ID from the Elasticsearch index.",
                 "consumes": [
@@ -459,14 +376,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dtos.QueryContent": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "string"
-                }
-            }
-        },
         "meta.BasicResponse": {
             "type": "object",
             "properties": {
@@ -513,7 +422,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "",
+	BasePath:         "/cvseeker/resumes",
 	Schemes:          []string{},
 	Title:            "CVSeeker Server",
 	Description:      "This is the server for api endpoints related to the CVSeeker application",

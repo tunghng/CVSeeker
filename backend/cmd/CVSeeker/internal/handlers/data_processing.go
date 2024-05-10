@@ -2,11 +2,10 @@ package handlers
 
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
-	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/errors"
-	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/dig"
+	"io"
 	"strings"
 )
 
@@ -30,36 +29,31 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 
 // ProcessDataHandler
 // @Summary Processes resume data
-// @Description Processes uploaded resume files and associated metadata as JSON
+// @Description Processes uploaded resume files and associated metadata
 // @Tags Data Processing
-// @Accept json
+// @Accept multipart/form-data
 // @Produce json
-// @Param request body dtos.ResumeRequest true "Resume data including file bytes"
+// @Param fullText query string true "Full text of the resume"
+// @Param file formData file true "Upload file"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,401,404,500 {object} meta.Error
-// @Router /cvseeker/resumes/upload [post]
+// @Router / [post]
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var requestData dtos.ResumeRequest
-		if err := c.ShouldBindJSON(&requestData); err != nil {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-			return
-		}
-
-		if strings.TrimSpace(requestData.Content) == "" || strings.TrimSpace(requestData.FileBytes) == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-			return
-		}
-
-		// Decode base64 file bytes
-		fileBytes, err := base64.StdEncoding.DecodeString(requestData.FileBytes)
+		fullText := strings.TrimSpace(c.Query("fullText"))
+		file, _, err := c.Request.FormFile("file")
 		if err != nil {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
 			return
 		}
 
-		// Process data (example function call, replace with actual processing logic)
-		resp, err := _this.dataProcessingService.ProcessData(c, requestData.Content, fileBytes)
+		fileBytes, err := io.ReadAll(file)
+		if err != nil {
+			_this.RespondError(c, err)
+			return
+		}
+
+		resp, err := _this.dataProcessingService.ProcessData(c, fullText, fileBytes)
 		_this.HandleResponse(c, resp, err)
 	}
 }

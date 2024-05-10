@@ -3,7 +3,6 @@ package handlers
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
 	"CVSeeker/cmd/CVSeeker/pkg/utils"
-	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/errors"
 	"CVSeeker/pkg/gpt"
 	"github.com/gin-gonic/gin"
@@ -31,63 +30,53 @@ func NewChatbotHandler(params ChatbotHandlerParams) *ChatbotHandler {
 
 // StartChatSession
 // @Summary Start a new chat session
-// @Description Starts a new chat session by creating an assistant and a thread, using specified documents.
+// @Description Starts a new chat session by creating an gpt and a thread.
 // @Tags Chatbot
 // @Accept json
 // @Produce json
-// @Param body body dtos.StartChatRequest true "Comma-separated list of document IDs"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
-// @Router /cvseeker/resumes/thread/start [POST]
+// @Router /thread/start [POST]
 func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var chatRequest dtos.StartChatRequest
-		if err := c.ShouldBindJSON(&chatRequest); err != nil {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-			return
-		}
-
-		if strings.TrimSpace(chatRequest.Ids) == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-			return
-		}
-
-		resp, err := _this.chatbotService.StartChatSession(c, chatRequest.Ids, chatRequest.ThreadName)
+		resp, err := _this.chatbotService.StartChatSession(c)
 		_this.HandleResponse(c, resp, err)
 	}
 }
 
 // SendMessage
 // @Summary Send a message to a chat session
-// @Description Sends a message to the specified chat session using message content provided in the request body.
+// @Description Sends a message to the specified chat session.
 // @Tags Chatbot
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"
-// @Param body body dtos.QueryRequest true "Message content"
+// @Param content query string true "Message content"
+// @Param idList query string true "Id List"
 // @Success 200 {object} meta.BasicResponse
 // @Failure 400,500 {object} meta.Error
-// @Router /cvseeker/resumes/thread/{threadId}/send [POST]
+// @Router /thread/{threadId}/send [POST]
 func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadID := strings.TrimSpace(c.Param("threadId"))
 		if threadID == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
-			return
-		}
-
-		var msgContent dtos.QueryRequest
-		if err := c.ShouldBindJSON(&msgContent); err != nil {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		if strings.TrimSpace(msgContent.Content) == "" {
+		message := strings.TrimSpace(c.Query("content"))
+		if message == "" {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 
-		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, msgContent.Content)
+		idList := strings.TrimSpace(c.Query("idList"))
+		if idList == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		resp, err := _this.chatbotService.SendMessageToChat(c, threadID, message, idList)
 		_this.HandleResponse(c, resp, err)
 	}
 }
@@ -102,12 +91,12 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 // @Success  200  {object}  meta.BasicResponse
 // @Failure   400,401,404,500  {object}  meta.Error
 // @Security  BearerAuth
-// @Router /cvseeker/resumes/thread/{threadId}/messages [GET]
+// @Router /thread/{threadId}/messages [GET]
 func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		threadId := strings.TrimSpace(c.Param("threadId"))
 		if threadId == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return
 		}
 		limit := utils.Str2StrInt64(c.Query("limit"), true)
@@ -120,44 +109,6 @@ func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 		request.After = after
 		request.Before = before
 		resp, err := _this.chatbotService.ListMessage(c, request)
-		_this.HandleResponse(c, resp, err)
-	}
-}
-
-// GetAllThreads
-// @Summary Get all thread IDs
-// @Description Retrieves all thread IDs from the database.
-// @Tags Chatbot
-// @Accept json
-// @Produce json
-// @Success 200 {object} meta.BasicResponse
-// @Failure 400,500 {object} meta.Error
-// @Router /cvseeker/resumes/thread [GET]
-func (_this *ChatbotHandler) GetAllThreads() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		resp, err := _this.chatbotService.GetAllThreads(c)
-		_this.HandleResponse(c, resp, err)
-	}
-}
-
-// GetResumesByThreadID
-// @Summary Get resume IDs by thread ID
-// @Description Retrieves all resume IDs associated with a given thread ID.
-// @Tags Chatbot
-// @Accept json
-// @Produce json
-// @Param threadId path string true "Thread ID"
-// @Success 200 {object} meta.BasicResponse
-// @Failure 400,500 {object} meta.Error
-// @Router /cvseeker/resumes/thread/{threadId} [GET]
-func (_this *ChatbotHandler) GetResumesByThreadID() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		threadID := strings.TrimSpace(c.Param("threadId"))
-		if threadID == "" {
-			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInternalServer))
-			return
-		}
-		resp, err := _this.chatbotService.GetResumesByThreadID(c, threadID)
 		_this.HandleResponse(c, resp, err)
 	}
 }

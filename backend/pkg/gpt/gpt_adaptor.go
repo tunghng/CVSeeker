@@ -18,7 +18,7 @@ import (
 
 type IGptAdaptorClient interface {
 	CreateAssistant(request AssistantRequest) (*AssistantResponse, error)
-	CreateThread(request CreateThreadRequest) (*ThreadResponse, error)
+	CreateThread() (*ThreadResponse, error)
 	DeleteThread(threadID string) (*DeleteThreadResponse, error)
 	ListMessages(threadID string, limit int, order, after, before string) (*ListMessagesResponse, error)
 	GetRunDetails(threadID, runID string) (*RunResponse, error)
@@ -86,14 +86,9 @@ func (g *gptAdaptorClient) CreateAssistant(request AssistantRequest) (*Assistant
 	return &response, nil
 }
 
-func (g *gptAdaptorClient) CreateThread(request CreateThreadRequest) (*ThreadResponse, error) {
+func (g *gptAdaptorClient) CreateThread() (*ThreadResponse, error) {
 	url := ThreadEndpoint
-
-	requestBody, err := json.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		return nil, err
 	}
