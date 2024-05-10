@@ -35,5 +35,7 @@ WORKDIR /root/
 # Copy the built binary and any other necessary files
 COPY --from=builder /app/cmd/CVSeeker/main .
 
+COPY --from=builder /app/cmd/CVSeeker/statics /root/statics
+
 # Run the binary
 CMD ["./main"]
