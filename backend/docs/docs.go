@@ -39,11 +39,13 @@ const docTemplate = `{
                 "summary": "Perform hybridsearch on elasticsearch",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Search query",
-                        "name": "query",
-                        "in": "query",
-                        "required": true
+                        "description": "Message content",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.QueryRequest"
+                        }
                     },
                     {
                         "type": "number",
@@ -151,11 +153,13 @@ const docTemplate = `{
                 "summary": "Start a new chat session",
                 "parameters": [
                     {
-                        "type": "string",
                         "description": "Comma-separated list of document IDs",
-                        "name": "ids",
-                        "in": "query",
-                        "required": true
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.StartChatRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -312,7 +316,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.QueryContent"
+                            "$ref": "#/definitions/dtos.QueryRequest"
                         }
                     }
                 ],
@@ -338,11 +342,11 @@ const docTemplate = `{
                 }
             }
         },
-        "/cvseeker/resumes/update": {
+        "/cvseeker/resumes/upload": {
             "post": {
-                "description": "Processes uploaded resume files and associated metadata",
+                "description": "Processes uploaded resume files and associated metadata as JSON",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -353,18 +357,13 @@ const docTemplate = `{
                 "summary": "Processes resume data",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Full text of the resume",
-                        "name": "fullText",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Upload file",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
+                        "description": "Resume data including file bytes",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ResumeRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -459,10 +458,33 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dtos.QueryContent": {
+        "dtos.QueryRequest": {
             "type": "object",
             "properties": {
                 "content": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.ResumeRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "fileBytes": {
+                    "description": "base64 encoded string of the file",
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.StartChatRequest": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "string"
+                },
+                "threadName": {
                     "type": "string"
                 }
             }
