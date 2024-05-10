@@ -4,19 +4,17 @@ import (
 	"CVSeeker/cmd/CVSeeker/internal/cfg"
 	"CVSeeker/internal/ginLogger"
 	"CVSeeker/internal/meta"
-	"CVSeeker/internal/models"
 	"CVSeeker/internal/repositories"
 	"CVSeeker/pkg/aws"
 	"CVSeeker/pkg/db"
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/huggingface"
 	"CVSeeker/pkg/summarizer"
-	"fmt"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
 	"strings"
-	"time"
 )
 
 type IDataProcessingService interface {
@@ -58,9 +56,9 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	model := viper.GetString(cfg.ChatGptModel)
 	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 	textEmbeddingModel := viper.GetString(cfg.HuggingfaceModel)
-	awsBucketName := viper.GetString(cfg.AwsBucket)
+	//awsBucketName := viper.GetString(cfg.AwsBucket)
 
-	// Summarize resume text by making request to OpenAI
+	// Parse resume text to JSON format by making request to OpenAI
 	responseText, err := _this.gptClient.AskGPT(prompt, model)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to summarize using GPT: %v", err)
@@ -68,41 +66,43 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	}
 
 	// Upload file to S3 and get the URL
-	key := fmt.Sprintf("%d.docx", time.Now().Unix())
+	//key := fmt.Sprintf("%d.docx", time.Now().Unix())
+	//
+	//fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, file)
+	//if err != nil {
+	//	ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
+	//	return nil, err
+	//}
 
-	fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, file)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
+	var resumeSummary elasticsearch.ResumeSummaryDTO
+	//var resumeSummary map[string]interface{}
+	if err := json.Unmarshal([]byte(responseText), &resumeSummary); err != nil {
+		ginLogger.Gin(c).Errorf("failed to parse JSON response: %v", err)
 		return nil, err
 	}
-
-	// Create resume in database
-	resume := &models.Resume{
-		FullText:     responseText,
-		DownloadLink: fileURL,
-	}
-
-	databaseResume, err := _this.resumeRepo.Create(_this.db, resume)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to create resume record: %v", err)
-		return nil, err
-	}
+	resumeSummary.URL = "https://cvseeker-bucket.s3.ap-southeast-2.amazonaws.com/1714643484.pdf"
 
 	// Create the vector representation of text
-	vectorEmbedding, err := _this.hfClient.GetTextEmbedding(responseText, textEmbeddingModel)
+	vectorEmbedding, err := _this.hfClient.GetTextEmbedding(fullText, textEmbeddingModel)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to get text embedding: %v", err)
 		return nil, err
 	}
 
-	// Index resume in Elasticsearch
-	elkResume := map[string]interface{}{
-		"content":   responseText,
-		"embedding": vectorEmbedding,
-		"url":       fileURL,
+	// Prepare the document for Elasticsearch
+	elkResume := elasticsearch.ElkResumeDTO{
+		Content:   resumeSummary,
+		Embedding: vectorEmbedding,
 	}
 
-	err = _this.elasticClient.AddDocument(c, elasticDocumentName, fmt.Sprintf("%d", databaseResume.ResumeId), elkResume)
+	// Index resume in Elasticsearch
+	//elkResume := map[string]interface{}{
+	//	"content":   resumeSummary,
+	//	"embedding": vectorEmbedding,
+	//	"url":       "https://cvseeker-bucket.s3.ap-southeast-2.amazonaws.com/1714643484.pdf",
+	//}
+
+	err = _this.elasticClient.AddDocument(c, elasticDocumentName, elkResume)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
 		return nil, err
@@ -113,7 +113,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 			Code:    200,
 			Message: "Resume processed and file uploaded successfully",
 		},
-		Data: nil,
+		Data: elkResume,
 	}
 
 	return response, nil
@@ -121,18 +121,40 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 
 func generatePrompt(fullText string) string {
 	var sb strings.Builder
-	sb.WriteString("Given the full text of a resume below, please perform a detailed summary focusing on essential information that will be used for text embedding models aimed at similarity matching with job descriptions. Output the summary in a structured and concise format suitable for embedding, which includes the following sections:\n\n")
-	sb.WriteString(fmt.Sprintf("Full text of the resume:\n%s\n\n", fullText))
-	sb.WriteString("Summary should include sections on these, you MUST NOT MAKE UP ANY INFORMATION, do not add the section if there is no content related:\n")
-	sb.WriteString("1. Header: Candidate's full name, email address, phone number, and any professional online profiles such as LinkedIn or GitHub.\n")
-	sb.WriteString("2. Summary: Concise professional summary or objective encapsulating the candidate’s career goals and main qualifications.\n")
-	sb.WriteString("3. Education: Each educational qualification including the degree, institution, year of graduation, and any honors or special recognitions.\n")
-	sb.WriteString("4. Work Experience:\n    * Include for each job the employer, job title, dates of employment, and a bulleted list of key responsibilities and significant achievements.\n")
-	sb.WriteString("5. Skills: List all relevant technical and soft skills, specific technologies or tools, formatted as a comma-separated list.\n")
-	sb.WriteString("6. Certifications: Any relevant certifications with the name, issuing organization, and date of certification.\n")
-	sb.WriteString("7. Projects: Significant projects including title, brief description, technologies used, and project's impact or outcome.\n")
-	sb.WriteString("8. Publications: Any publications including title, co-authors, publication venue, and publication date.\n")
-	sb.WriteString("9. Languages: Languages known along with proficiency level (e.g., fluent, intermediate).\n")
-	sb.WriteString("10. Professional Affiliations: Memberships or roles in professional organizations, including the organization name, role nature, and dates of involvement.\n")
+	sb.WriteString("Full text of the resume:\n\n")
+	sb.WriteString(fullText)
+	sb.WriteString("\n\nPlease transform the above resume text into a well-structured JSON. The JSON should have the following structure and order:\n\n")
+	sb.WriteString(`{
+  "summary": "[Provide a concise professional summary based on the resume. Include key skills and experiences.]",
+  "skills": ["List all relevant skills derived from the resume, each as a separate element in the array."],
+  "basic_info": {
+    "full_name": "[Invent a full name that sounds realistic and appropriate for the professional field]",
+    "university": "[Generate a university name that fits the education level and field of study]",
+    "education_level": "[Assign an education level, e.g., BS, MS, PhD, appropriate for the resume context]",
+    "majors": ["Create a list of majors that align with the professional background and education level]",
+    "GPA": [Generate a GPA as a number that is plausible for the given educational background, or use null if not applicable]
+  },
+  "work_experience": [
+    {
+      "job_title": "[Title of the position]",
+      "company": "[Name of the company]",
+      "location": "[Location of the job]",
+      "duration": "[Duration of the job in years or months, e.g., '2 years']",
+      "job_summary": "[A brief summary of job responsibilities and achievements]"
+    }
+  ],
+  "project_experience": [
+    {
+      "project_name": "[Name of the project]",
+      "project_description": "[A detailed description of the project, including technologies used and outcomes]"
+    }
+  ],
+  "award": [
+    {
+      "award_name": "[Name of any award received, empty array if none]"
+    }
+  ]
+}`)
+	sb.WriteString("\n\nAll details in the 'basic_info' section should be invented but must sound logical and realistic, appropriate for the professional context. Ensure the details are consistent with typical professional and educational backgrounds relevant to the data in the rest of the resume. For other sections, ensure all entries are derived from the resume's content, maintaining consistency and accuracy with the original information. Provide clear, precise language to avoid ambiguities and ensure data types match the expected format.")
 	return sb.String()
 }
