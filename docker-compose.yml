@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:8.2.0
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_MYSQL_PASSWORD}
+      - MYSQL_USER=${DB_MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${DB_MYSQL_DATABASE}
+    volumes:
+      - ./${DB_LOCAL_DIR}:/var/lib/mysql
+      - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"  # Ensure to adjust the port if "serve" is configured differently
+    depends_on:
+      - backend
