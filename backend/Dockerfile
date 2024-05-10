@@ -20,8 +20,15 @@ WORKDIR /app/cmd/CVSeeker
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 # Use a smaller base image to run the application
-FROM alpine:latest  
+FROM alpine:latest
 RUN apk --no-cache add ca-certificates
+
+# Install bash
+RUN apk add --no-cache bash
+
+# Add wait-for-it
+COPY --from=builder /app/wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
 
 WORKDIR /root/
 

@@ -1,14 +1,5 @@
 version: '3.8'
 services:
-  backend:
-    build: ./backend
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    depends_on:
-      - mysql
-
   mysql:
     container_name: mysql
     image: mysql:8.2.0
@@ -22,9 +13,18 @@ services:
     volumes:
       - ./${DB_LOCAL_DIR}:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 10s
       retries: 5
 
-
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
