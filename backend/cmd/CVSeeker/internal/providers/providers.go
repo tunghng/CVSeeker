@@ -53,6 +53,8 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(gpt.NewGptAdaptorClient)
 
 		_ = container.Provide(repositories.NewResumeRepository)
+		_ = container.Provide(repositories.NewThreadResumeRepository)
+		_ = container.Provide(repositories.NewThreadRepository)
 
 		_ = container.Provide(services.NewDataProcessingService)
 		_ = container.Provide(services.NewSearchService)
