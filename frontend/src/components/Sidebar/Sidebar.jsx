@@ -37,20 +37,20 @@ const Sidebar = () => {
             <div className="navigation-list">
                 <div>
                     <h3 className='navigation-title'>Today</h3>
-                    <Link to='/' className='navigation-item'>
+                    <Link to='/chat/123' className='navigation-item'>
                         <span>Find 10 CVs good at JavaScript</span>
                     </Link>
-                    <Link to='/' className='navigation-item'>
+                    <Link to='/chat/456' className='navigation-item'>
                         <span>Find 8 people good at communicate</span>
                     </Link>
                 </div>
 
                 <div>
                     <h3 className='navigation-title'>24/04/2024</h3>
-                    <Link to='/' className='navigation-item'>
+                    <Link to='/chat/hehe' className='navigation-item'>
                         <span>Find 8 people good at communicate</span>
                     </Link>
-                    <Link to='/' className='navigation-item'>
+                    <Link to='/chat/abc' className='navigation-item'>
                         <span>Find 8 people good at communicate</span>
                     </Link>
                 </div>

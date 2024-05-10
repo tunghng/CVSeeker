@@ -1,10 +1,14 @@
 
 import { useContext } from "react"
 import { GlobalContext } from "../../contexts/GlobalContext"
+import { useLocation } from "react-router-dom"
+
 import FeatherIcon from "feather-icons-react";
 
 const StackItem = ({ item }) => {
+    // ====== State Management ======
     const globalContext = useContext(GlobalContext);
+    const location = useLocation()
 
     const handleDetailClick = (e) => {
         e.stopPropagation();
@@ -22,8 +26,11 @@ const StackItem = ({ item }) => {
             onClick={handleDetailClick}
         >
             <p>{item.name}</p>
-            <FeatherIcon icon="x" className="w-6 h-6 p-1 rounded-full cursor-pointer hover:bg-subtitle"
-                onClick={handleRemoveClick} />
+            {
+                location.pathname === '/search' &&
+                <FeatherIcon icon="x" className="w-6 h-6 p-1 rounded-full cursor-pointer hover:bg-subtitle"
+                    onClick={handleRemoveClick} />
+            }
         </div>
     )
 }
