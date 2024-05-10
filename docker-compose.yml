@@ -29,3 +29,10 @@ services:
       mysql:
         condition: service_healthy
     command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"  # Ensure to adjust the port if "serve" is configured differently
+    depends_on:
+      - backend
