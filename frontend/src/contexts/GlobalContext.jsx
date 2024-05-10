@@ -34,7 +34,9 @@ function GlobalProvider({ children }) {
         setSelectedItemsStack(newStack);
     }
     
-    
+    // ====== Detailed Item Modal state
+    const [showDetailItemModal, setShowDetailItemModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
 
 
     const value = {
@@ -51,6 +53,11 @@ function GlobalProvider({ children }) {
         setSelectedItemsStack,
         pushToSelectedStack,
         popFromSelectedStack,
+
+        showDetailItemModal,
+        setShowDetailItemModal,
+        selectedItem,
+        setSelectedItem,
     }
 
     return (

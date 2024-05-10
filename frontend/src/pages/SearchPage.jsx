@@ -11,6 +11,8 @@ import SearchInput from "../components/SearchInput/SearchInput"
 import SearchSlider from "../components/SearchSlider/SearchSlider"
 import IndeterminateCheckbox from "../components/IndeterminateCheckbox/IndeterminateCheckbox"
 import SearchResultList from "../components/SearchResultList/SearchResultList"
+import StackItem from "../components/StackItem/StackItem"
+import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
 
 const ViewMode = {
     GRID: 'grid',
@@ -38,6 +40,12 @@ const SearchPage = () => {
     }, [query, level])
 
     // ====== Event Handlers ======
+    const handleAddToList = () => {
+        globalContext.pushToSelectedStack(searchResults.filter(item => item.selected))
+        if (globalContext.showSelectedItemsStack === false) {
+            globalContext.toggleSelectedItemsStack()
+        }
+    }
 
     return (
         <main className="h-full flex overflow-x-hidden">
@@ -56,7 +64,7 @@ const SearchPage = () => {
                 {/* ====== Actions Toolbar ====== */}
                 <div className="my-container-medium flex justify-between mt-3 h-10">
                     {/* ====== Selecting Checkbox ====== */}
-                    <div className="flex items-center gap-x-3">
+                    <div className="flex items-center gap-x-3 pl-3">
                         <IndeterminateCheckbox
                             searchResults={searchResults}
                             setSearchResults={setSearchResults}
@@ -67,7 +75,7 @@ const SearchPage = () => {
                             <>
                                 <button
                                     className="my-button my-button-outline"
-                                    onClick={() => globalContext.pushToSelectedStack(searchResults.filter(item => item.selected))}
+                                    onClick={handleAddToList}
                                 >Add to List</button>
                             </>
                         }
@@ -77,13 +85,13 @@ const SearchPage = () => {
                     <div className="flex items-center">
                         <p className="mr-2">View as</p>
                         <button
-                            className={`my-button my-button-outline-secondary px-3 rounded-l-full ${viewMode === ViewMode.LIST && 'bg-primary-subtle hover:bg-primary-subtle'}`}
+                            className={`my-button my-button-outline-secondary px-3 rounded-l-full ${viewMode === ViewMode.LIST && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
                             onClick={() => setViewMode(ViewMode.LIST)}
                         >
                             <FeatherIcon icon="list" className="w-5 h-5" />
                         </button>
                         <button
-                            className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${viewMode === ViewMode.GRID && 'bg-primary-subtle hover:bg-primary-subtle'}`}
+                            className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${viewMode === ViewMode.GRID && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
                             onClick={() => setViewMode(ViewMode.GRID)}
                         >
                             <FeatherIcon icon="grid" className="w-5 h-5" />
@@ -108,17 +116,13 @@ const SearchPage = () => {
                 <div className="flex-1">
                     {
                         globalContext.selectedItemsStack.map(item => (
-                            <div key={item.id}>
-                                <p onClick={() => globalContext.popFromSelectedStack(item.id)}>
-                                    {item.name}
-                                </p>
-                            </div>
+                            <StackItem key={item.id} item={item} />
                         ))
                     }
                 </div>
 
                 <button
-                    className="my-button my-button-outline"
+                    className="my-button my-button-primary py-2"
                     data-tooltip-id="start-chat-tooltip"
                     data-tooltip-content="Start Chat Session with selected items..."
                     data-tooltip-place="top"
@@ -127,7 +131,7 @@ const SearchPage = () => {
                 </button>
                 <Tooltip id="start-chat-tooltip" />
 
-                {/* ====== Toggle Stack  ====== */}
+                {/* ====== Toggle Stack Button ====== */}
                 <button
                     className="absolute top-1/2 -left-4 transform -translate-x-1/2 -translate-y-1/2"
                     onClick={globalContext.toggleSelectedItemsStack}
@@ -144,6 +148,8 @@ const SearchPage = () => {
                 </button>
 
             </div>
+
+            <DetailItemModal />
         </main>
     )
 }
