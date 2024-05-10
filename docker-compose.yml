@@ -12,6 +12,7 @@ services:
       - MYSQL_DATABASE=${DB_MYSQL_DATABASE}
     volumes:
       - ./${DB_LOCAL_DIR}:/var/lib/mysql
+      - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
