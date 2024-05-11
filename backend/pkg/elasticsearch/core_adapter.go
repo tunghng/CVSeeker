@@ -18,9 +18,10 @@ import (
 )
 
 type IElasticsearchClient interface {
-	AddDocument(ctx context.Context, indexName string, document interface{}) error
+	AddDocument(ctx context.Context, indexName string, document interface{}) (string, error)
 	KeywordSearch(ctx context.Context, indexName string, query string) ([]ResumeSummaryDTO, error)
 	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ResumeSummaryDTO, error)
+	DeleteDocumentByID(ctx context.Context, indexName, documentID string) error
 	HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ResumeSummaryDTO, error)
 	GetDocumentByID(ctx context.Context, indexName, documentId string) (*ResumeSummaryDTO, error)
 	FetchDocumentsByIDs(ctx context.Context, indexName string, documentIDs []string) ([]ResumeSummaryDTO, error)
@@ -55,13 +56,13 @@ func NewElasticsearchClient(cfgReader *viper.Viper) (IElasticsearchClient, error
 }
 
 // AddDocument adds a new document to the specified index
-func (ec *ElasticsearchClient) AddDocument(ctx context.Context, indexName string, document interface{}) error {
+func (ec *ElasticsearchClient) AddDocument(ctx context.Context, indexName string, document interface{}) (string, error) {
 	docJSON, err := json.Marshal(document)
 	if err != nil {
-		return fmt.Errorf("error marshaling document: %w", err)
+		return "", fmt.Errorf("error marshaling document: %w", err)
 	}
 
-	// Prepare the request with the specified index, document ID and document body
+	// Prepare the request with the specified index, document body, and make it refresh immediately
 	req := esapi.IndexRequest{
 		Index:   indexName,
 		Body:    bytes.NewReader(docJSON),
@@ -71,15 +72,24 @@ func (ec *ElasticsearchClient) AddDocument(ctx context.Context, indexName string
 	// Perform the request with the given context
 	res, err := req.Do(ctx, ec.client)
 	if err != nil {
-		return fmt.Errorf("error indexing document: %w", err)
+		return "", fmt.Errorf("error indexing document: %w", err)
 	}
 	defer res.Body.Close()
 
+	// Read the response body
 	if res.IsError() {
-		return fmt.Errorf("error response from Elasticsearch: %s", res.String())
+		return "", fmt.Errorf("error response from Elasticsearch: %s", res.String())
 	}
 
-	return nil
+	// Parse the response body to extract the ID
+	var result struct {
+		ID string `json:"_id"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("error parsing response body: %w", err)
+	}
+
+	return result.ID, nil
 }
 
 // GetDocumentByID retrieves a document by its ID from a specific index and converts it to an ResumeSummaryDTO.
@@ -169,6 +179,27 @@ func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexNam
 	}
 
 	return response, nil
+}
+
+func (ec *ElasticsearchClient) DeleteDocumentByID(ctx context.Context, indexName, documentID string) error {
+	// Create the Delete request to Elasticsearch
+	req := esapi.DeleteRequest{
+		Index:      indexName,
+		DocumentID: documentID,
+	}
+
+	// Perform the request with the provided context
+	res, err := req.Do(ctx, ec.client)
+	if err != nil {
+		return fmt.Errorf("error deleting document: %w", err)
+	}
+	defer res.Body.Close() // Ensure body is closed after the operation
+
+	if res.IsError() {
+		return fmt.Errorf("error response from Elasticsearch while deleting document: %s", res.String())
+	}
+
+	return nil
 }
 
 func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName string, query string) ([]ResumeSummaryDTO, error) {

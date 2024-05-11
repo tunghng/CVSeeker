@@ -2,6 +2,7 @@ package services
 
 import (
 	"CVSeeker/cmd/CVSeeker/internal/cfg"
+	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/ginLogger"
 	"CVSeeker/internal/meta"
 	"CVSeeker/internal/repositories"
@@ -15,10 +16,12 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
 	"strings"
+	"sync"
 )
 
 type IDataProcessingService interface {
-	ProcessData(c *gin.Context, fullText string, file []byte) (*meta.BasicResponse, error)
+	ProcessData(c *gin.Context, fullText string, file string) (*meta.BasicResponse, error)
+	ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData) (*meta.BasicResponse, error)
 }
 
 type DataProcessingService struct {
@@ -51,12 +54,109 @@ func NewDataProcessingService(args DataProcessingServiceArgs) IDataProcessingSer
 	}
 }
 
-func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string, file []byte) (*meta.BasicResponse, error) {
+func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string, file string) (*meta.BasicResponse, error) {
+	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
+
+	// Create the ElkResume DTO
+	elkResume, err := _this.createElkResume(c, fullText, file)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to create elastic document: %v", err)
+		return nil, err
+	}
+
+	// Upload the document and get its ID
+	documentID, err := _this.elasticClient.AddDocument(c.Request.Context(), elasticDocumentName, elkResume)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
+		return nil, err
+	}
+
+	// Prepare the result using the ResumeProcessingResult struct
+	result := dtos.ResumeProcessingResult{
+		Id:     documentID,
+		Status: "Success", // Set status as "Success" since there was no error
+	}
+
+	// Prepare the basic response with the result included
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "Resume processed and file uploaded successfully",
+		},
+		Data: result,
+	}
+
+	return response, nil
+}
+
+func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData) (*meta.BasicResponse, error) {
+	var wg sync.WaitGroup
+	results := make(chan *dtos.ResumeProcessingResult, len(resumes))
+	errors := make(chan error, len(resumes))
+
+	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
+
+	for _, resume := range resumes {
+		wg.Add(1)
+		go func(res dtos.ResumeData) {
+			defer wg.Done()
+			elkResume, err := _this.createElkResume(c, res.Content, res.FileBytes)
+			if err != nil {
+				ginLogger.Gin(c).Errorf("failed to create elk resume: %v", err)
+				errors <- err
+				results <- &dtos.ResumeProcessingResult{Status: "Failed"}
+				return
+			}
+
+			documentID, err := _this.elasticClient.AddDocument(c.Request.Context(), elasticDocumentName, elkResume)
+			if err != nil {
+				ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
+				errors <- err
+				results <- &dtos.ResumeProcessingResult{Id: documentID, Status: "Failed"}
+				return
+			}
+
+			results <- &dtos.ResumeProcessingResult{Id: documentID, Status: "Success"}
+		}(resume)
+	}
+
+	wg.Wait()
+	close(results)
+	close(errors)
+
+	// Check for errors and aggregate results
+	var finalResults []dtos.ResumeProcessingResult
+	for err := range errors {
+		if err != nil {
+			return nil, err
+		}
+	}
+	for res := range results {
+		finalResults = append(finalResults, *res)
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "Batch processing completed successfully",
+		},
+		Data: finalResults,
+	}
+
+	return response, nil
+}
+
+func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText string, file string) (*elasticsearch.ElkResumeDTO, error) {
 	prompt := generatePrompt(fullText)
 	model := viper.GetString(cfg.ChatGptModel)
-	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 	textEmbeddingModel := viper.GetString(cfg.HuggingfaceModel)
 	//awsBucketName := viper.GetString(cfg.AwsBucket)
+
+	//fileBytes, err := base64.StdEncoding.DecodeString(file)
+	//if err != nil {
+	//	ginLogger.Gin(c).Errorf("failed to decode file: %v", err)
+	//	return nil, err
+	//}
 
 	// Parse resume text to JSON format by making request to OpenAI
 	responseText, err := _this.gptClient.AskGPT(prompt, model)
@@ -90,33 +190,12 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	}
 
 	// Prepare the document for Elasticsearch
-	elkResume := elasticsearch.ElkResumeDTO{
+	elkResume := &elasticsearch.ElkResumeDTO{
 		Content:   resumeSummary,
 		Embedding: vectorEmbedding,
 	}
 
-	// Index resume in Elasticsearch
-	//elkResume := map[string]interface{}{
-	//	"content":   resumeSummary,
-	//	"embedding": vectorEmbedding,
-	//	"url":       "https://cvseeker-bucket.s3.ap-southeast-2.amazonaws.com/1714643484.pdf",
-	//}
-
-	err = _this.elasticClient.AddDocument(c, elasticDocumentName, elkResume)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
-		return nil, err
-	}
-
-	response := &meta.BasicResponse{
-		Meta: meta.Meta{
-			Code:    200,
-			Message: "Resume processed and file uploaded successfully",
-		},
-		Data: elkResume,
-	}
-
-	return response, nil
+	return elkResume, nil
 }
 
 func generatePrompt(fullText string) string {

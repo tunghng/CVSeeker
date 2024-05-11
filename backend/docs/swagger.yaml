@@ -57,6 +57,42 @@ info:
   version: "1.0"
 paths:
   /cvseeker/resumes/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a document by its ID from the Elasticsearch index.
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Document deletion successful
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Delete Document By Id
+      tags:
+      - Search
     get:
       consumes:
       - application/json
