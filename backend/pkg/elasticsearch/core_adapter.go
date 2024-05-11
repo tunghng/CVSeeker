@@ -167,11 +167,19 @@ func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexNam
 		if doc.Found {
 			// Assuming content is a JSON string that maps directly to ResumeSummaryDTO
 			var resume ResumeSummaryDTO
-			contentData, ok := doc.Source["content"].(string)
+
+			contentData, ok := doc.Source["content"].(map[string]interface{})
 			if !ok {
-				return nil, fmt.Errorf("content field missing or not correctly formatted")
+				return nil, fmt.Errorf("content field missing or not correctly formatted as a JSON object")
 			}
-			if err := json.Unmarshal([]byte(contentData), &resume); err != nil {
+
+			// Marshal the contentData back to JSON string to unmarshal into DTO
+			jsonData, err := json.Marshal(contentData)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal content data: %w", err)
+			}
+
+			if err := json.Unmarshal(jsonData, &resume); err != nil {
 				return nil, fmt.Errorf("error unmarshaling resume content: %w", err)
 			}
 			response = append(response, resume)
