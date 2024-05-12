@@ -54,7 +54,7 @@ ROOT_URLCONF = 'crawler.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [r'D:\Development\Bootcamp Grab\Project\Crawl LinkedIn Profile\crawler\main\templates'],
+        'DIRS': [r'.\main\templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
