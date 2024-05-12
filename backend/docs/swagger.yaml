@@ -4,13 +4,19 @@ definitions:
       content:
         type: string
     type: object
-  dtos.ResumeRequest:
+  dtos.ResumeData:
     properties:
       content:
         type: string
       fileBytes:
-        description: base64 encoded string of the file
         type: string
+    type: object
+  dtos.ResumesRequest:
+    properties:
+      resumes:
+        items:
+          $ref: '#/definitions/dtos.ResumeData'
+        type: array
     type: object
   dtos.StartChatRequest:
     properties:
@@ -57,6 +63,42 @@ info:
   version: "1.0"
 paths:
   /cvseeker/resumes/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a document by its ID from the Elasticsearch index.
+      parameters:
+      - description: Document ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Document deletion successful
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Delete Document By Id
+      tags:
+      - Search
     get:
       consumes:
       - application/json
@@ -93,6 +135,45 @@ paths:
       summary: Get Document By Id
       tags:
       - Search
+  /cvseeker/resumes/batch/upload:
+    post:
+      consumes:
+      - application/json
+      description: Processes multiple uploaded resume files and associated metadata
+        as JSON in a single batch.
+      parameters:
+      - description: Batch of resume data including file bytes for each
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ResumesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Batch processing completed successfully
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Batch processes resume data
+      tags:
+      - Data Processing
   /cvseeker/resumes/search:
     get:
       consumes:
@@ -316,7 +397,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dtos.ResumeRequest'
+          $ref: '#/definitions/dtos.ResumeData'
       produces:
       - application/json
       responses:

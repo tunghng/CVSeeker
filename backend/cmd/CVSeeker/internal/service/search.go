@@ -14,6 +14,7 @@ import (
 type SearchService interface {
 	HybridSearch(c *gin.Context, query string, from, size int, knnBoost float32) (*meta.BasicResponse, error)
 	GetDocumentByID(c *gin.Context, documentID string) (*meta.BasicResponse, error)
+	DeleteDocumentByID(c *gin.Context, documentID string) (*meta.BasicResponse, error)
 }
 
 type searchServiceImpl struct {
@@ -79,6 +80,27 @@ func (_this *searchServiceImpl) GetDocumentByID(c *gin.Context, documentID strin
 			Message: "Document retrieval successful",
 		},
 		Data: document,
+	}
+
+	return response, nil
+}
+
+func (_this *searchServiceImpl) DeleteDocumentByID(c *gin.Context, documentID string) (*meta.BasicResponse, error) {
+	indexName := viper.GetString(cfg.ElasticsearchDocumentIndex)
+
+	// Delete the document by ID using the Elasticsearch client
+	err := _this.elasticClient.DeleteDocumentByID(c, indexName, documentID)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to delete document by ID: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    200,
+			Message: "Document deletion successful",
+		},
+		Data: nil, // No data to return for deletion operations
 	}
 
 	return response, nil

@@ -10,6 +10,7 @@ import (
 	"CVSeeker/pkg/db"
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/gpt"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
@@ -65,11 +66,25 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 		return nil, err
 	}
 
-	// Format the documents' content
+	// Format the documents' content from ResumeSummaryDTO
 	var fullTextContent strings.Builder
 	fullTextContent.WriteString("You will use these information to answer questions from the user: ")
-	for _, doc := range documents {
-		fullTextContent.WriteString(doc.Content + " ")
+	for _, resume := range documents {
+		fullTextContent.WriteString(fmt.Sprintf("Summary: %s; Skills: %v; ", resume.Summary, resume.Skills))
+		fullTextContent.WriteString(fmt.Sprintf("Education: %s, %s, GPA: %.2f; ", resume.BasicInfo.University, resume.BasicInfo.EducationLevel, resume.BasicInfo.GPA))
+		fullTextContent.WriteString("Work Experience: ")
+		for _, work := range resume.WorkExperience {
+			fullTextContent.WriteString(fmt.Sprintf("%s at %s, %s; ", work.JobTitle, work.Company, work.Duration))
+		}
+		fullTextContent.WriteString("Projects: ")
+		for _, project := range resume.ProjectExperience {
+			fullTextContent.WriteString(fmt.Sprintf("%s: %s; ", project.ProjectName, project.ProjectDescription))
+		}
+		fullTextContent.WriteString("Awards: ")
+		for _, award := range resume.Award {
+			fullTextContent.WriteString(fmt.Sprintf("%s; ", award.AwardName))
+		}
+		fullTextContent.WriteString(" | ") // Separator for multiple resumes
 	}
 
 	// Create the initial message for the thread
