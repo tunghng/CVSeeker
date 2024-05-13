@@ -43,9 +43,24 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Batch processing completed successfully",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.ResumeProcessingResult"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -124,7 +139,22 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/elasticsearch.ResumeSummaryDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -171,7 +201,22 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.Thread"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -217,7 +262,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gpt.ThreadResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -310,7 +367,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gpt.ListMessagesResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -375,7 +444,87 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gpt.ListMessagesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/cvseeker/resumes/thread/{threadId}/updateName": {
+            "post": {
+                "description": "Updates the name of an existing thread by thread ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chatbot"
+                ],
+                "summary": "Update a thread's name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Thread ID",
+                        "name": "threadId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New Name for the Thread",
+                        "name": "newName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/elasticsearch.ResumeSummaryDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -421,7 +570,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.ResumeProcessingResult"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -477,7 +638,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/elasticsearch.ResumeSummaryDTO"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -582,6 +755,18 @@
                 }
             }
         },
+        "dtos.ResumeProcessingResult": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Assume each resume has a reference or ID.",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.ResumesRequest": {
             "type": "object",
             "properties": {
@@ -600,6 +785,225 @@
                     "type": "string"
                 },
                 "threadName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.Thread": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
+        "elasticsearch.Award": {
+            "type": "object",
+            "properties": {
+                "award_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "elasticsearch.BasicInfo": {
+            "type": "object",
+            "properties": {
+                "education_level": {
+                    "description": "BS, MS, or PhD",
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "gpa": {
+                    "type": "number"
+                },
+                "majors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "university": {
+                    "type": "string"
+                }
+            }
+        },
+        "elasticsearch.ProjectExperience": {
+            "type": "object",
+            "properties": {
+                "project_description": {
+                    "type": "string"
+                },
+                "project_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "elasticsearch.ResumeSummaryDTO": {
+            "type": "object",
+            "properties": {
+                "award": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/elasticsearch.Award"
+                    }
+                },
+                "basic_info": {
+                    "$ref": "#/definitions/elasticsearch.BasicInfo"
+                },
+                "project_experience": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/elasticsearch.ProjectExperience"
+                    }
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "work_experience": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/elasticsearch.WorkExperience"
+                    }
+                }
+            }
+        },
+        "elasticsearch.WorkExperience": {
+            "type": "object",
+            "properties": {
+                "company": {
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Could be changed to a more structured format if necessary",
+                    "type": "string"
+                },
+                "job_summary": {
+                    "type": "string"
+                },
+                "job_title": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.ListMessagesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gpt.MessageResponse"
+                    }
+                },
+                "first_id": {
+                    "type": "string"
+                },
+                "has_more": {
+                    "type": "boolean"
+                },
+                "last_id": {
+                    "type": "string"
+                },
+                "object": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.MessageContent": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "array",
+                            "items": {}
+                        },
+                        "value": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "assistant_id": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gpt.MessageContent"
+                    }
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "file_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "object": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "run_id": {
+                    "type": "string"
+                },
+                "thread_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.ThreadResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "object": {
                     "type": "string"
                 }
             }

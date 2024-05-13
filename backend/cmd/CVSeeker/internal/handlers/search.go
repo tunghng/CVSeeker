@@ -37,7 +37,7 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 // @Param knnBoost query float32 false "Boost factor for the KNN component" default(0.5)
 // @Param from query int false "Start index for search results" default(0)
 // @Param size query int false "Number of search results to return" default(10)
-// @Success 200 {object} meta.BasicResponse
+// @Success 200 {object} meta.BasicResponse{data=[]elasticsearch.ResumeSummaryDTO}
 // @Failure 400,401,404,500 {object} meta.Error
 // @Router /cvseeker/resumes/search [GET]
 func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
@@ -82,13 +82,13 @@ func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param id path string true "Document ID"
-// @Success 200 {object} meta.BasicResponse
+// @Success 200 {object} meta.BasicResponse{data=elasticsearch.ResumeSummaryDTO}
 // @Failure 400,401,404,500 {object} meta.Error
 // @Router /cvseeker/resumes/{id} [GET]
 func (_this *SearchHandler) GetDocumentByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get document ID from query parameters or path parameters
-		documentID := c.Param("id") // Assuming the ID is passed as a URL parameter
+		documentID := c.Param("id")
 		if documentID == "" {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
 			return

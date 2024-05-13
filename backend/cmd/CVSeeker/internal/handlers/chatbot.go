@@ -36,7 +36,7 @@ func NewChatbotHandler(params ChatbotHandlerParams) *ChatbotHandler {
 // @Accept json
 // @Produce json
 // @Param body body dtos.StartChatRequest true "Comma-separated list of document IDs"
-// @Success 200 {object} meta.BasicResponse
+// @Success 200 {object} meta.BasicResponse{data=gpt.ThreadResponse}
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/start [POST]
 func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
@@ -65,7 +65,7 @@ func (_this *ChatbotHandler) StartChatSession() gin.HandlerFunc {
 // @Produce json
 // @Param threadId path string true "Thread ID"
 // @Param body body dtos.QueryRequest true "Message content"
-// @Success 200 {object} meta.BasicResponse
+// @Success 200 {object} meta.BasicResponse{data=gpt.ListMessagesResponse}
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/{threadId}/send [POST]
 func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
@@ -99,7 +99,7 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"
-// @Success  200  {object}  meta.BasicResponse
+// @Success  200  {object}  meta.BasicResponse{data=gpt.ListMessagesResponse}
 // @Failure   400,401,404,500  {object}  meta.Error
 // @Security  BearerAuth
 // @Router /cvseeker/resumes/thread/{threadId}/messages [GET]
@@ -130,7 +130,7 @@ func (_this *ChatbotHandler) ListMessage() gin.HandlerFunc {
 // @Tags Chatbot
 // @Accept json
 // @Produce json
-// @Success 200 {object} meta.BasicResponse
+// @Success 200 {object} meta.BasicResponse{data=[]dtos.Thread}
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread [GET]
 func (_this *ChatbotHandler) GetAllThreads() gin.HandlerFunc {
@@ -170,7 +170,7 @@ func (_this *ChatbotHandler) GetResumesByThreadID() gin.HandlerFunc {
 // @Produce json
 // @Param threadId path string true "Thread ID"
 // @Param newName body string true "New Name for the Thread"
-// @Success 200 {object} meta.BasicResponse
+// @Success 200 {object} meta.BasicResponse{data=[]elasticsearch.ResumeSummaryDTO}
 // @Failure 400,500 {object} meta.Error
 // @Router /cvseeker/resumes/thread/{threadId}/updateName [POST]
 func (_this *ChatbotHandler) UpdateThreadName() gin.HandlerFunc {
