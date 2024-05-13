@@ -69,7 +69,7 @@ const UploadPage = () => {
 
 
                 {/* ====== Upload PDF file ====== */}
-                <h2 className="mt-6 text-lg text-text">Upload PDF file</h2>
+                <h2 className="mt-8 text-lg text-text">Upload PDF file</h2>
                 <FileUploader
                     handleChange={handleChange}
                     name="file"
