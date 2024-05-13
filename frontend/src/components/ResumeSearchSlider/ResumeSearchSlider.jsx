@@ -1,22 +1,10 @@
 
-import { useContext, useEffect } from "react";
-import { useSearchParams } from "react-router-dom"
-import { GlobalContext } from "../../contexts/GlobalContext"
-
 import { Tooltip } from "react-tooltip";
 
-import './SearchSlider.css';
+import './ResumeSearchSlider.css';
 
-const SearchSlider = () => {
-    // ====== State Management ======
-    const globalContext = useContext(GlobalContext);
-    const [searchParams, setSearchParams] = useSearchParams();
+const ResumeSearchSlider = ({ value, onChange }) => {
 
-    useEffect(() => {
-        const level = searchParams.get('level') || globalContext.sliderValue;
-        globalContext.setSliderValue(level);
-    }, [searchParams, globalContext.setSliderValue]);
-    
     const valueScripts = {
         0: "Search simply using keywords",
         0.25: "Searching mainly using keywords",
@@ -36,7 +24,7 @@ const SearchSlider = () => {
             >
                 Keyword
             </span>
-            <Tooltip id="keyword-tooltip"  style={{ width: "14rem" }}/>
+            <Tooltip id="keyword-tooltip" style={{ width: "14rem" }} />
 
             <input
                 type="range"
@@ -44,13 +32,13 @@ const SearchSlider = () => {
                 min="0"
                 max="1"
                 step="0.25"
-                value={globalContext.sliderValue}
-                onChange={(e) => globalContext.setSliderValue(e.target.value)}
+                value={value}
+                onChange={onChange}
                 data-tooltip-id="slider-tooltip"
-                data-tooltip-content={valueScripts[globalContext.sliderValue]}
+                data-tooltip-content={valueScripts[value]}
                 data-tooltip-place="bottom"
             />
-            <Tooltip id="slider-tooltip" style={{ width: "12rem" }}/>
+            <Tooltip id="slider-tooltip" style={{ width: "12rem" }} />
 
             <span
                 data-tooltip-id="context-tooltip"
@@ -61,9 +49,9 @@ const SearchSlider = () => {
             >
                 Context
             </span>
-            <Tooltip id="context-tooltip" style={{ width: "14rem" }}/>
+            <Tooltip id="context-tooltip" style={{ width: "14rem" }} />
         </div>
     );
 };
 
-export default SearchSlider;
+export default ResumeSearchSlider;

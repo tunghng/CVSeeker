@@ -14,7 +14,22 @@ const ChatPage = () => {
     const { id } = useParams();
 
     // ====== Event Handlers ======
-
+    const stackItemDetailClickHandler = (item) => {
+        globalContext.setDetailItem(item)
+        globalContext.setShowDetailItemModal(true)
+    }
+    const stackItemRemoveClickHandler = (itemId) => {
+        globalContext.popFromSelectedStack(itemId)
+    }
+    const detailItemModalCloseHandler = () => {
+        globalContext.setShowDetailItemModal(false)
+    }
+    const detailItemModalAddToListHandler = () => {
+        globalContext.pushToSelectedStack([globalContext.detailItem])
+        if (globalContext.showSelectedItemsStack === false) {
+            globalContext.toggleSelectedItemsStack()
+        }
+    }
 
     return (
         <main className="h-full flex overflow-x-hidden">
@@ -36,7 +51,7 @@ const ChatPage = () => {
                             placeholder="Type a message..."
                         />
                         <button className="absolute right-3 p-1.5 my-button my-button-subtle">
-                            <FeatherIcon icon="send" className="w-5 h-5" strokeWidth={2.3}/>
+                            <FeatherIcon icon="send" className="w-5 h-5" strokeWidth={2.3} />
                         </button>
                     </div>
                 </div>
@@ -50,7 +65,13 @@ const ChatPage = () => {
                 <div className="flex-1">
                     {
                         globalContext.selectedItemsStack.map(item => (
-                            <StackItem key={item.id} item={item} />
+                            <StackItem
+                                key={item.id}
+                                item={item}
+                                onDetailClick={stackItemDetailClickHandler}
+                                onRemoveClick={stackItemRemoveClickHandler}
+                                showRemoveIcon={false}
+                            />
                         ))
                     }
                 </div>
@@ -74,7 +95,13 @@ const ChatPage = () => {
 
             </div>
 
-            <DetailItemModal />
+
+            {/* ====== Detail Item Modal ====== */}
+            <DetailItemModal
+                showDetailItemModal={globalContext.showDetailItemModal}
+                detailItem={globalContext.detailItem}
+                onModalClose={detailItemModalCloseHandler}
+            />
         </main>
     )
 }

@@ -1,14 +1,14 @@
 
 import { useState, useContext, useEffect } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 
 import search from "../services/search"
 
 import { Tooltip } from "react-tooltip"
 import FeatherIcon from 'feather-icons-react'
-import SearchInput from "../components/SearchInput/SearchInput"
-import SearchSlider from "../components/SearchSlider/SearchSlider"
+import ResumeSearchInput from "../components/ResumeSearchInput/ResumeSearchInput"
+import ResumeSearchSlider from "../components/ResumeSearchSlider/ResumeSearchSlider"
 import IndeterminateCheckbox from "../components/IndeterminateCheckbox/IndeterminateCheckbox"
 import SearchResultList from "../components/SearchResultList/SearchResultList"
 import StackItem from "../components/StackItem/StackItem"
@@ -23,25 +23,80 @@ const SearchPage = () => {
     // ====== State Management ======
     const globalContext = useContext(GlobalContext);
 
-    const [searchParams, setSearchParams] = useSearchParams();
-    const query = searchParams.get('query') || '';
-    const level = searchParams.get('level') || 0.5;
+    const navigate = useNavigate()
 
-    const [viewMode, setViewMode] = useState(ViewMode.LIST)
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [resumeSearchInput, setResumeSearchInput] = useState(searchParams.get('query') || '');
+    const [resumeSearchLevel, setResumeSearchLevel] = useState(searchParams.get('level') || 0.5);
+
+    const [resultViewMode, setResultViewMode] = useState(ViewMode.LIST)
 
     const [searchResults, setSearchResults] = useState([]);
     const selectedCount = searchResults.filter(item => item.selected).length
+    const isAllSelected = searchResults.every(item => item.selected)
+    const isIndeterminate = searchResults.some(item => item.selected) && !isAllSelected
 
-    // ====== Fetching Data ======
+    // ====== Side Effects ======
     useEffect(() => {
-        search(query, level)
+        search(resumeSearchInput, resumeSearchLevel)
             .then(data => setSearchResults(data))
             .catch(error => console.error(error))
-    }, [query, level])
+    }, [searchParams]);
 
     // ====== Event Handlers ======
-    const handleAddToList = () => {
+    const resumeSearchKeyDownHandler = (e) => {
+        if (e.key === 'Enter'
+            && resumeSearchInput.trim() !== ''
+            && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
+            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+        }
+    }
+    const resumeSearchClickHandler = () => {
+        if (resumeSearchInput.trim() !== ''
+            && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
+            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+        }
+    }
+
+    const resultSelectAllHandler = () => {
+        const updatedItems = searchResults.map(item => ({ ...item, selected: !isAllSelected }))
+        setSearchResults(updatedItems)
+    }
+
+    const addResultToStackHandler = () => {
         globalContext.pushToSelectedStack(searchResults.filter(item => item.selected))
+        if (globalContext.showSelectedItemsStack === false) {
+            globalContext.toggleSelectedItemsStack()
+        }
+    }
+
+    const resultItemClickHandler = (id) => {
+        const updatedResults = searchResults.map(item =>
+            item.id === id ? { ...item, selected: !item.selected } : item
+        );
+        setSearchResults(updatedResults);
+    }
+    const resultItemDetailClickHandler = (item) => {
+        globalContext.setDetailItem(item)
+        globalContext.setShowDetailItemModal(true)
+    }
+    const resultItemDownloadClickHandler = (item) => {
+        console.log(item)
+    }
+
+    const stackItemDetailClickHandler = (item) => {
+        globalContext.setDetailItem(item)
+        globalContext.setShowDetailItemModal(true)
+    }
+    const stackItemRemoveClickHandler = (itemId) => {
+        globalContext.popFromSelectedStack(itemId)
+    }
+
+    const detailItemModalCloseHandler = () => {
+        globalContext.setShowDetailItemModal(false)
+    }
+    const detailItemModalAddToListHandler = () => {
+        globalContext.pushToSelectedStack([globalContext.detailItem])
         if (globalContext.showSelectedItemsStack === false) {
             globalContext.toggleSelectedItemsStack()
         }
@@ -53,12 +108,20 @@ const SearchPage = () => {
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
                 {/* ====== Search Input ====== */}
                 <div className="my-container-small pt-6">
-                    <SearchInput />
+                    <ResumeSearchInput
+                        value={resumeSearchInput}
+                        onChange={(e) => setResumeSearchInput(e.target.value)}
+                        onPressEnter={resumeSearchKeyDownHandler}
+                        onClickButton={resumeSearchClickHandler}
+                    />
                 </div>
 
                 {/* ====== Search Slider ====== */}
                 <div className="my-container-small pt-3">
-                    <SearchSlider />
+                    <ResumeSearchSlider
+                        value={resumeSearchLevel}
+                        onChange={(e) => setResumeSearchLevel(e.target.value)}
+                    />
                 </div>
 
                 {/* ====== Actions Toolbar ====== */}
@@ -66,8 +129,9 @@ const SearchPage = () => {
                     {/* ====== Selecting Checkbox ====== */}
                     <div className="flex items-center gap-x-3 pl-3">
                         <IndeterminateCheckbox
-                            searchResults={searchResults}
-                            setSearchResults={setSearchResults}
+                            checked={isAllSelected}
+                            indeterminate={isIndeterminate}
+                            onChange={resultSelectAllHandler}
                         />
                         <p>{selectedCount} selected</p>
                         {
@@ -75,7 +139,7 @@ const SearchPage = () => {
                             <>
                                 <button
                                     className="my-button my-button-outline"
-                                    onClick={handleAddToList}
+                                    onClick={addResultToStackHandler}
                                 >Add to List</button>
                             </>
                         }
@@ -85,14 +149,14 @@ const SearchPage = () => {
                     <div className="flex items-center">
                         <p className="mr-2">View as</p>
                         <button
-                            className={`my-button my-button-outline-secondary px-3 rounded-l-full ${viewMode === ViewMode.LIST && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
-                            onClick={() => setViewMode(ViewMode.LIST)}
+                            className={`my-button my-button-outline-secondary px-3 rounded-l-full ${resultViewMode === ViewMode.LIST && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
+                            onClick={() => setResultViewMode(ViewMode.LIST)}
                         >
                             <FeatherIcon icon="list" className="w-5 h-5" />
                         </button>
                         <button
-                            className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${viewMode === ViewMode.GRID && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
-                            onClick={() => setViewMode(ViewMode.GRID)}
+                            className={`my-button my-button-outline-secondary px-3 rounded-r-full border-l-0 ${resultViewMode === ViewMode.GRID && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
+                            onClick={() => setResultViewMode(ViewMode.GRID)}
                         >
                             <FeatherIcon icon="grid" className="w-5 h-5" />
                         </button>
@@ -103,8 +167,10 @@ const SearchPage = () => {
                 <div className="my-container-medium mt-4">
                     <SearchResultList
                         searchResults={searchResults}
-                        setSearchResults={setSearchResults}
-                        viewMode={viewMode}
+                        viewMode={resultViewMode}
+                        onItemSelectClick={resultItemClickHandler}
+                        onItemDetailClick={resultItemDetailClickHandler}
+                        onItemDownloadClick={resultItemDownloadClickHandler}
                     />
                 </div>
             </div>
@@ -117,7 +183,13 @@ const SearchPage = () => {
                 <div className="flex-1">
                     {
                         globalContext.selectedItemsStack.map(item => (
-                            <StackItem key={item.id} item={item} />
+                            <StackItem
+                                key={item.id}
+                                item={item}
+                                onDetailClick={stackItemDetailClickHandler}
+                                onRemoveClick={stackItemRemoveClickHandler}
+                                showRemoveIcon={true}
+                            />
                         ))
                     }
                 </div>
@@ -150,7 +222,15 @@ const SearchPage = () => {
 
             </div>
 
-            <DetailItemModal />
+
+            {/* ====== Detail Item Modal ====== */}
+            <DetailItemModal
+                showDetailItemModal={globalContext.showDetailItemModal}
+                detailItem={globalContext.detailItem}
+                onModalClose={detailItemModalCloseHandler}
+                onAddToList={detailItemModalAddToListHandler}
+            />
+
         </main>
     )
 }

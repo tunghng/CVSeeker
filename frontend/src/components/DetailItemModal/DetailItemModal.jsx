@@ -1,24 +1,17 @@
 
-import { useContext } from "react"
-import { GlobalContext } from "../../contexts/GlobalContext"
-import { useLocation } from "react-router-dom"
-
 import FeatherIcon from 'feather-icons-react'
 
-const DetailItemModal = () => {
-    // ====== State Management ======
-    const globalContext = useContext(GlobalContext);
-    const location = useLocation()
+const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddToList }) => {
 
     return (
-        <div className={`${globalContext.showDetailItemModal ? 'block' : 'hidden'} fixed top-0 left-0 w-screen h-screen z-10 bg-black/80`}
-            onClick={() => globalContext.setShowDetailItemModal(false)}
+        <div className={`${showDetailItemModal ? 'block' : 'hidden'} fixed top-0 left-0 w-screen h-screen z-10 bg-black/80`}
+            onClick={onModalClose}
         >
             <div className='h-14 px-6 flex justify-between items-center bg-black/80'
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className='flex items-baseline gap-x-6'>
-                    <h1 className='text-xl text-white'>{globalContext.selectedItem?.name}</h1>
+                    <h1 className='text-xl text-white'>{detailItem?.name}</h1>
                     <p className='text-white'>Imported date 07-07-2024 17:20</p>
                 </div>
 
@@ -29,17 +22,16 @@ const DetailItemModal = () => {
                     </button>
 
                     {
-                        location.pathname === '/search' &&
-                        <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'
-                            onClick={() => globalContext.pushToSelectedStack([globalContext.selectedItem])}
-                        >
-                            <FeatherIcon icon="plus" className='w-[18px] h-[18px]' strokeWidth={1.6} />
-                            <p className='hidden sm:block'>Add to List</p>
-                        </button>
+                        onAddToList && (
+                            <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'
+                                onClick={onAddToList}
+                            >
+                                <FeatherIcon icon="plus" className='w-[18px] h-[18px]' strokeWidth={1.6} />
+                                <p className='hidden sm:block'>Add to List</p>
+                            </button>
+                        )
                     }
                 </div>
-
-
             </div>
         </div>
     )
