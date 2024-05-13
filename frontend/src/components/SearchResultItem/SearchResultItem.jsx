@@ -1,31 +1,25 @@
 
-import { useContext } from "react"
-import { GlobalContext } from "../../contexts/GlobalContext"
-
 import FeatherIcon from 'feather-icons-react'
 
-const SearchResultItem = ({ item, viewMode, handleItemClick }) => {
-    // ====== State Management ======
-    const globalContext = useContext(GlobalContext);
+const SearchResultItem = ({ item, viewMode, onSelectClick, onDetailClick, onDownloadClick }) => {
 
-    // ====== Event Handlers ======
-    const handleDetailDoubleClick = () => {
-        // console.log(item.id);
+    const handleSelectClick = () => {
+        onSelectClick(item.id);
     }
+
     const handleDetailClick = (e) => {
         e.stopPropagation();
-        globalContext.setSelectedItem(item);
-        globalContext.setShowDetailItemModal(true);
+        onDetailClick(item);
     }
+
     const handleDownloadClick = (e) => {
         e.stopPropagation();
-        console.log(item.name);
+        onDownloadClick(item);
     }
 
     return (
         <div className="h-14 flex border-b border-border hover:bg-primary-subtle"
-            onDoubleClick={handleDetailDoubleClick}
-            onClick={() => handleItemClick(item.id)}
+            onClick={handleSelectClick}
         >
             <div className="w-10 flex justify-center items-center relative">
                 <input

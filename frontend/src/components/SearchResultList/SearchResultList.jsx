@@ -1,15 +1,7 @@
 
 import SearchResultItem from "../SearchResultItem/SearchResultItem";
 
-const SearchResultList = ({ searchResults, setSearchResults, viewMode }) => {
-
-    // ====== Event Handlers ======
-    const handleItemClick = (id) => {
-        const updatedResults = searchResults.map(item =>
-            item.id === id ? { ...item, selected: !item.selected } : item
-        );
-        setSearchResults(updatedResults);
-    }
+const SearchResultList = ({ searchResults, viewMode, onItemSelectClick, onItemDetailClick, onItemDownloadClick }) => {
 
     return (
         <div className="w-full">
@@ -32,7 +24,9 @@ const SearchResultList = ({ searchResults, setSearchResults, viewMode }) => {
                         key={item.id}
                         item={item}
                         viewMode={viewMode}
-                        handleItemClick={handleItemClick}
+                        onSelectClick={onItemSelectClick}
+                        onDetailClick={onItemDetailClick}
+                        onDownloadClick={onItemDownloadClick}
                     />
                 ))
             }
