@@ -99,7 +99,7 @@ func (_this *DataProcessingHandler) ProcessDataBatchHandler() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {object} meta.BasicResponse{data=[]dtos.UploadDTO}
-// @Failure 400, 500 {object} meta.Error
+// @Failure 400,401,404,500 {object} meta.Error
 // @Router /cvseeker/resumes/upload [get]
 func (_this *DataProcessingHandler) GetAllUploadsHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {

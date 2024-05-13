@@ -42,6 +42,17 @@ definitions:
       updated_at:
         type: integer
     type: object
+  dtos.UploadDTO:
+    properties:
+      createdAt:
+        description: Assuming date is formatted as a string for the client
+        type: integer
+      documentId:
+        description: omitempty to not display if empty
+        type: string
+      status:
+        type: string
+    type: object
   elasticsearch.Award:
     properties:
       award_name:
@@ -622,6 +633,44 @@ paths:
       tags:
       - Chatbot
   /cvseeker/resumes/upload:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a list of all upload records sorted from the most recent
+        to the oldest
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.UploadDTO'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Retrieves all upload records
+      tags:
+      - Uploads
     post:
       consumes:
       - application/json

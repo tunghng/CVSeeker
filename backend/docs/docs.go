@@ -550,6 +550,66 @@ const docTemplate = `{
             }
         },
         "/cvseeker/resumes/upload": {
+            "get": {
+                "description": "Fetches a list of all upload records sorted from the most recent to the oldest",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Uploads"
+                ],
+                "summary": "Retrieves all upload records",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.UploadDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Processes uploaded resume files and associated metadata as JSON",
                 "consumes": [
@@ -807,6 +867,22 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "integer"
+                }
+            }
+        },
+        "dtos.UploadDTO": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "Assuming date is formatted as a string for the client",
+                    "type": "integer"
+                },
+                "documentId": {
+                    "description": "omitempty to not display if empty",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
