@@ -12,8 +12,6 @@ function GlobalProvider({ children }) {
         setShowSidebar(!showSidebar);
     }
 
-    // ====== Search Slider value state
-    const [sliderValue, setSliderValue] = useState(0.5);
 
     // ====== Selected Stack state
     const [showSelectedItemsStack, setShowSelectedItemsStack] = useState(false);
@@ -42,9 +40,6 @@ function GlobalProvider({ children }) {
     const value = {
         showSidebar,
         toggleSidebar,
-
-        sliderValue,
-        setSliderValue,
 
         showSelectedItemsStack,
         toggleSelectedItemsStack,
