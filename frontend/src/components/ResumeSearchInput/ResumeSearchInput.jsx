@@ -1,14 +1,14 @@
 
 import MyInput from '../common/MyInput'
 
-const ResumeSearchInput = ({ value, onChange, onPressEnter, onClickSearch }) => {
+const ResumeSearchInput = ({ value, onChange, onPressEnter, onClickButton }) => {
 
     return (
         <MyInput
             value={value}
             onChange={onChange}
             onPressEnter={onPressEnter}
-            onClickSearch={onClickSearch}
+            onClickButton={onClickButton}
             placeholder="Enter desired CV description..."
             icon="search"
         />

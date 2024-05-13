@@ -112,7 +112,7 @@ const SearchPage = () => {
                         value={resumeSearchInput}
                         onChange={(e) => setResumeSearchInput(e.target.value)}
                         onPressEnter={resumeSearchKeyDownHandler}
-                        onClickSearch={resumeSearchClickHandler}
+                        onClickButton={resumeSearchClickHandler}
                     />
                 </div>
 

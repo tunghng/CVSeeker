@@ -1,18 +1,33 @@
-
 import FeatherIcon from 'feather-icons-react';
 
 const MyInput = ({
     value,
     onChange,
     onPressEnter,
-    onClickSearch,
+    onClickButton,
     placeholder = "Search...",
     className = "",
     inputClassName = "",
     buttonClassName = "",
     iconClassName = "",
     icon = "",
+    textClassName = "",
+    text = "",
+    disabled = false
 }) => {
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && onPressEnter && !disabled) {
+            onPressEnter(e);
+        }
+    };
+
+    const handleClickButton = () => {
+        if (onClickButton && !disabled) {
+            onClickButton();
+        }
+    };
+
     return (
         <div className={`relative flex items-center w-full ${className}`}>
             <input
@@ -21,18 +36,18 @@ const MyInput = ({
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
-                onKeyDown={onPressEnter}
+                onKeyDown={handleKeyPress}
             />
 
-            {
-                icon && <button
-                    onClick={onClickSearch}
-                    className={`absolute right-2 p-2 rounded-full text-text peer-focus:text-primary transition-all duration-300 ease-in-out ${buttonClassName}`}
+            {(icon || text) && (
+                <button
+                    onClick={handleClickButton}
+                    className={`absolute right-2 p-2 flex items-center rounded-full text-text peer-focus:text-primary transition-all duration-300 ease-in-out ${buttonClassName}`}
                 >
                     <FeatherIcon icon={icon} className={`w-6 h-6 ${iconClassName}`} />
-
+                    {text && <span className={`ml-2 font-semibold ${textClassName}`}>{text}</span>}
                 </button>
-            }
+            )}
         </div>
     );
 };

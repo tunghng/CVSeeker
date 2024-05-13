@@ -2,6 +2,7 @@
 import { useRef, useState } from "react"
 
 import { FileUploader } from "react-drag-drop-files";
+import LinkedinUploadInput from "../components/LinkedinUploadInput/LinkedinUploadInput";
 import FeatherIcon from 'feather-icons-react'
 import fileicon from '../assets/images/file.png'
 
@@ -10,12 +11,23 @@ const fileTypes = ["PDF"];
 const UploadPage = () => {
     // ====== State Management ======
     const [urlInput, setUrlInput] = useState('')
-    const urlInputDOM = useRef(null)
 
     const [file, setFile] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
 
     // ====== Event Handlers ======
+    const linkedinUploadKeyDownHandler = (e) => {
+        if (e.key === 'Enter' && urlInput.trim() !== '') {
+            console.log(urlInput.trim())
+        }
+    }
+    const linkedinUploadClickHandler = () => {
+        if (urlInput.trim() !== '') {
+            console.log(urlInput.trim())
+        }
+    }
+    
+
     const handleChange = (file) => {
         setFile(file);
     };
@@ -31,14 +43,11 @@ const UploadPage = () => {
 
                 {/* ====== Upload by link profile ====== */}
                 <h2 className="mt-4 text-lg text-text">Upload profile by Linkedin Url</h2>
-                <input
-                    type="text"
-                    className="w-full mt-2 pl-4 pr-11 py-2 peer bg-transparent rounded-full text-text font-medium text-lg outline-none border-2 border-border focus:border-primary transition-all duration-300 ease-in-out"
-                    placeholder="Paste Linkedin URL here..."
+                <LinkedinUploadInput
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
-                    // onKeyDown={searchKeyDownHandler}
-                    ref={urlInputDOM}
+                    onPressEnter={linkedinUploadKeyDownHandler}
+                    onClickButton={linkedinUploadClickHandler}
                 />
 
 
