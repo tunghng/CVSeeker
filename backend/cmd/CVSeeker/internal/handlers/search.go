@@ -98,3 +98,28 @@ func (_this *SearchHandler) GetDocumentByID() gin.HandlerFunc {
 		_this.HandleResponse(c, response, err)
 	}
 }
+
+// DeleteDocumentByID
+// @Summary Delete Document By Id
+// @Description Deletes a document by its ID from the Elasticsearch index.
+// @Tags Search
+// @Accept json
+// @Produce json
+// @Param id path string true "Document ID"
+// @Success 200 {object} meta.BasicResponse "Document deletion successful"
+// @Failure 400,401,404,500 {object} meta.Error
+// @Router /cvseeker/resumes/{id} [DELETE]
+func (_this *SearchHandler) DeleteDocumentByID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Get document ID from path parameters
+		documentID := c.Param("id")
+		if documentID == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		// Perform deletion through the search service
+		resp, err := _this.searchService.DeleteDocumentByID(c, documentID)
+		_this.HandleResponse(c, resp, err)
+	}
+}
