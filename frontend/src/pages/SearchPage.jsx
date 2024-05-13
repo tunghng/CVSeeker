@@ -70,6 +70,38 @@ const SearchPage = () => {
         }
     }
 
+    const resultItemClickHandler = (id) => {
+        const updatedResults = searchResults.map(item =>
+            item.id === id ? { ...item, selected: !item.selected } : item
+        );
+        setSearchResults(updatedResults);
+    }
+    const resultItemDetailClickHandler = (item) => {
+        globalContext.setDetailItem(item)
+        globalContext.setShowDetailItemModal(true)
+    }
+    const resultItemDownloadClickHandler = (item) => {
+        console.log(item)
+    }
+
+    const stackItemDetailClickHandler = (item) => {
+        globalContext.setDetailItem(item)
+        globalContext.setShowDetailItemModal(true)
+    }
+    const stackItemRemoveClickHandler = (itemId) => {
+        globalContext.popFromSelectedStack(itemId)
+    }
+
+    const detailItemModalCloseHandler = () => {
+        globalContext.setShowDetailItemModal(false)
+    }
+    const detailItemModalAddToListHandler = () => {
+        globalContext.pushToSelectedStack([globalContext.detailItem])
+        if (globalContext.showSelectedItemsStack === false) {
+            globalContext.toggleSelectedItemsStack()
+        }
+    }
+
     return (
         <main className="h-full flex overflow-x-hidden">
             {/* ====== Search Result Window ====== */}
@@ -135,8 +167,10 @@ const SearchPage = () => {
                 <div className="my-container-medium mt-4">
                     <SearchResultList
                         searchResults={searchResults}
-                        setSearchResults={setSearchResults}
                         viewMode={resultViewMode}
+                        onItemSelectClick={resultItemClickHandler}
+                        onItemDetailClick={resultItemDetailClickHandler}
+                        onItemDownloadClick={resultItemDownloadClickHandler}
                     />
                 </div>
             </div>
@@ -149,7 +183,13 @@ const SearchPage = () => {
                 <div className="flex-1">
                     {
                         globalContext.selectedItemsStack.map(item => (
-                            <StackItem key={item.id} item={item} />
+                            <StackItem
+                                key={item.id}
+                                item={item}
+                                onDetailClick={stackItemDetailClickHandler}
+                                onRemoveClick={stackItemRemoveClickHandler}
+                                showRemoveIcon={true}
+                            />
                         ))
                     }
                 </div>
@@ -182,7 +222,15 @@ const SearchPage = () => {
 
             </div>
 
-            <DetailItemModal />
+
+            {/* ====== Detail Item Modal ====== */}
+            <DetailItemModal
+                showDetailItemModal={globalContext.showDetailItemModal}
+                detailItem={globalContext.detailItem}
+                onModalClose={detailItemModalCloseHandler}
+                onAddToList={detailItemModalAddToListHandler}
+            />
+
         </main>
     )
 }
