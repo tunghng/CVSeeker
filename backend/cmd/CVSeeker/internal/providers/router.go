@@ -31,6 +31,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 		data := baseRoute.Group("/resumes")
 		{
 			data.POST("/upload", hs.DataProcessingHandler.ProcessDataHandler())
+			data.GET("/upload", hs.DataProcessingHandler.GetAllUploadsHandler())
 			data.POST("/batch/upload", hs.DataProcessingHandler.ProcessDataBatchHandler())
 
 			data.GET("/search", hs.SearchHandler.HybridSearch())

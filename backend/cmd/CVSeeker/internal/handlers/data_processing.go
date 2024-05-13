@@ -91,3 +91,19 @@ func (_this *DataProcessingHandler) ProcessDataBatchHandler() gin.HandlerFunc {
 		_this.HandleResponse(c, resp, err)
 	}
 }
+
+// GetAllUploadsHandler
+// @Summary Retrieves all upload records
+// @Description Fetches a list of all upload records sorted from the most recent to the oldest
+// @Tags Uploads
+// @Accept json
+// @Produce json
+// @Success 200 {object} meta.BasicResponse{data=[]dtos.UploadDTO}
+// @Failure 400, 500 {object} meta.Error
+// @Router /cvseeker/resumes/upload [get]
+func (_this *DataProcessingHandler) GetAllUploadsHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		resp, err := _this.dataProcessingService.GetAllUploads(c)
+		_this.HandleResponse(c, resp, err)
+	}
+}
