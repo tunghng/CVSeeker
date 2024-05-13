@@ -161,3 +161,40 @@ func (_this *ChatbotHandler) GetResumesByThreadID() gin.HandlerFunc {
 		_this.HandleResponse(c, resp, err)
 	}
 }
+
+// UpdateThreadName
+// @Summary Update a thread's name
+// @Description Updates the name of an existing thread by thread ID.
+// @Tags Chatbot
+// @Accept json
+// @Produce json
+// @Param threadId path string true "Thread ID"
+// @Param newName body string true "New Name for the Thread"
+// @Success 200 {object} meta.BasicResponse
+// @Failure 400,500 {object} meta.Error
+// @Router /cvseeker/resumes/thread/{threadId}/updateName [POST]
+func (_this *ChatbotHandler) UpdateThreadName() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		threadID := strings.TrimSpace(c.Param("threadId"))
+		if threadID == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		var newNameRequest struct {
+			NewName string `json:"newName"`
+		}
+		if err := c.ShouldBindJSON(&newNameRequest); err != nil {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		if strings.TrimSpace(newNameRequest.NewName) == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+
+		resp, err := _this.chatbotService.UpdateThreadName(c, threadID, newNameRequest.NewName)
+		_this.HandleResponse(c, resp, err)
+	}
+}

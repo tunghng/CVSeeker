@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
+	"net/http"
 )
 
 type SearchService interface {
@@ -55,7 +56,7 @@ func (_this *searchServiceImpl) HybridSearch(c *gin.Context, query string, from,
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Search completed successfully",
 		},
 		Data: results,
@@ -76,7 +77,7 @@ func (_this *searchServiceImpl) GetDocumentByID(c *gin.Context, documentID strin
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Document retrieval successful",
 		},
 		Data: document,
@@ -97,7 +98,7 @@ func (_this *searchServiceImpl) DeleteDocumentByID(c *gin.Context, documentID st
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Document deletion successful",
 		},
 		Data: nil, // No data to return for deletion operations

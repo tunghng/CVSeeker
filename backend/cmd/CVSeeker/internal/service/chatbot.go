@@ -24,6 +24,7 @@ type IChatbotService interface {
 	ListMessage(c *gin.Context, request gpt.ListMessageRequest) (*meta.BasicResponse, error)
 	GetAllThreads(c *gin.Context) (*meta.BasicResponse, error)
 	GetResumesByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error)
+	UpdateThreadName(c *gin.Context, threadID string, newName string) (*meta.BasicResponse, error)
 }
 
 type ChatbotService struct {
@@ -131,7 +132,7 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 	// Prepare the response with the thread information
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Session started successfully with initial data",
 		},
 		Data: thread,
@@ -197,7 +198,7 @@ func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Response retrieved successfully",
 		},
 		Data: listMessageResponse,
@@ -243,7 +244,7 @@ func (_this *ChatbotService) GetAllThreads(c *gin.Context) (*meta.BasicResponse,
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "All threads retrieved successfully",
 		},
 		Data: threadDTOs,
@@ -269,10 +270,36 @@ func (_this *ChatbotService) GetResumesByThreadID(c *gin.Context, threadID strin
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Resume IDs retrieved successfully for the thread",
 		},
 		Data: documents,
+	}
+	return response, nil
+}
+
+func (_this *ChatbotService) UpdateThreadName(c *gin.Context, threadID string, newName string) (*meta.BasicResponse, error) {
+	// Attempt to update the thread name
+	err := _this.threadRepo.UpdateThreadName(_this.db, threadID, newName)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to update thread name: %v", err)
+		return nil, err
+	}
+
+	// Retrieve the updated thread to confirm the change
+	updatedThread, err := _this.threadRepo.FindByID(_this.db, threadID)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to fetch updated thread: %v", err)
+		return nil, err
+	}
+
+	// Prepare the response
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    http.StatusOK,
+			Message: "Thread name updated successfully",
+		},
+		Data: updatedThread,
 	}
 	return response, nil
 }

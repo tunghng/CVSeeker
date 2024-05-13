@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
+	"net/http"
 	"strings"
 	"sync"
 )
@@ -80,7 +81,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	// Prepare the basic response with the result included
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Resume processed and file uploaded successfully",
 		},
 		Data: result,
@@ -137,7 +138,7 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Batch processing completed successfully",
 		},
 		Data: finalResults,
