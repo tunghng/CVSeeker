@@ -20,7 +20,7 @@ const SidebarThreadItem = ({ item, isActive }) => {
             >
                 <FeatherIcon icon="inbox" className="w-8 h-8 p-1" strokeWidth={1.8} />
             </button>
-            <Tooltip id="item-tooltip" />
+            <Tooltip id="item-tooltip" className="hidden group-hover:block" />
         </Link>
     )
 }
