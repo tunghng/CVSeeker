@@ -18,7 +18,7 @@ const LinkedinUploadInput = ({ value, onChange, onPressEnter, onClickButton }) =
             icon="upload"
             text='Upload'
             className='mt-2'
-            inputClassName={`${checkValidUrl(value) ? 'border-primary' : 'focus:border-border'}`}
+            inputClassName={`${checkValidUrl(value) ? 'border-primary' : 'focus:!border-border'}`}
             buttonClassName={`${checkValidUrl(value) ? 'bg-primary peer-focus:text-white text-white hover:bg-primary-hover' : '!bg-gray-300 !text-gray-500 !cursor-default'}
                             h-full pl-3 pr-4 rounded-l-none !right-0`}
             iconClassName='!w-5 !h-5'
