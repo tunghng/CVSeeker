@@ -1,20 +1,22 @@
 
-import { useState } from "react"
+import { useState } from "react";
+import extractPdfFile from "../services/extractPdfFile";
+import uploadPdfFiles from "../services/uploadPdfFiles";
 
+import fileicon from '../assets/images/file.png';
 import { FileUploader } from "react-drag-drop-files";
+import FeatherIcon from 'feather-icons-react';
 import LinkedinUploadInput from "../components/LinkedinUploadInput/LinkedinUploadInput";
-import FeatherIcon from 'feather-icons-react'
-import fileicon from '../assets/images/file.png'
-import pdfToText from 'react-pdftotext'
 
 const fileTypes = ["PDF"];
 
 const UploadPage = () => {
     // ====== State Management ======
-    const [urlInput, setUrlInput] = useState('')
-    const [files, setFiles] = useState([])
-    const [isDragging, setIsDragging] = useState(false)
-    const [error, setError] = useState('')
+    const [urlInput, setUrlInput] = useState('');
+    const [error, setError] = useState('');
+    const [isDragging, setIsDragging] = useState(false);
+    const [files, setFiles] = useState([]);
+    const [processedFiles, setProcessedFiles] = useState([]);
 
     // ====== Event Handlers ======
     const linkedinUploadKeyDownHandler = (e) => {
@@ -32,7 +34,6 @@ const UploadPage = () => {
         setError('')
 
         const filesArray = Array.isArray(fileList) ? fileList : Object.values(fileList);
-
         const invalidFiles = filesArray.filter(file => !fileTypes.includes(file.name.split('.').pop().toUpperCase()));
 
         if (invalidFiles.length > 0) {
@@ -42,7 +43,7 @@ const UploadPage = () => {
 
         const updatedFiles = [...files, ...filesArray];
         setFiles(updatedFiles);
-        await readPdfFiles(filesArray[0]);
+        await readPdfFiles(filesArray);
     };
 
     const handleDragStateChange = (dragging) => {
@@ -53,13 +54,35 @@ const UploadPage = () => {
         const updatedFiles = [...files];
         updatedFiles.splice(index, 1);
         setFiles(updatedFiles);
+
+        const updatedTextFiles = [...processedFiles];
+        updatedTextFiles.splice(index, 1);
+        setProcessedFiles(updatedTextFiles);
     };
 
-    const readPdfFiles = async (file) => {
-        pdfToText(file)
-            .then(text => console.log(text))
-            .catch(error => console.error("Failed to extract text from pdf"))
+    const readPdfFiles = async (filesArray) => {
+        const newTextFiles = [...processedFiles];
+
+        for (const file of filesArray) {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const text = await extractPdfFile(file);
+                let fileBytes = new Uint8Array(reader.result);
+                let decoder = new TextDecoder("utf-8");
+                let str = decoder.decode(fileBytes);
+
+                if (text) {
+                    newTextFiles.push({ content: text, fileBytes: str });
+                }
+                setProcessedFiles([...newTextFiles]);
+            };
+            reader.readAsArrayBuffer(file);
+        }
     };
+
+    const uploadPdfFilesHandler = async () => {
+        await uploadPdfFiles(processedFiles);
+    }
 
     return (
         <main>
@@ -74,7 +97,6 @@ const UploadPage = () => {
                     onPressEnter={linkedinUploadKeyDownHandler}
                     onClickButton={linkedinUploadClickHandler}
                 />
-
 
                 {/* ====== Upload PDF file ====== */}
                 <h2 className="mt-8 text-lg text-text">Upload PDF file</h2>
@@ -98,26 +120,26 @@ const UploadPage = () => {
 
                 {/* ====== Uploaded files ====== */}
                 <div className="flex flex-col">
-                    {
-                        files.length > 0 && (
-                            <>
-                                {files.map((file, index) => (
-                                    <div key={index} className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">
-                                        <FeatherIcon icon="file" className="w-8 h-8 text-text " strokeWidth={1.8} />
-                                        <div className="ml-2">
-                                            <h3 className="text-lg text-text">{file.name}</h3>
-                                            <p className="text-subtitle">{file.size} bytes</p>
-                                        </div>
-                                        <FeatherIcon icon="x" className="ml-auto w-6 h-6 text-text cursor-pointer" strokeWidth={1.8} onClick={() => removeFile(index)} />
+                    {files.length > 0 && (
+                        <>
+                            {files.map((file, index) => (
+                                <div key={index} className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">
+                                    <FeatherIcon icon="file" className="w-8 h-8 text-text" strokeWidth={1.8} />
+                                    <div className="ml-2">
+                                        <h3 className="text-lg text-text">{file.name}</h3>
+                                        <p className="text-subtitle">{file.size} bytes</p>
                                     </div>
-                                ))}
-                                <button className="my-button my-button-primary self-end flex px-3 py-2 mt-4">
-                                    <FeatherIcon icon="upload" strokeWidth={1.8} />
-                                    <span className="ml-2 font-semibold">Upload</span>
-                                </button>
-                            </>
-                        )
-                    }
+                                    <FeatherIcon icon="x" className="ml-auto w-6 h-6 text-text cursor-pointer" strokeWidth={1.8} onClick={() => removeFile(index)} />
+                                </div>
+                            ))}
+                            <button
+                                className="my-button my-button-primary self-end flex px-3 py-2 mt-4"
+                                onClick={uploadPdfFilesHandler}>
+                                <FeatherIcon icon="upload" strokeWidth={1.8} />
+                                <span className="ml-2 font-semibold">Upload</span>
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </main>
