@@ -670,7 +670,7 @@ paths:
             $ref: '#/definitions/meta.Error'
       summary: Retrieves all upload records
       tags:
-      - Uploads
+      - Data Processing
     post:
       consumes:
       - application/json

@@ -95,7 +95,7 @@ func (_this *DataProcessingHandler) ProcessDataBatchHandler() gin.HandlerFunc {
 // GetAllUploadsHandler
 // @Summary Retrieves all upload records
 // @Description Fetches a list of all upload records sorted from the most recent to the oldest
-// @Tags Uploads
+// @Tags Data Processing
 // @Accept json
 // @Produce json
 // @Success 200 {object} meta.BasicResponse{data=[]dtos.UploadDTO}
