@@ -1,7 +1,7 @@
 
 import { useState } from "react";
-import extractPdfFile from "../services/extractPdfFile";
-import uploadPdfFiles from "../services/uploadPdfFiles";
+import processUploadFiles from "../services/data-processing/processUploadFiles";
+import uploadPdfFiles from "../services/data-processing/uploadPdfFiles";
 
 import fileicon from '../assets/images/file.png';
 import { FileUploader } from "react-drag-drop-files";
@@ -30,7 +30,8 @@ const UploadPage = () => {
         }
     }
 
-    const handleChange = async (fileList) => {
+
+    const uploadFilesChangeHandler = async (fileList) => {
         setError('')
 
         const filesArray = Array.isArray(fileList) ? fileList : Object.values(fileList);
@@ -43,14 +44,17 @@ const UploadPage = () => {
 
         const updatedFiles = [...files, ...filesArray];
         setFiles(updatedFiles);
-        await readPdfFiles(filesArray);
+
+        const processedNewFiles = await processUploadFiles(filesArray);
+        const updatedTextFiles = [...processedFiles, ...processedNewFiles];
+        setProcessedFiles(updatedTextFiles);
     };
 
-    const handleDragStateChange = (dragging) => {
+    const dragStateChangeHandler = (dragging) => {
         setIsDragging(dragging);
     };
 
-    const removeFile = (index) => {
+    const removeUploadFileHandler = (index) => {
         const updatedFiles = [...files];
         updatedFiles.splice(index, 1);
         setFiles(updatedFiles);
@@ -60,27 +64,7 @@ const UploadPage = () => {
         setProcessedFiles(updatedTextFiles);
     };
 
-    const readPdfFiles = async (filesArray) => {
-        const newTextFiles = [...processedFiles];
-
-        for (const file of filesArray) {
-            const reader = new FileReader();
-            reader.onload = async () => {
-                const text = await extractPdfFile(file);
-                let fileBytes = new Uint8Array(reader.result);
-                let decoder = new TextDecoder("utf-8");
-                let str = decoder.decode(fileBytes);
-
-                if (text) {
-                    newTextFiles.push({ content: text, fileBytes: str });
-                }
-                setProcessedFiles([...newTextFiles]);
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    };
-
-    const uploadPdfFilesHandler = async () => {
+    const uploadFilesHandler = async () => {
         await uploadPdfFiles(processedFiles);
     }
 
@@ -101,14 +85,14 @@ const UploadPage = () => {
                 {/* ====== Upload PDF file ====== */}
                 <h2 className="mt-8 text-lg text-text">Upload PDF file</h2>
                 <FileUploader
-                    handleChange={handleChange}
+                    handleChange={uploadFilesChangeHandler}
                     name="file"
                     multiple={true}
                     types={fileTypes}
                     onTypeError={() => setError('Invalid file type. Please upload only PDF files.')}
                     children={<CustomFileUploader isDragging={isDragging} />}
                     dropMessageStyle={{ display: "none" }}
-                    onDraggingStateChange={handleDragStateChange}
+                    onDraggingStateChange={dragStateChangeHandler}
                 />
                 <div className="mt-2 flex justify-between text-subtitle">
                     <p>Support formats: PDF</p>
@@ -129,12 +113,12 @@ const UploadPage = () => {
                                         <h3 className="text-lg text-text">{file.name}</h3>
                                         <p className="text-subtitle">{file.size} bytes</p>
                                     </div>
-                                    <FeatherIcon icon="x" className="ml-auto w-6 h-6 text-text cursor-pointer" strokeWidth={1.8} onClick={() => removeFile(index)} />
+                                    <FeatherIcon icon="x" className="ml-auto w-6 h-6 text-text cursor-pointer" strokeWidth={1.8} onClick={() => removeUploadFileHandler(index)} />
                                 </div>
                             ))}
                             <button
                                 className="my-button my-button-primary self-end flex px-3 py-2 mt-4"
-                                onClick={uploadPdfFilesHandler}>
+                                onClick={uploadFilesHandler}>
                                 <FeatherIcon icon="upload" strokeWidth={1.8} />
                                 <span className="ml-2 font-semibold">Upload</span>
                             </button>

@@ -1,5 +1,5 @@
 
-import axiosInstance from './configs'
+import axiosInstance from '../configs'
 
 export default async function uploadPdfFiles(textFiles) {
 
@@ -8,9 +8,9 @@ export default async function uploadPdfFiles(textFiles) {
             resumes: [...textFiles]
         });
 
+        res = res.data.meta.code === 200 ? res.data.data : { error: res.data.meta.message }
         console.log(res)
-        res = res.meta.code === 200 ? res.data : { error: res.meta.message }
-
+        
         // return res
     }
 

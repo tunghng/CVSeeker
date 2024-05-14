@@ -1,7 +1,8 @@
 
 import pdfToText from 'react-pdftotext'
 
-const extractPdfFile = async (file) => {
+export default async function extractPdfFile(file) {
+    
     try {
         const text = await pdfToText(file)
         return text
@@ -11,4 +12,3 @@ const extractPdfFile = async (file) => {
     }
 }
 
-export default extractPdfFile
