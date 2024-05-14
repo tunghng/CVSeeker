@@ -34,7 +34,7 @@ func NewDataProcessingHandler(params DataProcessingHandlerParams) *DataProcessin
 // @Accept json
 // @Produce json
 // @Param request body dtos.ResumeData true "Resume data including file bytes"
-// @Success 200 {object} meta.BasicResponse
+// @Success 200 {object} meta.BasicResponse{data=dtos.ResumeProcessingResult}
 // @Failure 400,401,404,500 {object} meta.Error
 // @Router /cvseeker/resumes/upload [post]
 func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
@@ -63,7 +63,7 @@ func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param request body dtos.ResumesRequest true "Batch of resume data including file bytes for each"
-// @Success 200 {object} meta.BasicResponse "Batch processing completed successfully"
+// @Success 200 {object} meta.BasicResponse{data=[]dtos.ResumeProcessingResult}
 // @Failure 400,401,404,500 {object} meta.Error
 // @Router /cvseeker/resumes/batch/upload [post]
 func (_this *DataProcessingHandler) ProcessDataBatchHandler() gin.HandlerFunc {
@@ -88,6 +88,22 @@ func (_this *DataProcessingHandler) ProcessDataBatchHandler() gin.HandlerFunc {
 
 		// Process the batch of resumes
 		resp, err := _this.dataProcessingService.ProcessDataBatch(c, requestData.Resumes)
+		_this.HandleResponse(c, resp, err)
+	}
+}
+
+// GetAllUploadsHandler
+// @Summary Retrieves all upload records
+// @Description Fetches a list of all upload records sorted from the most recent to the oldest
+// @Tags Uploads
+// @Accept json
+// @Produce json
+// @Success 200 {object} meta.BasicResponse{data=[]dtos.UploadDTO}
+// @Failure 400,401,404,500 {object} meta.Error
+// @Router /cvseeker/resumes/upload [get]
+func (_this *DataProcessingHandler) GetAllUploadsHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		resp, err := _this.dataProcessingService.GetAllUploads(c)
 		_this.HandleResponse(c, resp, err)
 	}
 }
