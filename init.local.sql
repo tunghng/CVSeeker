@@ -27,3 +27,12 @@ CREATE TABLE `thread_resumes` (
   KEY `idx_thread_id` (`thread_id`),
   KEY `idx_resume_id` (`resume_id`)
 );
+
+CREATE TABLE `upload` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `document_id` varchar(255) DEFAULT NULL,
+  `status` varchar(100) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);

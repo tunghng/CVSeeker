@@ -11,6 +11,14 @@ definitions:
       fileBytes:
         type: string
     type: object
+  dtos.ResumeProcessingResult:
+    properties:
+      id:
+        description: Assume each resume has a reference or ID.
+        type: string
+      status:
+        type: string
+    type: object
   dtos.ResumesRequest:
     properties:
       resumes:
@@ -23,6 +31,161 @@ definitions:
       ids:
         type: string
       threadName:
+        type: string
+    type: object
+  dtos.Thread:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: integer
+    type: object
+  dtos.UploadDTO:
+    properties:
+      createdAt:
+        description: Assuming date is formatted as a string for the client
+        type: integer
+      documentId:
+        description: omitempty to not display if empty
+        type: string
+      status:
+        type: string
+    type: object
+  elasticsearch.Award:
+    properties:
+      award_name:
+        type: string
+    type: object
+  elasticsearch.BasicInfo:
+    properties:
+      education_level:
+        description: BS, MS, or PhD
+        type: string
+      full_name:
+        type: string
+      gpa:
+        type: number
+      majors:
+        items:
+          type: string
+        type: array
+      university:
+        type: string
+    type: object
+  elasticsearch.ProjectExperience:
+    properties:
+      project_description:
+        type: string
+      project_name:
+        type: string
+    type: object
+  elasticsearch.ResumeSummaryDTO:
+    properties:
+      award:
+        items:
+          $ref: '#/definitions/elasticsearch.Award'
+        type: array
+      basic_info:
+        $ref: '#/definitions/elasticsearch.BasicInfo'
+      project_experience:
+        items:
+          $ref: '#/definitions/elasticsearch.ProjectExperience'
+        type: array
+      skills:
+        items:
+          type: string
+        type: array
+      summary:
+        type: string
+      url:
+        type: string
+      work_experience:
+        items:
+          $ref: '#/definitions/elasticsearch.WorkExperience'
+        type: array
+    type: object
+  elasticsearch.WorkExperience:
+    properties:
+      company:
+        type: string
+      duration:
+        description: Could be changed to a more structured format if necessary
+        type: string
+      job_summary:
+        type: string
+      job_title:
+        type: string
+      location:
+        type: string
+    type: object
+  gpt.ListMessagesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/gpt.MessageResponse'
+        type: array
+      first_id:
+        type: string
+      has_more:
+        type: boolean
+      last_id:
+        type: string
+      object:
+        type: string
+    type: object
+  gpt.MessageContent:
+    properties:
+      text:
+        properties:
+          annotations:
+            items: {}
+            type: array
+          value:
+            type: string
+        type: object
+      type:
+        type: string
+    type: object
+  gpt.MessageResponse:
+    properties:
+      assistant_id:
+        type: string
+      content:
+        items:
+          $ref: '#/definitions/gpt.MessageContent'
+        type: array
+      created_at:
+        type: integer
+      file_ids:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      object:
+        type: string
+      role:
+        type: string
+      run_id:
+        type: string
+      thread_id:
+        type: string
+    type: object
+  gpt.ThreadResponse:
+    properties:
+      created_at:
+        type: integer
+      id:
+        type: string
+      metadata:
+        additionalProperties: true
+        type: object
+      object:
         type: string
     type: object
   meta.BasicResponse:
@@ -115,7 +278,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/elasticsearch.ResumeSummaryDTO'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -152,9 +320,16 @@ paths:
       - application/json
       responses:
         "200":
-          description: Batch processing completed successfully
+          description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.ResumeProcessingResult'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -208,7 +383,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/elasticsearch.ResumeSummaryDTO'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -239,7 +421,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.Thread'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -297,7 +486,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/gpt.ListMessagesResponse'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -343,7 +537,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/gpt.ListMessagesResponse'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -353,6 +552,48 @@ paths:
           schema:
             $ref: '#/definitions/meta.Error'
       summary: Send a message to a chat session
+      tags:
+      - Chatbot
+  /cvseeker/resumes/thread/{threadId}/updateName:
+    post:
+      consumes:
+      - application/json
+      description: Updates the name of an existing thread by thread ID.
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      - description: New Name for the Thread
+        in: body
+        name: newName
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/elasticsearch.ResumeSummaryDTO'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Update a thread's name
       tags:
       - Chatbot
   /cvseeker/resumes/thread/start:
@@ -374,7 +615,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/gpt.ThreadResponse'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -387,6 +633,44 @@ paths:
       tags:
       - Chatbot
   /cvseeker/resumes/upload:
+    get:
+      consumes:
+      - application/json
+      description: Fetches a list of all upload records sorted from the most recent
+        to the oldest
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.UploadDTO'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Retrieves all upload records
+      tags:
+      - Data Processing
     post:
       consumes:
       - application/json
@@ -404,7 +688,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/meta.BasicResponse'
+            allOf:
+            - $ref: '#/definitions/meta.BasicResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dtos.ResumeProcessingResult'
+              type: object
         "400":
           description: Bad Request
           schema:

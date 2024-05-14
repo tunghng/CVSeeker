@@ -11,7 +11,7 @@ services:
       - MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
       - MYSQL_DATABASE=${DB_MYSQL_DATABASE}
     volumes:
-      - ./${DB_LOCAL_DIR}:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -36,3 +36,7 @@ services:
       - "5173:5173"  # Ensure to adjust the port if "serve" is configured differently
     depends_on:
       - backend
+
+volumes:
+  mysql_data:
+    driver: local

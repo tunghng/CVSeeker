@@ -50,9 +50,24 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Batch processing completed successfully",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.ResumeProcessingResult"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -131,7 +146,22 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/elasticsearch.ResumeSummaryDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -178,7 +208,22 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.Thread"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -224,7 +269,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gpt.ThreadResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -317,7 +374,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gpt.ListMessagesResponse"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -382,7 +451,87 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/gpt.ListMessagesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/cvseeker/resumes/thread/{threadId}/updateName": {
+            "post": {
+                "description": "Updates the name of an existing thread by thread ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chatbot"
+                ],
+                "summary": "Update a thread's name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Thread ID",
+                        "name": "threadId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New Name for the Thread",
+                        "name": "newName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/elasticsearch.ResumeSummaryDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -401,6 +550,66 @@ const docTemplate = `{
             }
         },
         "/cvseeker/resumes/upload": {
+            "get": {
+                "description": "Fetches a list of all upload records sorted from the most recent to the oldest",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Data Processing"
+                ],
+                "summary": "Retrieves all upload records",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.UploadDTO"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Processes uploaded resume files and associated metadata as JSON",
                 "consumes": [
@@ -428,7 +637,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dtos.ResumeProcessingResult"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -484,7 +705,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/meta.BasicResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/meta.BasicResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/elasticsearch.ResumeSummaryDTO"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -589,6 +822,18 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.ResumeProcessingResult": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Assume each resume has a reference or ID.",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.ResumesRequest": {
             "type": "object",
             "properties": {
@@ -607,6 +852,241 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "threadName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.Thread": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dtos.UploadDTO": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "Assuming date is formatted as a string for the client",
+                    "type": "integer"
+                },
+                "documentId": {
+                    "description": "omitempty to not display if empty",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "elasticsearch.Award": {
+            "type": "object",
+            "properties": {
+                "award_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "elasticsearch.BasicInfo": {
+            "type": "object",
+            "properties": {
+                "education_level": {
+                    "description": "BS, MS, or PhD",
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "gpa": {
+                    "type": "number"
+                },
+                "majors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "university": {
+                    "type": "string"
+                }
+            }
+        },
+        "elasticsearch.ProjectExperience": {
+            "type": "object",
+            "properties": {
+                "project_description": {
+                    "type": "string"
+                },
+                "project_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "elasticsearch.ResumeSummaryDTO": {
+            "type": "object",
+            "properties": {
+                "award": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/elasticsearch.Award"
+                    }
+                },
+                "basic_info": {
+                    "$ref": "#/definitions/elasticsearch.BasicInfo"
+                },
+                "project_experience": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/elasticsearch.ProjectExperience"
+                    }
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "work_experience": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/elasticsearch.WorkExperience"
+                    }
+                }
+            }
+        },
+        "elasticsearch.WorkExperience": {
+            "type": "object",
+            "properties": {
+                "company": {
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Could be changed to a more structured format if necessary",
+                    "type": "string"
+                },
+                "job_summary": {
+                    "type": "string"
+                },
+                "job_title": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.ListMessagesResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gpt.MessageResponse"
+                    }
+                },
+                "first_id": {
+                    "type": "string"
+                },
+                "has_more": {
+                    "type": "boolean"
+                },
+                "last_id": {
+                    "type": "string"
+                },
+                "object": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.MessageContent": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "object",
+                    "properties": {
+                        "annotations": {
+                            "type": "array",
+                            "items": {}
+                        },
+                        "value": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "assistant_id": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/gpt.MessageContent"
+                    }
+                },
+                "created_at": {
+                    "type": "integer"
+                },
+                "file_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "object": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "run_id": {
+                    "type": "string"
+                },
+                "thread_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "gpt.ThreadResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "object": {
                     "type": "string"
                 }
             }
