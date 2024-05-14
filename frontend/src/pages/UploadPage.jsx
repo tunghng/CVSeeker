@@ -17,6 +17,7 @@ const UploadPage = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [files, setFiles] = useState([]);
     const [processedFiles, setProcessedFiles] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     // ====== Event Handlers ======
     const linkedinUploadKeyDownHandler = (e) => {
@@ -45,9 +46,11 @@ const UploadPage = () => {
         const updatedFiles = [...files, ...filesArray];
         setFiles(updatedFiles);
 
+        setIsLoading(true);
         const processedNewFiles = await processUploadFiles(filesArray);
         const updatedTextFiles = [...processedFiles, ...processedNewFiles];
         setProcessedFiles(updatedTextFiles);
+        setIsLoading(false);
     };
 
     const dragStateChangeHandler = (dragging) => {
@@ -117,10 +120,17 @@ const UploadPage = () => {
                                 </div>
                             ))}
                             <button
-                                className="my-button my-button-primary self-end flex px-3 py-2 mt-4"
-                                onClick={uploadFilesHandler}>
-                                <FeatherIcon icon="upload" strokeWidth={1.8} />
-                                <span className="ml-2 font-semibold">Upload</span>
+                                className={`my-button ${isLoading ? 'my-button-disabled' : 'my-button-primary'} self-end flex items-center px-3 py-2 mt-4`}
+                                onClick={uploadFilesHandler}
+                                disabled={isLoading}>
+                                {
+                                    isLoading ?
+                                        <span className="mr-2">Processing...</span> :
+                                        <>
+                                            <FeatherIcon icon="upload" strokeWidth={1.8} />
+                                            <span className="ml-2 font-semibold">Upload</span>
+                                        </>
+                                }
                             </button>
                         </>
                     )}
