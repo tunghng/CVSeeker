@@ -5,6 +5,7 @@ import { FileUploader } from "react-drag-drop-files";
 import LinkedinUploadInput from "../components/LinkedinUploadInput/LinkedinUploadInput";
 import FeatherIcon from 'feather-icons-react'
 import fileicon from '../assets/images/file.png'
+import pdfToText from 'react-pdftotext'
 
 const fileTypes = ["PDF"];
 
@@ -27,8 +28,8 @@ const UploadPage = () => {
         }
     }
 
-    const handleChange = (fileList) => {
-        setError('');
+    const handleChange = async (fileList) => {
+        setError('')
 
         const filesArray = Array.isArray(fileList) ? fileList : Object.values(fileList);
 
@@ -41,6 +42,7 @@ const UploadPage = () => {
 
         const updatedFiles = [...files, ...filesArray];
         setFiles(updatedFiles);
+        await readPdfFiles(filesArray[0]);
     };
 
     const handleDragStateChange = (dragging) => {
@@ -51,6 +53,12 @@ const UploadPage = () => {
         const updatedFiles = [...files];
         updatedFiles.splice(index, 1);
         setFiles(updatedFiles);
+    };
+
+    const readPdfFiles = async (file) => {
+        pdfToText(file)
+            .then(text => console.log(text))
+            .catch(error => console.error("Failed to extract text from pdf"))
     };
 
     return (
@@ -93,15 +101,15 @@ const UploadPage = () => {
                     {
                         files.length > 0 && (
                             <>
-                            {files.map((file, index) => (
-                                <div key={index} className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">
-                                    <FeatherIcon icon="file" className="w-8 h-8 text-text " strokeWidth={1.8} />
-                                    <div className="ml-2">
-                                        <h3 className="text-lg text-text">{file.name}</h3>
-                                        <p className="text-subtitle">{file.size} bytes</p>
+                                {files.map((file, index) => (
+                                    <div key={index} className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">
+                                        <FeatherIcon icon="file" className="w-8 h-8 text-text " strokeWidth={1.8} />
+                                        <div className="ml-2">
+                                            <h3 className="text-lg text-text">{file.name}</h3>
+                                            <p className="text-subtitle">{file.size} bytes</p>
+                                        </div>
+                                        <FeatherIcon icon="x" className="ml-auto w-6 h-6 text-text cursor-pointer" strokeWidth={1.8} onClick={() => removeFile(index)} />
                                     </div>
-                                    <FeatherIcon icon="x" className="ml-auto w-6 h-6 text-text cursor-pointer" strokeWidth={1.8} onClick={() => removeFile(index)} />
-                                </div>
                                 ))}
                                 <button className="my-button my-button-primary self-end flex px-3 py-2 mt-4">
                                     <FeatherIcon icon="upload" strokeWidth={1.8} />
