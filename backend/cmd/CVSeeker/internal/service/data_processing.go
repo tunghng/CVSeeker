@@ -13,6 +13,7 @@ import (
 	"CVSeeker/pkg/huggingface"
 	"CVSeeker/pkg/summarizer"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
@@ -78,6 +79,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 		// Assume createElkResume is an existing method that prepares the data for Elasticsearch
 		elkResume, err := _this.createElkResume(c, fullText, file)
 		if err != nil {
+			_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed"})
 			ginLogger.Gin(c).Errorf("failed to create elastic document: %v", err)
 			return
 		}
@@ -232,8 +234,9 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 	}
 	resumeSummary.URL = "https://cvseeker-bucket.s3.ap-southeast-2.amazonaws.com/1714643484.pdf"
 
+	embeddingText := generateFulltext(resumeSummary)
 	// Create the vector representation of text
-	vectorEmbedding, err := _this.hfClient.GetTextEmbedding(fullText, textEmbeddingModel)
+	vectorEmbedding, err := _this.hfClient.GetTextEmbedding(embeddingText, textEmbeddingModel)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to get text embedding: %v", err)
 		return nil, err
@@ -286,4 +289,23 @@ func generatePrompt(fullText string) string {
 }`)
 	sb.WriteString("\n\nAll details in the 'basic_info' section should be invented but must sound logical and realistic, appropriate for the professional context. Ensure the details are consistent with typical professional and educational backgrounds relevant to the data in the rest of the resume. For other sections, ensure all entries are derived from the resume's content, maintaining consistency and accuracy with the original information. Provide clear, precise language to avoid ambiguities and ensure data types match the expected format.")
 	return sb.String()
+}
+
+func generateFulltext(resume elasticsearch.ResumeSummaryDTO) string {
+	var fullTextContent strings.Builder
+	fullTextContent.WriteString(fmt.Sprintf("Summary: %s; Skills: %v; ", resume.Summary, resume.Skills))
+	fullTextContent.WriteString(fmt.Sprintf("Education: %s, %s, GPA: %.2f; ", resume.BasicInfo.University, resume.BasicInfo.EducationLevel, resume.BasicInfo.GPA))
+	fullTextContent.WriteString("Work Experience: ")
+	for _, work := range resume.WorkExperience {
+		fullTextContent.WriteString(fmt.Sprintf("%s at %s, %s; ", work.JobTitle, work.Company, work.Duration))
+	}
+	fullTextContent.WriteString("Projects: ")
+	for _, project := range resume.ProjectExperience {
+		fullTextContent.WriteString(fmt.Sprintf("%s: %s; ", project.ProjectName, project.ProjectDescription))
+	}
+	fullTextContent.WriteString("Awards: ")
+	for _, award := range resume.Award {
+		fullTextContent.WriteString(fmt.Sprintf("%s; ", award.AwardName))
+	}
+	return fullTextContent.String()
 }
