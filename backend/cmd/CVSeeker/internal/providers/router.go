@@ -6,19 +6,31 @@ import (
 	"CVSeeker/internal/ginLogger"
 	commonMiddleware "CVSeeker/internal/ginMiddleware"
 	"CVSeeker/internal/ginServer"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	_swaggerFiles "github.com/swaggo/files"
 	_ginSwagger "github.com/swaggo/gin-swagger"
+	"time"
 )
 
 // setupRouter setup router.
 func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 	return func(router *gin.Engine) {
+		// CORS configuration
+		corsConfig := cors.Config{
+			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+			MaxAge:           12 * time.Hour,
+		}
 
 		router.Use(
+			cors.New(corsConfig),
 			gzip.Gzip(gzip.DefaultCompression),
 			commonMiddleware.RequestIDLoggingMiddleware(),
 			ginLogger.MiddlewareGin(AppName, zerolog.InfoLevel),

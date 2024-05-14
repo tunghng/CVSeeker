@@ -559,7 +559,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Uploads"
+                    "Data Processing"
                 ],
                 "summary": "Retrieves all upload records",
                 "responses": {
