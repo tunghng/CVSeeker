@@ -19,7 +19,7 @@ const Layout = () => {
                 <Sidebar />
 
                 {/* ====== Child route rendering ====== */}
-                <div className={`${globalContext.showSidebar && 'md:ml-64'} flex-1 h-full bg-background overflow-y-scroll transition-all duration-700 ease-in-out`}>
+                <div className={`${globalContext.showSidebar && 'md:ml-64'} flex-1 mt-12 bg-background transition-all duration-700 ease-in-out`}>
                     <Outlet />
                 </div>
             </div>

@@ -2,6 +2,9 @@
 @tailwind components;
 
 @layer components {
+    .my-content-wrapper {
+        @apply h-[calc(100vh-3rem)] overflow-y-scroll;
+    }
     .my-container-medium {
         @apply w-full max-w-[50rem] mx-auto px-6 sm:px-10;
     }

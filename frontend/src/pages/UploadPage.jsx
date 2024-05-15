@@ -72,12 +72,13 @@ const UploadPage = () => {
     }
 
     return (
-        <main>
+        <main className="my-content-wrapper">
             <div className="my-container-medium py-6">
-                <h1 className="text-2xl font-bold">Upload profile</h1>
+                <h1 className="text-2xl font-bold text-title">Upload profile</h1>
 
                 {/* ====== Upload by link profile ====== */}
                 <h2 className="mt-4 text-lg text-text">Upload profile by Linkedin Url</h2>
+
                 <LinkedinUploadInput
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
@@ -87,6 +88,7 @@ const UploadPage = () => {
 
                 {/* ====== Upload PDF file ====== */}
                 <h2 className="mt-8 text-lg text-text">Upload PDF file</h2>
+
                 <FileUploader
                     handleChange={uploadFilesChangeHandler}
                     name="file"
@@ -148,7 +150,7 @@ function CustomFileUploader({ isDragging }) {
                 <FeatherIcon icon="upload" className={`absolute -right-3 -bottom-2 w-8 h-8 p-1.5 rounded-full ${isDragging ? 'bg-primary' : 'bg-title'} text-white transition-all duration-300 ease-in-out`} strokeWidth={1.9} />
             </div>
 
-            <h1 className="mt-6">Drag and drop files here or
+            <h1 className="mt-6 text-title">Drag and drop files here or
                 <span className="ml-1 underline cursor-pointer underline-offset-2">Choose files</span>
             </h1>
         </div>

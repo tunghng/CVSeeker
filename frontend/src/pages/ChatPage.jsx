@@ -32,7 +32,7 @@ const ChatPage = () => {
     }
 
     return (
-        <main className="h-full flex overflow-x-hidden">
+        <main className="my-content-wrapper">
             {/* ====== Chat Window ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
 

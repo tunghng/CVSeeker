@@ -32,7 +32,7 @@ const MyInput = ({
         <div className={`relative flex items-center w-full ${className}`}>
             <input
                 type="text"
-                className={`flex-1 pl-4 pr-11 py-2 peer bg-transparent rounded-full text-text font-medium text-lg outline-none border-2 border-border focus:border-primary transition-all duration-300 ease-in-out ${inputClassName}`}
+                className={`flex-1 pl-4 pr-11 py-2 peer bg-transparent rounded-full text-title font-medium text-lg outline-none border-2 border-border focus:border-primary transition-all duration-300 ease-in-out ${inputClassName}`}
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}

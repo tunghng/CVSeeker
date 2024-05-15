@@ -24,7 +24,7 @@ const HomePage = () => {
     }
 
     return (
-        <main>
+        <main className="my-content-wrapper">
             {/* ====== Search Input ====== */}
             <div className="my-container-small pt-6">
                 <ResumeSearchInput
