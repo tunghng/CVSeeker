@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom"
-import { useContext, useState } from "react"
+import { useContext } from "react"
 import { GlobalContext } from "../../contexts/GlobalContext"
 
 import FeatherIcon from 'feather-icons-react'
@@ -8,17 +8,10 @@ import SidebarThreadItem from "../SidebarThreadItem/SidebarThreadItem"
 
 import './Sidebar.css'
 
-const Sidebar = () => {
+const Sidebar = ({ threads }) => {
     // ====== State Management ======
     const globalContext = useContext(GlobalContext);
     const location = useLocation()
-
-    const [threadList, setThreadList] = useState([
-        { id: '123', name: 'Find 10 CVs good at JavaScript' },
-        { id: '456', name: 'Find 8 people good at communicate' },
-        { id: '234', name: 'Find 5 people good at communicate' },
-        { id: '102', name: 'Find 4 people good at communicate' },
-    ])
 
     return (
         <div className={`${globalContext.showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 h-full mt-12 fixed top-0 left-0 flex flex-col z-10 bg-background py-2 border-r-2 border-border transition-all duration-700 ease-in-out`}>
@@ -46,7 +39,7 @@ const Sidebar = () => {
             <div className="thread-list">
                 <h3 className='thread-title mt-6'>Threads</h3>
                 <div>
-                    {threadList.map((item, index) => (
+                    {threads.map((item, index) => (
                         <SidebarThreadItem
                             key={index}
                             item={item}
