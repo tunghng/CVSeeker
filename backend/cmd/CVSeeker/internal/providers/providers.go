@@ -13,7 +13,6 @@ import (
 	"CVSeeker/pkg/huggingface"
 	"CVSeeker/pkg/logger"
 	"CVSeeker/pkg/summarizer"
-	"CVSeeker/pkg/websocket"
 	"go.uber.org/dig"
 )
 
@@ -52,7 +51,6 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(huggingface.NewHuggingFaceClient)
 		_ = container.Provide(aws.NewS3Client)
 		_ = container.Provide(gpt.NewGptAdaptorClient)
-		_ = container.Provide(websocket.NewWebSocketClient)
 
 		_ = container.Provide(repositories.NewResumeRepository)
 		_ = container.Provide(repositories.NewThreadResumeRepository)

@@ -6,6 +6,7 @@ import (
 	"CVSeeker/internal/ginLogger"
 	commonMiddleware "CVSeeker/internal/ginMiddleware"
 	"CVSeeker/internal/ginServer"
+	"CVSeeker/pkg/websocket"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -57,5 +58,14 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 			data.GET("/thread/:threadId", hs.ChatbotHandler.GetResumesByThreadID())
 			data.POST("/thread/:threadId/updateName", hs.ChatbotHandler.UpdateThreadName())
 		}
+
+		router.GET("/ws", func(c *gin.Context) {
+			// Error handling omitted for brevity
+			_, err := websocket.HandleWebSocket(c.Writer, c.Request)
+			if err != nil {
+				// Log error or handle it
+				return
+			}
+		})
 	}
 }

@@ -40,7 +40,7 @@ require (
 	github.com/gin-contrib/cors v1.7.2
 	github.com/swaggo/swag v1.16.3
 	github.com/tmc/langchaingo v0.1.9
-	github.com/zhouhui8915/go-socket.io-client v0.0.0-20200925034401-83ee73793ba4
+	nhooyr.io/websocket v1.8.7
 )
 
 require (
@@ -83,6 +83,7 @@ require (
 	github.com/jinzhu/now v1.1.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -107,7 +108,6 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.0.1 // indirect
-	github.com/zhouhui8915/engine.io-go v0.0.0-20150910083302-02ea08f0971f // indirect
 	go.opentelemetry.io/otel v1.22.0 // indirect
 	go.opentelemetry.io/otel/metric v1.22.0 // indirect
 	go.opentelemetry.io/otel/trace v1.22.0 // indirect

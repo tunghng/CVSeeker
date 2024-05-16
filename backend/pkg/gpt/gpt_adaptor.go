@@ -25,7 +25,6 @@ type IGptAdaptorClient interface {
 	ListMessages(threadID string, limit int, order, after, before string) (*ListMessagesResponse, error)
 	GetRunDetails(threadID, runID string) (*RunResponse, error)
 	CreateRunAndStreamResponse(threadID string, request CreateRunRequest) (<-chan string, error)
-
 	CreateMessage(threadID string, request CreateMessageRequest) (*MessageResponse, error)
 	WaitForRunCompletion(threadID, runID string) (*RunResponse, error)
 }
@@ -313,6 +312,7 @@ func (g *gptAdaptorClient) CreateRunAndStreamResponse(threadID string, request C
 					// Log the value for each text entry in the content array
 					for _, content := range message.Delta.Content {
 						if content.Type == "text" {
+
 							fmt.Println("Logged Value:", content.Text.Value)
 							valueChannel <- content.Text.Value
 						}
