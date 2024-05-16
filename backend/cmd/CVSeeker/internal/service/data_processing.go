@@ -12,6 +12,7 @@ import (
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/huggingface"
 	"CVSeeker/pkg/summarizer"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -20,10 +21,11 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 )
 
 type IDataProcessingService interface {
-	ProcessData(c *gin.Context, fullText string, file string) (*meta.BasicResponse, error)
+	ProcessData(c *gin.Context, fullText string, file string, uuid string) (*meta.BasicResponse, error)
 	ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData) (*meta.BasicResponse, error)
 	GetAllUploads(c *gin.Context) (*meta.BasicResponse, error)
 }
@@ -61,13 +63,14 @@ func NewDataProcessingService(args DataProcessingServiceArgs) IDataProcessingSer
 	}
 }
 
-func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string, file string) (*meta.BasicResponse, error) {
+func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string, file string, uuid string) (*meta.BasicResponse, error) {
 	// This method now schedules the processing in the background and immediately returns a response
 	go func() {
 		elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 
 		initialUpload := &models.Upload{
 			Status: "Processing", // Initial status
+			UUID:   uuid,
 		}
 
 		createdUpload, err := _this.uploadRepo.Create(_this.db, initialUpload)
@@ -182,7 +185,9 @@ func (_this *DataProcessingService) GetAllUploads(c *gin.Context) (*meta.BasicRe
 		dto := dtos.UploadDTO{
 			DocumentID: upload.DocumentID,
 			Status:     upload.Status,
+			Name:       upload.Name,
 			CreatedAt:  upload.CreatedAt.Unix(), // Format time as RFC3339
+			UUID:       upload.UUID,
 		}
 		uploadsDTO = append(uploadsDTO, dto)
 	}
@@ -202,13 +207,13 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 	prompt := generatePrompt(fullText)
 	model := viper.GetString(cfg.ChatGptModel)
 	textEmbeddingModel := viper.GetString(cfg.HuggingfaceModel)
-	//awsBucketName := viper.GetString(cfg.AwsBucket)
+	awsBucketName := viper.GetString(cfg.AwsBucket)
 
-	//fileBytes, err := base64.StdEncoding.DecodeString(file)
-	//if err != nil {
-	//	ginLogger.Gin(c).Errorf("failed to decode file: %v", err)
-	//	return nil, err
-	//}
+	fileBytes, err := base64.StdEncoding.DecodeString(file)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to decode file: %v", err)
+		return nil, err
+	}
 
 	// Parse resume text to JSON format by making request to OpenAI
 	responseText, err := _this.gptClient.AskGPT(prompt, model)
@@ -218,13 +223,13 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 	}
 
 	// Upload file to S3 and get the URL
-	//key := fmt.Sprintf("%d.docx", time.Now().Unix())
-	//
-	//fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, file)
-	//if err != nil {
-	//	ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
-	//	return nil, err
-	//}
+	key := fmt.Sprintf("%d.docx", time.Now().Unix())
+
+	fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, fileBytes)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
+		return nil, err
+	}
 
 	var resumeSummary elasticsearch.ResumeSummaryDTO
 	//var resumeSummary map[string]interface{}
@@ -232,7 +237,7 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 		ginLogger.Gin(c).Errorf("failed to parse JSON response: %v", err)
 		return nil, err
 	}
-	resumeSummary.URL = "https://cvseeker-bucket.s3.ap-southeast-2.amazonaws.com/1714643484.pdf"
+	resumeSummary.URL = fileURL
 
 	embeddingText := generateFulltext(resumeSummary)
 	// Create the vector representation of text

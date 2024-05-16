@@ -2,6 +2,7 @@ package gpt
 
 import (
 	"CVSeeker/pkg/cfg"
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -22,7 +24,8 @@ type IGptAdaptorClient interface {
 	DeleteThread(threadID string) (*DeleteThreadResponse, error)
 	ListMessages(threadID string, limit int, order, after, before string) (*ListMessagesResponse, error)
 	GetRunDetails(threadID, runID string) (*RunResponse, error)
-	CreateRun(threadID string, request CreateRunRequest) (*RunResponse, error)
+	CreateRunAndStreamResponse(threadID string, request CreateRunRequest) (<-chan string, error)
+
 	CreateMessage(threadID string, request CreateMessageRequest) (*MessageResponse, error)
 	WaitForRunCompletion(threadID, runID string) (*RunResponse, error)
 }
@@ -261,49 +264,69 @@ func (g *gptAdaptorClient) ListMessages(threadID string, limit int, order, after
 	return &response, nil
 }
 
-func (g *gptAdaptorClient) CreateRun(threadID string, request CreateRunRequest) (*RunResponse, error) {
-	urls := fmt.Sprintf("%v/%v/runs", ThreadEndpoint, threadID)
+func (g *gptAdaptorClient) CreateRunAndStreamResponse(threadID string, request CreateRunRequest) (<-chan string, error) {
+	url := fmt.Sprintf("%v/%v/runs", ThreadEndpoint, threadID)
 
 	requestBody, err := json.Marshal(request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to marshal request: %v", err)
 	}
 
-	req, err := http.NewRequest("POST", urls, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", url, strings.NewReader(string(requestBody)))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 
-	// Sử dụng hàm helper để thêm headers chung
 	g.addCommonHeaders(req)
 
 	resp, err := g.Client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute request: %v", err)
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
 
-		}
-	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		var errMsg string
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			errMsg = "Failed to read response body"
-		} else {
-			errMsg = string(bodyBytes)
-		}
-		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, errMsg)
-	}
-	// Xử lý response
-	var response RunResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
+		resp.Body.Close()
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, string(bodyBytes))
 	}
 
-	return &response, nil
+	valueChannel := make(chan string)
+
+	go func() {
+		defer close(valueChannel)
+		defer resp.Body.Close()
+
+		scanner := bufio.NewScanner(resp.Body)
+		var currentEvent string
+		for scanner.Scan() {
+			line := scanner.Text()
+			if strings.HasPrefix(line, "event:") {
+				currentEvent = strings.TrimSpace(line[6:])
+			} else if strings.HasPrefix(line, "data:") {
+				data := strings.TrimSpace(line[5:])
+				if currentEvent == "thread.message.delta" {
+					var message DeltaMessage
+					if err := json.Unmarshal([]byte(data), &message); err != nil {
+						fmt.Printf("Error unmarshalling DeltaMessage: %v\n", err)
+						continue
+					}
+					// Log the value for each text entry in the content array
+					for _, content := range message.Delta.Content {
+						if content.Type == "text" {
+							fmt.Println("Logged Value:", content.Text.Value)
+							valueChannel <- content.Text.Value
+						}
+					}
+				}
+			}
+		}
+
+		if err := scanner.Err(); err != nil {
+			fmt.Printf("Error reading stream: %v\n", err)
+		}
+	}()
+
+	return valueChannel, nil
 }
 
 func (g *gptAdaptorClient) GetRunDetails(threadID, runID string) (*RunResponse, error) {

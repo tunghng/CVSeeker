@@ -16,4 +16,6 @@ type ResumesRequest struct {
 type ResumeData struct {
 	Content   string `json:"content"`
 	FileBytes string `json:"fileBytes"`
+	Name      string `json:"name"`
+	UUID      string `json:"uuid"`
 }

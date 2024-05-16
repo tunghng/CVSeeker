@@ -2,6 +2,7 @@ package dtos
 
 import (
 	"CVSeeker/internal/meta"
+	"encoding/json"
 )
 
 // Response response custom message
@@ -54,4 +55,23 @@ type PaginationFilter struct {
 	UserId     int64
 	ChannelIds []int64
 	OrderBy    string `json:"orderBy"`
+}
+
+type StreamedEvent struct {
+	Event string          `json:"event"`
+	Data  json.RawMessage `json:"data"` // Using RawMessage to handle varying data structures
+}
+
+type DeltaMessage struct {
+	ID     string `json:"id"`
+	Object string `json:"object"`
+	Delta  struct {
+		Content []struct {
+			Index int    `json:"index"`
+			Type  string `json:"type"`
+			Text  struct {
+				Value string `json:"value"`
+			} `json:"text"`
+		} `json:"content"`
+	} `json:"delta"`
 }

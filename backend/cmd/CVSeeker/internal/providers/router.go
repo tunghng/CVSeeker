@@ -21,7 +21,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 	return func(router *gin.Engine) {
 		// CORS configuration
 		corsConfig := cors.Config{
-			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowOrigins:     []string{"*"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
@@ -46,7 +46,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 			data.GET("/upload", hs.DataProcessingHandler.GetAllUploadsHandler())
 			data.POST("/batch/upload", hs.DataProcessingHandler.ProcessDataBatchHandler())
 
-			data.GET("/search", hs.SearchHandler.HybridSearch())
+			data.POST("/search", hs.SearchHandler.HybridSearch())
 			data.GET("/:id", hs.SearchHandler.GetDocumentByID())
 			data.DELETE("/:id", hs.SearchHandler.DeleteDocumentByID())
 

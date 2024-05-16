@@ -10,6 +10,8 @@ definitions:
         type: string
       fileBytes:
         type: string
+      name:
+        type: string
     type: object
   dtos.ResumeProcessingResult:
     properties:
@@ -50,6 +52,8 @@ definitions:
       documentId:
         description: omitempty to not display if empty
         type: string
+      name:
+        type: string
       status:
         type: string
     type: object
@@ -89,6 +93,8 @@ definitions:
         type: array
       basic_info:
         $ref: '#/definitions/elasticsearch.BasicInfo'
+      id:
+        type: string
       project_experience:
         items:
           $ref: '#/definitions/elasticsearch.ProjectExperience'
@@ -350,7 +356,7 @@ paths:
       tags:
       - Data Processing
   /cvseeker/resumes/search:
-    get:
+    post:
       consumes:
       - application/json
       description: Executes a search combining keyword and vector-based queries with
@@ -479,6 +485,20 @@ paths:
         in: path
         name: threadId
         required: true
+        type: string
+      - description: Maximum number of messages to return
+        in: query
+        name: limit
+        type: integer
+      - description: Cursor for pagination, specifying an exclusive start point for
+          the list (ID of a message)
+        in: query
+        name: after
+        type: string
+      - description: Cursor for pagination, specifying an exclusive end point for
+          the list (ID of a message)
+        in: query
+        name: before
         type: string
       produces:
       - application/json

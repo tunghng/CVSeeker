@@ -6,6 +6,7 @@ type ElkResumeDTO struct {
 }
 
 type ResumeSummaryDTO struct {
+	Id                string              `json:"id"`
 	Summary           string              `json:"summary"`
 	Skills            []string            `json:"skills"`
 	BasicInfo         BasicInfo           `json:"basic_info"`

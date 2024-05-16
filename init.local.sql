@@ -32,6 +32,8 @@ CREATE TABLE `upload` (
   `id` int NOT NULL AUTO_INCREMENT,
   `document_id` varchar(255) DEFAULT NULL,
   `status` varchar(100) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `uuid` varchar(255) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

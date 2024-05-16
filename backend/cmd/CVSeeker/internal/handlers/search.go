@@ -39,7 +39,7 @@ func NewSearchHandler(params SearchHandlerParams) *SearchHandler {
 // @Param size query int false "Number of search results to return" default(10)
 // @Success 200 {object} meta.BasicResponse{data=[]elasticsearch.ResumeSummaryDTO}
 // @Failure 400,401,404,500 {object} meta.Error
-// @Router /cvseeker/resumes/search [GET]
+// @Router /cvseeker/resumes/search [POST]
 func (_this *SearchHandler) HybridSearch() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request dtos.QueryRequest
