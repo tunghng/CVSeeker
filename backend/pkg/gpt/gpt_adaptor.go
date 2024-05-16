@@ -2,6 +2,7 @@ package gpt
 
 import (
 	"CVSeeker/pkg/cfg"
+	"CVSeeker/pkg/websocket"
 	"bufio"
 	"bytes"
 	"encoding/json"
@@ -312,7 +313,7 @@ func (g *gptAdaptorClient) CreateRunAndStreamResponse(threadID string, request C
 					// Log the value for each text entry in the content array
 					for _, content := range message.Delta.Content {
 						if content.Type == "text" {
-
+							websocket.BroadcastMessage([]byte(content.Text.Value))
 							fmt.Println("Logged Value:", content.Text.Value)
 							valueChannel <- content.Text.Value
 						}

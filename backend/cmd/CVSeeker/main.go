@@ -5,7 +5,6 @@ import (
 	_ "CVSeeker/docs"
 	"CVSeeker/internal/ginServer"
 	"CVSeeker/pkg/cfg"
-	"CVSeeker/pkg/websocket"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
@@ -33,8 +32,7 @@ import (
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
 	providers.BuildContainer()
-	hub := websocket.NewHub()
-	go hub.Run()
+
 	if os.Getenv("ENVIRONMENT") == cfg.EnvironmentLocal {
 		gin.SetMode(gin.DebugMode)
 	} else {

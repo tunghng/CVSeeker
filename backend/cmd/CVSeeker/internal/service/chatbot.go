@@ -33,6 +33,7 @@ type ChatbotService struct {
 	elasticClient    elasticsearch.IElasticsearchClient
 	threadRepo       repositories.IThreadRepository
 	threadResumeRepo repositories.IThreadResumeRepository
+	//webSocketHub     *websocket.Hub
 }
 
 type ChatbotServiceArgs struct {
@@ -42,6 +43,7 @@ type ChatbotServiceArgs struct {
 	ElasticClient    elasticsearch.IElasticsearchClient
 	ThreadRepo       repositories.IThreadRepository
 	ThreadResumeRepo repositories.IThreadResumeRepository
+	//WebSocketHub     *websocket.Hub
 }
 
 func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
@@ -51,6 +53,7 @@ func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
 		elasticClient:    args.ElasticClient,
 		threadRepo:       args.ThreadRepo,
 		threadResumeRepo: args.ThreadResumeRepo,
+		//webSocketHub:     args.WebSocketHub,
 	}
 }
 
@@ -128,8 +131,6 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 		threadResumes = append(threadResumes, threadResume)
 	}
 	err = _this.threadResumeRepo.CreateBulkThreadResume(_this.db, threadResumes)
-
-	//threadIDMessage := fmt.Sprintf("New thread started with ID: %s", thread.ID)
 
 	// Prepare the response with the thread information
 	response := &meta.BasicResponse{
