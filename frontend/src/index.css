@@ -5,7 +5,7 @@
 @font-face {
     font-family: 'Quicksand';
     src: url('./assets/fonts/Quicksand.woff2') format('woff2'),
-         url('./assets/fonts/Quicksand.woff') format('woff');
+        url('./assets/fonts/Quicksand.woff') format('woff');
 }
 
 :root {
@@ -13,7 +13,7 @@
     --primary-hover-color: #045adb;
     --primary-subtle-color: #CFE2FF;
     --secondary-subtle-color: #DEE2E6;
-    
+
     --disable-light-color: #E9ECEF;
     --border-color: #DEE2E6;
 
@@ -30,4 +30,35 @@
     box-sizing: border-box;
     font-family: 'Quicksand', 'Trebuchet MS', 'Arial', sans-serif;
     font-weight: 500;
+}
+
+
+.loader {
+    width: 32px;
+    aspect-ratio: 2;
+    --dot: no-repeat radial-gradient(circle closest-side, var(--subtitle-color) 85%, transparent);
+    background:
+        var(--dot) 0% 50%,
+        var(--dot) 50% 50%,
+        var(--dot) 100% 50%;
+    background-size: calc(100%/3) 50%;
+    animation: loader-animation 1s infinite linear;
+}
+
+@keyframes loader-animation {
+    20% {
+        background-position: 0% 0%, 50% 50%, 100% 50%
+    }
+
+    40% {
+        background-position: 0% 100%, 50% 0%, 100% 50%
+    }
+
+    60% {
+        background-position: 0% 50%, 50% 100%, 100% 0%
+    }
+
+    80% {
+        background-position: 0% 50%, 50% 50%, 100% 100%
+    }
 }
