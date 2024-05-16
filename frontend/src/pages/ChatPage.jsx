@@ -43,21 +43,27 @@ const ChatPage = () => {
     }
 
     const threadMessageSendKeyDownHandler = (e) => {
-        if (e.key === 'Enter' && threadInput.trim() !== '') {
-            const newMessage = {
-                id: uuidv4(),
-                role: 'user',
-                content: [
-                    {
-                        type: "text",
-                        text: {
-                            value: threadInput.trim()
+        if (e.key === 'Enter') {
+            if (e.shiftKey) {
+                setThreadInput(threadInput + '\n');
+            }
+            else if (threadInput.trim() !== '') {
+                const newMessage = {
+                    id: uuidv4(),
+                    role: 'user',
+                    content: [
+                        {
+                            type: "text",
+                            text: {
+                                value: threadInput.trim().replace(/\n/g, '\n\n')
+                            }
                         }
-                    }
-                ]
-            };
-            setThreadMessages([...threadMessages, newMessage]);
-            setThreadInput('');
+                    ]
+                };
+                setThreadMessages([...threadMessages, newMessage]);
+                setThreadInput('');
+            }
+            e.preventDefault();
         }
     };
 
@@ -70,7 +76,7 @@ const ChatPage = () => {
                     {
                         type: "text",
                         text: {
-                            value: threadInput.trim()
+                            value: threadInput.trim().replace(/\n/g, '\n\n')
                         }
                     }
                 ]

@@ -1,0 +1,23 @@
+.thread-message-input-wrapper:focus-within {
+    border-color: var(--primary-color);
+}
+
+#thread-message-input::-webkit-scrollbar {
+    width: 4px;
+    background: transparent;
+    border-radius: 10px;
+}
+
+#thread-message-input::-webkit-scrollbar-track {
+}
+
+#thread-message-input::-webkit-scrollbar-thumb {
+    width: 5px;
+    margin: 5px;
+    padding: 5px;
+    
+    background-color: darkgrey;
+    outline: 1px solid darkgrey;
+    border-radius: 10px;
+    transform: translateX(10px);
+}
