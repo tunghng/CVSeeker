@@ -11,7 +11,7 @@ const Layout = () => {
     const globalContext = useContext(GlobalContext);
 
     return (
-        <div className="flex flex-col h-screen">
+        <div className="flex h-screen">
             {/* ====== Header ====== */}
             <Header />
 

@@ -73,7 +73,7 @@ const UploadPage = () => {
 
     return (
         <main className="my-content-wrapper">
-            <div className="my-container-medium py-6">
+            <div className="my-container-medium pt-6 pb-8">
                 <h1 className="text-2xl font-bold text-title">Upload profile</h1>
 
                 {/* ====== Upload by link profile ====== */}
@@ -122,7 +122,7 @@ const UploadPage = () => {
                                 </div>
                             ))}
                             <button
-                                className={`my-button ${isLoading ? 'my-button-disabled' : 'my-button-primary'} self-end flex items-center px-3 py-2 mt-4`}
+                                className={`my-button ${isLoading ? 'my-button-disabled' : 'my-button-primary'} self-end flex items-center px-3 py-2 mt-6`}
                                 onClick={uploadFilesHandler}
                                 disabled={isLoading}>
                                 {

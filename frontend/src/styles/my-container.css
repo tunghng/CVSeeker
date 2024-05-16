@@ -6,9 +6,9 @@
         @apply h-[calc(100vh-3rem)] overflow-y-scroll;
     }
     .my-container-medium {
-        @apply w-full max-w-[50rem] mx-auto px-6 sm:px-10;
+        @apply w-full max-w-[52rem] mx-auto px-4 sm:px-6;
     }
     .my-container-small {
-        @apply w-full max-w-[44rem] mx-auto px-6 sm:px-10;
+        @apply w-full max-w-[44rem] mx-auto px-4 sm:px-6;
     }
 }

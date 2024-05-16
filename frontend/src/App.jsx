@@ -22,7 +22,7 @@ export default function App() {
                     <Route path="/" element={<Layout />}>
                         <Route index element={<HomePage />} />
                         <Route path="search" element={<SearchPage />} />
-                        <Route path="chat/:id" element={<ChatPage />} />
+                        <Route path="chat/:threadId" element={<ChatPage />} />
                         <Route path="upload" element={<UploadPage />} />
                         <Route path="saved" element={<SavedPage />} />
                         <Route path="*" element={<h1>Not Found</h1>} />

@@ -9,7 +9,7 @@ const SidebarThreadItem = ({ item, isActive }) => {
         <Link to={`/chat/${item.id}`}
             className={`thread-item group ${isActive && 'active'}`}
         >
-            <span>{item.name === '' ? 'No Name' : item.name}</span>
+            <span>{item.name === '' ? 'New Thread' : item.name}</span>
 
             <button
                 className="ml-3 rounded-md hidden group-hover:block hover:opacity-80 transition-all duration-300 ease-in-out"

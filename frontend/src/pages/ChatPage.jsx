@@ -2,16 +2,28 @@
 import { useState, useContext, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
+import getThreadMessage from "../services/chat/getThreadMessage"
 
 import StackItem from "../components/StackItem/StackItem"
 import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
 import FeatherIcon from 'feather-icons-react'
 import { Tooltip } from "react-tooltip"
+import ThreadMessageList from "../components/ThreadMessageList/ThreadMessageList"
 
 const ChatPage = () => {
     // ====== State Management ======
     const globalContext = useContext(GlobalContext);
-    const { id } = useParams();
+    let { threadId } = useParams();
+    const [threadMessages, setThreadMessages] = useState([]);
+
+    // ====== Fetching Thread Messages ======
+    useEffect(() => {
+        setThreadMessages([])
+        getThreadMessage(threadId)
+            .then(res => {
+                setThreadMessages(res)
+            })
+    }, [threadId]);
 
     // ====== Event Handlers ======
     const stackItemDetailClickHandler = (item) => {
@@ -24,27 +36,39 @@ const ChatPage = () => {
     const detailItemModalCloseHandler = () => {
         globalContext.setShowDetailItemModal(false)
     }
-    const detailItemModalAddToListHandler = () => {
-        globalContext.pushToSelectedStack([globalContext.detailItem])
-        if (globalContext.showSelectedItemsStack === false) {
-            globalContext.toggleSelectedItemsStack()
-        }
-    }
 
     return (
-        <main className="my-content-wrapper">
-            {/* ====== Chat Window ====== */}
+        <main className="my-content-wrapper flex">
+
+            {/* ====== Thread Name ====== */}
+            <div className={`fixed ${globalContext.showSelectedItemsStack ? 'right-72' : 'right-0'} ${globalContext.showSidebar ? 'left-64' : 'left-0'} pr-4 transition-all duration-700 ease-in-out`}>
+                <div className="my-container-medium bg-background py-2">
+                    <h1 className="text-xl font-bold text-title">Thread name</h1>
+                </div>
+            </div>
+
+
+            {/* ====== Thread Messages ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
+                <div className="my-container-medium mt-12 pb-28">
+                    {
+                        threadMessages.length === 0 ?
+                            (
+                                <div className="flex flex-col items-center justify-center h-[calc(100%-3rem)] space-y-4">
+                                    <p className="text-text">Loading messsages ...</p>
+                                    <div className="loader"></div>
+                                </div>
+                            ) :
+                            <ThreadMessageList threadMessages={threadMessages} />
+                    }
+                </div>
+            </div>
 
-                <div className="my-container-medium flex flex-col pt-6 h-full">
-                    {/* ====== Chat Messages ====== */}
-                    <div className="flex-1">
-                        <h1 className="text-xl font-bold">Chat with {id}</h1>
-                    </div>
 
-
-                    {/* ====== Chat Input ====== */}
-                    <div className="relative flex items-center py-6">
+            {/* ====== Thread Input ====== */}
+            <div className={`fixed bottom-0 ${globalContext.showSelectedItemsStack ? 'right-72' : 'right-0'} ${globalContext.showSidebar ? 'left-64' : 'left-0'} pr-4 transition-all duration-700 ease-in-out`}>
+                <div className="my-container-medium bg-background">
+                    <div className="relative w-full h-20 flex items-center">
                         <input
                             type="text"
                             className="flex-1 px-3 py-3 rounded-lg text-text text-base outline-none border-2 border-border focus:border-primary transition-all duration-300 ease-in-out"
@@ -56,6 +80,8 @@ const ChatPage = () => {
                     </div>
                 </div>
             </div>
+
+
 
 
             {/* ====== Selected Items Stack ====== */}
@@ -79,7 +105,7 @@ const ChatPage = () => {
 
                 {/* ====== Toggle Stack Button ====== */}
                 <button
-                    className="absolute top-1/2 -left-4 transform -translate-x-1/2 -translate-y-1/2"
+                    className="absolute top-1/2 -left-6 transform -translate-x-1/2 -translate-y-1/2"
                     onClick={globalContext.toggleSelectedItemsStack}
                 >
                     <div className="flex h-12 w-6 flex-col items-center justify-center group"
