@@ -3,25 +3,30 @@ import { useState, useContext, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 import getThreadMessage from "../services/chat/getThreadMessage"
+import { v4 as uuidv4 } from 'uuid';
 
 import StackItem from "../components/StackItem/StackItem"
 import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
 import FeatherIcon from 'feather-icons-react'
 import { Tooltip } from "react-tooltip"
 import ThreadMessageList from "../components/ThreadMessageList/ThreadMessageList"
+import ThreadMessageInput from "../components/ThreadMessageInput/ThreadMessageInput"
 
 const ChatPage = () => {
     // ====== State Management ======
     const globalContext = useContext(GlobalContext);
     let { threadId } = useParams();
+    const [threadInfo, setThreadInfo] = useState(null);
     const [threadMessages, setThreadMessages] = useState([]);
+    const [threadInput, setThreadInput] = useState('');
 
     // ====== Fetching Thread Messages ======
     useEffect(() => {
         setThreadMessages([])
         getThreadMessage(threadId)
             .then(res => {
-                setThreadMessages(res)
+                setThreadInfo(res)
+                setThreadMessages(res.data)
             })
     }, [threadId]);
 
@@ -37,16 +42,46 @@ const ChatPage = () => {
         globalContext.setShowDetailItemModal(false)
     }
 
+    const threadMessageSendKeyDownHandler = (e) => {
+        if (e.key === 'Enter' && threadInput.trim() !== '') {
+            const newMessage = {
+                id: uuidv4(),
+                role: 'user',
+                content: [
+                    {
+                        type: "text",
+                        text: {
+                            value: threadInput.trim()
+                        }
+                    }
+                ]
+            };
+            setThreadMessages([...threadMessages, newMessage]);
+            setThreadInput('');
+        }
+    };
+
+    const threadMessageSendClickHandler = () => {
+        if (threadInput.trim() !== '') {
+            const newMessage = {
+                id: uuidv4(),
+                role: 'user',
+                content: [
+                    {
+                        type: "text",
+                        text: {
+                            value: threadInput.trim()
+                        }
+                    }
+                ]
+            };
+            setThreadMessages([...threadMessages, newMessage]);
+            setThreadInput('');
+        }
+    };
+
     return (
         <main className="my-content-wrapper flex">
-
-            {/* ====== Thread Name ====== */}
-            {/* <div className={`fixed ${globalContext.showSelectedItemsStack ? 'right-72' : 'right-0'} ${globalContext.showSidebar ? 'left-64' : 'left-0'} pr-4 transition-all duration-700 ease-in-out`}>
-                <div className="my-container-medium bg-background py-2">
-                    <h1 className="text-xl font-bold text-title">Thread name</h1>
-                </div>
-            </div> */}
-
 
             {/* ====== Thread Messages ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
@@ -68,16 +103,12 @@ const ChatPage = () => {
             {/* ====== Thread Input ====== */}
             <div className={`fixed bottom-0 ${globalContext.showSelectedItemsStack ? 'right-72' : 'right-0'} ${globalContext.showSidebar ? 'left-64' : 'left-0'} pr-4 transition-all duration-700 ease-in-out`}>
                 <div className="my-container-medium bg-background">
-                    <div className="relative w-full h-20 flex items-center">
-                        <input
-                            type="text"
-                            className="flex-1 px-3 py-3 rounded-lg text-text text-base outline-none border-2 border-border focus:border-primary transition-all duration-300 ease-in-out"
-                            placeholder="Type a message..."
-                        />
-                        <button className="absolute right-3 p-1.5 my-button my-button-subtle">
-                            <FeatherIcon icon="send" className="w-5 h-5" strokeWidth={2.3} />
-                        </button>
-                    </div>
+                    <ThreadMessageInput
+                        value={threadInput}
+                        onChange={(e) => setThreadInput(e.target.value)}
+                        onPressEnter={threadMessageSendKeyDownHandler}
+                        onClickButton={threadMessageSendClickHandler}
+                    />
                 </div>
             </div>
 
