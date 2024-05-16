@@ -21,7 +21,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 	return func(router *gin.Engine) {
 		// CORS configuration
 		corsConfig := cors.Config{
-			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowOrigins:     []string{"*"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},

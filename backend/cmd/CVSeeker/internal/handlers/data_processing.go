@@ -51,7 +51,7 @@ func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 		}
 
 		// Process data (example function call, replace with actual processing logic)
-		resp, err := _this.dataProcessingService.ProcessData(c, requestData.Content, requestData.FileBytes)
+		resp, err := _this.dataProcessingService.ProcessData(c, requestData.Content, requestData.FileBytes, requestData.UUID)
 		_this.HandleResponse(c, resp, err)
 	}
 }

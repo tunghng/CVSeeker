@@ -25,6 +25,7 @@ type IGptAdaptorClient interface {
 	ListMessages(threadID string, limit int, order, after, before string) (*ListMessagesResponse, error)
 	GetRunDetails(threadID, runID string) (*RunResponse, error)
 	CreateRunAndStreamResponse(threadID string, request CreateRunRequest) (<-chan string, error)
+
 	CreateMessage(threadID string, request CreateMessageRequest) (*MessageResponse, error)
 	WaitForRunCompletion(threadID, runID string) (*RunResponse, error)
 }

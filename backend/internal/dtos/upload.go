@@ -5,4 +5,5 @@ type UploadDTO struct {
 	Status     string `json:"status"`
 	Name       string `json:"name"`
 	CreatedAt  int64  `json:"createdAt"` // Assuming date is formatted as a string for the client
+	UUID       string `json:"uuid"`
 }

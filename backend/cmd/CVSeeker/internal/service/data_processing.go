@@ -25,7 +25,7 @@ import (
 )
 
 type IDataProcessingService interface {
-	ProcessData(c *gin.Context, fullText string, file string) (*meta.BasicResponse, error)
+	ProcessData(c *gin.Context, fullText string, file string, uuid string) (*meta.BasicResponse, error)
 	ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData) (*meta.BasicResponse, error)
 	GetAllUploads(c *gin.Context) (*meta.BasicResponse, error)
 }
@@ -63,13 +63,14 @@ func NewDataProcessingService(args DataProcessingServiceArgs) IDataProcessingSer
 	}
 }
 
-func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string, file string) (*meta.BasicResponse, error) {
+func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string, file string, uuid string) (*meta.BasicResponse, error) {
 	// This method now schedules the processing in the background and immediately returns a response
 	go func() {
 		elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 
 		initialUpload := &models.Upload{
 			Status: "Processing", // Initial status
+			UUID:   uuid,
 		}
 
 		createdUpload, err := _this.uploadRepo.Create(_this.db, initialUpload)
@@ -186,6 +187,7 @@ func (_this *DataProcessingService) GetAllUploads(c *gin.Context) (*meta.BasicRe
 			Status:     upload.Status,
 			Name:       upload.Name,
 			CreatedAt:  upload.CreatedAt.Unix(), // Format time as RFC3339
+			UUID:       upload.UUID,
 		}
 		uploadsDTO = append(uploadsDTO, dto)
 	}

@@ -147,12 +147,6 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message string) (*meta.BasicResponse, error) {
 	DefaultAssistant := viper.GetString(cfg.DefaultOpenAIAssistant)
 
-	//err := _this.webSocketClient.StartWebSocketClient()
-	//if err != nil {
-	//	ginLogger.Gin(c).Errorf("failed to start WebSocket: %v", err)
-	//	return nil, err
-	//}
-
 	// Create message and add to thread
 	messageRequest := gpt.CreateMessageRequest{
 		Content: message,
@@ -182,15 +176,13 @@ func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message
 		messages = append(messages, value)
 	}
 
-	combinedMessages := strings.Join(messages, "")
-
 	// Prepare the final response
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
 			Code:    http.StatusOK,
 			Message: "Response retrieved successfully",
 		},
-		Data: combinedMessages, // Assuming you want to return the collected messages
+		Data: messages, // Assuming you want to return the collected messages
 	}
 
 	return response, nil
