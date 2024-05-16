@@ -7,7 +7,7 @@ export default async function getAllThreads() {
         
         if (res.data.meta.code === 200) {
             res = res.data.data;
-            res.sort((a, b) => b.updated_at - a.updated_at);
+            // res.sort((a, b) => b.updated_at - a.updated_at);
             return res;
         } else {
             console.error("Error fetching threads: ", res.data.meta.message);

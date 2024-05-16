@@ -41,18 +41,18 @@ const ChatPage = () => {
         <main className="my-content-wrapper flex">
 
             {/* ====== Thread Name ====== */}
-            <div className={`fixed ${globalContext.showSelectedItemsStack ? 'right-72' : 'right-0'} ${globalContext.showSidebar ? 'left-64' : 'left-0'} pr-4 transition-all duration-700 ease-in-out`}>
+            {/* <div className={`fixed ${globalContext.showSelectedItemsStack ? 'right-72' : 'right-0'} ${globalContext.showSidebar ? 'left-64' : 'left-0'} pr-4 transition-all duration-700 ease-in-out`}>
                 <div className="my-container-medium bg-background py-2">
                     <h1 className="text-xl font-bold text-title">Thread name</h1>
                 </div>
-            </div>
+            </div> */}
 
 
             {/* ====== Thread Messages ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
-                <div className="my-container-medium mt-12 pb-28">
+                <div className="my-container-medium mt-6 pb-28">
                     {
-                        threadMessages.length === 0 ?
+                        (threadMessages === null || threadMessages.length === 0) ?
                             (
                                 <div className="flex flex-col items-center justify-center h-[calc(100%-3rem)] space-y-4">
                                     <p className="text-text">Loading messsages ...</p>

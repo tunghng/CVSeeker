@@ -2,19 +2,24 @@
 import axiosInstance from "../configs";
 
 export default async function getThreadMessage(threadId) {
-    
     try {
-        let res = await axiosInstance.get(`/thread/${threadId}/messages`)
+        let res = await axiosInstance.get(`/thread/${threadId}/messages`);
         
-        res = res.data.meta.code === 200 ? res.data.data : { error: res.data.meta.message }
-        console.log(res)
-        
-        return res;
-    }
-    catch (err) {
-        if (err.response) {
-            console.log(err.response.data.message);
-            return { error: err.response.data.message };
+        if (res.data.meta.code === 200) {
+            res = res.data.data;
+            res.data.reverse();
+
+            return res;
+        } else {
+            console.error("Error fetching thread messages: ", res.data.meta.message);
+            return null;
         }
+    } catch (err) {
+        if (err.response) {
+            console.error("Get Thread Message Error: ", err.response.data.message);
+        } else {
+            console.error("Get Thread Message Error: ", err.message);
+        }
+        return null;
     }
 }
