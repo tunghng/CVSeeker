@@ -138,8 +138,8 @@ const ChatPage = () => {
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
                 <div className="my-container-medium mt-0 pb-24">
                     {(threadMessages === null || threadMessages.length === 0) ? (
-                        <div className="flex flex-col items-center justify-center h-[calc(100%-3rem)] space-y-4">
-                            <p className="text-text">Loading messages ...</p>
+                        <div className="mt-6 flex flex-col items-center space-y-4">
+                            <p className="text-subtitle">Loading messages ...</p>
                             <div className="loader"></div>
                         </div>
                     ) : (
