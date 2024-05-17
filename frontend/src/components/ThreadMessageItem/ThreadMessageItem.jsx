@@ -7,8 +7,8 @@ const ThreadMessageItem = ({ item }) => {
     }
 
     return (
-        <div className={`mt-6 px-4 py-3 rounded-xl
-            ${item.role === 'user' ? 'bg-primary text-white ml-10' : 'bg-border'}
+        <div className={`mt-5 px-4 py-2.5 rounded-xl
+            ${item.role === 'user' ? 'bg-primary text-white ml-10 self-end' : 'bg-border self-start'}
         `}>
             <ReactMarkdown>
                 {item.content[0].text.value}

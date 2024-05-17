@@ -3,14 +3,15 @@ import { useState, useContext, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 import getThreadMessage from "../services/chat/getThreadMessage"
+import sendThreadMessage from "../services/chat/sendThreadMessage"
 import { v4 as uuidv4 } from 'uuid';
 
 import StackItem from "../components/StackItem/StackItem"
 import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
-import FeatherIcon from 'feather-icons-react'
 import { Tooltip } from "react-tooltip"
 import ThreadMessageList from "../components/ThreadMessageList/ThreadMessageList"
 import ThreadMessageInput from "../components/ThreadMessageInput/ThreadMessageInput"
+import ReactMarkdown from 'react-markdown'
 
 const ChatPage = () => {
     // ====== State Management ======
@@ -19,6 +20,8 @@ const ChatPage = () => {
     const [threadInfo, setThreadInfo] = useState(null);
     const [threadMessages, setThreadMessages] = useState([]);
     const [threadInput, setThreadInput] = useState('');
+    const [isAssistantLoading, setIsAssistantLoading] = useState(false);
+    const [assistantTempMessage, setAssistantTempMessage] = useState('');
 
     // ====== Fetching Thread Messages ======
     useEffect(() => {
@@ -42,73 +45,115 @@ const ChatPage = () => {
         globalContext.setShowDetailItemModal(false)
     }
 
-    const threadMessageSendKeyDownHandler = (e) => {
+    const threadMessageSendKeyDownHandler = async (e) => {
         if (e.key === 'Enter') {
             if (e.shiftKey) {
                 setThreadInput(threadInput + '\n');
-            }
-            else if (threadInput.trim() !== '') {
-                const newMessage = {
-                    id: uuidv4(),
-                    role: 'user',
-                    content: [
-                        {
-                            type: "text",
-                            text: {
-                                value: threadInput.trim().replace(/\n/g, '\n\n')
-                            }
-                        }
-                    ]
-                };
-                setThreadMessages([...threadMessages, newMessage]);
+            } else if (threadInput.trim() !== '') {
+                let message = threadInput.trim().replace(/\n/g, '\n\n');
                 setThreadInput('');
+                renderUserMessage(message);
+                setIsAssistantLoading(true);
+                const response = await sendThreadMessage(threadId, message);
+                await renderAssistantTempMessage(response);
             }
             e.preventDefault();
         }
     };
 
-    const threadMessageSendClickHandler = () => {
+    const threadMessageSendClickHandler = async () => {
         if (threadInput.trim() !== '') {
-            const newMessage = {
-                id: uuidv4(),
-                role: 'user',
-                content: [
-                    {
-                        type: "text",
-                        text: {
-                            value: threadInput.trim().replace(/\n/g, '\n\n')
-                        }
-                    }
-                ]
-            };
-            setThreadMessages([...threadMessages, newMessage]);
+            let message = threadInput.trim().replace(/\n/g, '\n\n');
             setThreadInput('');
+            renderUserMessage(message);
+            setIsAssistantLoading(true);
+            const response = await sendThreadMessage(threadId, message);
+            await renderAssistantTempMessage(response);
         }
     };
+
+    const renderUserMessage = (message) => {
+        const newMessage = {
+            id: uuidv4(),
+            role: 'user',
+            content: [
+                {
+                    type: "text",
+                    text: {
+                        value: message
+                    }
+                }
+            ]
+        };
+        setThreadMessages(threadMessages => [...threadMessages, newMessage]);
+    };
+
+    const renderAssistantTempMessage = async (message) => {
+        let index = 0;
+        let tempMessage = '';
+        const intervalId = setInterval(() => {
+            if (index < message.length) {
+                tempMessage += message[index];
+                setAssistantTempMessage(tempMessage);
+                index++;
+            } else {
+                clearInterval(intervalId);
+                setIsAssistantLoading(false);
+                renderAssistantMessage(message.join(''));
+            }
+        }, 100);
+    };
+
+    const renderAssistantMessage = (message) => {
+        const newMessage = {
+            id: uuidv4(),
+            role: 'assistant',
+            content: [
+                {
+                    type: "text",
+                    text: {
+                        value: message
+                    }
+                }
+            ]
+        };
+        setThreadMessages(threadMessages => [...threadMessages, newMessage]);
+        setAssistantTempMessage('');
+    };
+
 
     return (
         <main className="my-content-wrapper flex">
 
             {/* ====== Thread Messages ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
-                <div className="my-container-medium mt-6 pb-28">
-                    {
-                        (threadMessages === null || threadMessages.length === 0) ?
-                            (
-                                <div className="flex flex-col items-center justify-center h-[calc(100%-3rem)] space-y-4">
-                                    <p className="text-text">Loading messsages ...</p>
-                                    <div className="loader"></div>
-                                </div>
-                            ) :
+                <div className="my-container-medium mt-0 pb-24">
+                    {(threadMessages === null || threadMessages.length === 0) ? (
+                        <div className="flex flex-col items-center justify-center h-[calc(100%-3rem)] space-y-4">
+                            <p className="text-text">Loading messages ...</p>
+                            <div className="loader"></div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col">
                             <ThreadMessageList threadMessages={threadMessages} />
-                    }
+                        </div>
+                    )}
+                    {isAssistantLoading && (
+                        <div className="mt-5 px-4 py-2.5 rounded-xl bg-border w-fit">
+                            {assistantTempMessage === '' ? (
+                                <div className="loader my-1"></div>
+                            ) : (
+                                <ReactMarkdown>{assistantTempMessage}</ReactMarkdown>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
 
             {/* ====== Thread Input ====== */}
             <div className={`fixed bottom-0 ${globalContext.showSelectedItemsStack ? 'right-72' : 'right-0'} ${globalContext.showSidebar ? 'left-64' : 'left-0'} pr-4 transition-all duration-700 ease-in-out`}>
-                <div className="my-container-medium bg-background">
+                <div className="my-container-medium bg-background pb-5 pt-2">
                     <ThreadMessageInput
                         value={threadInput}
                         onChange={(e) => setThreadInput(e.target.value)}

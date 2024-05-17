@@ -17,8 +17,13 @@ const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton }) =>
         }
     }, [value]);
 
+    const handleClickButton = () => {
+        onClickButton();
+        textareaRef.current.focus();
+    };
+
     return (
-        <div className="thread-message-input-wrapper relative flex items-center w-full my-5 rounded-lg border-2 border-border transition-all duration-300 ease-in-out">
+        <div className="thread-message-input-wrapper relative flex items-center w-full rounded-lg border-2 border-border transition-all duration-300 ease-in-out">
             <textarea
                 ref={textareaRef}
                 id="thread-message-input"
@@ -32,7 +37,7 @@ const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton }) =>
             />
 
             <button
-                onClick={onClickButton}
+                onClick={handleClickButton}
                 className="absolute right-3 bottom-2 p-1.5 my-button my-button-subtle flex items-center rounded-md transition-all duration-300 ease-in-out"
             >
                 <FeatherIcon icon="send" className="w-5 h-5" />
