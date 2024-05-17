@@ -1,5 +1,5 @@
 
-import { useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 import getThreadMessage from "../services/chat/getThreadMessage"
@@ -23,6 +23,8 @@ const ChatPage = () => {
     const [isAssistantLoading, setIsAssistantLoading] = useState(false);
     const [assistantTempMessage, setAssistantTempMessage] = useState('');
 
+    const messagesEndRef = useRef(null);
+
     // ====== Fetching Thread Messages ======
     useEffect(() => {
         setThreadMessages([])
@@ -32,6 +34,12 @@ const ChatPage = () => {
                 setThreadMessages(res.data)
             })
     }, [threadId]);
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [assistantTempMessage, threadMessages]);
 
     // ====== Event Handlers ======
     const stackItemDetailClickHandler = (item) => {
@@ -49,15 +57,16 @@ const ChatPage = () => {
         if (e.key === 'Enter') {
             if (e.shiftKey) {
                 setThreadInput(threadInput + '\n');
+                e.preventDefault();
             } else if (threadInput.trim() !== '') {
                 let message = threadInput.trim().replace(/\n/g, '\n\n');
+                e.preventDefault();
                 setThreadInput('');
                 renderUserMessage(message);
                 setIsAssistantLoading(true);
                 const response = await sendThreadMessage(threadId, message);
                 await renderAssistantTempMessage(response);
             }
-            e.preventDefault();
         }
     };
 
@@ -136,6 +145,7 @@ const ChatPage = () => {
                     ) : (
                         <div className="flex flex-col">
                             <ThreadMessageList threadMessages={threadMessages} />
+                            <div ref={messagesEndRef} />
                         </div>
                     )}
                     {isAssistantLoading && (
