@@ -1,7 +1,7 @@
 
 import axiosInstance from "../configs";
 
-export default async function searchResume(text, level, page = 0, size = 10) {
+export default async function searchResume(text, level, page = 0, size = 15) {
 
     try {
         let res = await axiosInstance.post(`/search?knnBoost=${level}&from=${page}&size=${size}`, {
@@ -10,7 +10,6 @@ export default async function searchResume(text, level, page = 0, size = 10) {
 
         if (res.data.meta.code === 200) {
             res = res.data.data;
-            console.log("Search resume result: ", res);
             return res;
         } else {
             console.log("Error searching resume: ", res.data.meta.message);

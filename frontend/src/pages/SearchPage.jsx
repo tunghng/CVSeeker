@@ -3,6 +3,7 @@ import { useState, useContext, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 import searchResume from "../services/search/searchResume"
+import startThread from "../services/chat/startThread"
 
 import { Tooltip } from "react-tooltip"
 import FeatherIcon from 'feather-icons-react'
@@ -97,6 +98,15 @@ const SearchPage = () => {
     }
     const stackItemRemoveClickHandler = (itemId) => {
         globalContext.popFromSelectedStack(itemId)
+    }
+    const startChatSessionHandler = () => {
+        const idsString = globalContext.selectedItemsStack.map(item => item.id).join(', ')
+        startThread(idsString)
+            .then(res => {
+                if (res !== null) {
+                    navigate(`/chat/${res.id}`)
+                }
+            })
     }
 
     const detailItemModalCloseHandler = () => {
@@ -199,7 +209,7 @@ const SearchPage = () => {
 
 
             {/* ====== Selected Items Stack ====== */}
-            <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} w-full max-w-72 h-[calc(100%-3rem)] fixed right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
+            <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} z-20 w-full max-w-72 h-[calc(100%-3rem)] fixed right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
                 <h1 className="text-lg font-semibold">Selected items ({globalContext.selectedItemsStack.length})</h1>
 
                 <div className="flex-1 overflow-y-auto mt-3 mb-4">
@@ -218,6 +228,7 @@ const SearchPage = () => {
 
                 <button
                     className="my-button my-button-primary py-2"
+                    onClick={startChatSessionHandler}
                     data-tooltip-id="start-chat-tooltip"
                     data-tooltip-content="Interact with AI chatbot in just a click!"
                     data-tooltip-place="top"
