@@ -18,7 +18,7 @@ const StackItem = ({ item, onDetailClick, onRemoveClick, showRemoveIcon }) => {
             className="px-3 py-2 mt-2 flex items-center justify-between rounded-md bg-disable-light cursor-pointer"
             onClick={handleDetailClick}
         >
-            <p>{item.name}</p>
+            <p>{item.basic_info.full_name}</p>
 
             {showRemoveIcon && (
                 <FeatherIcon
