@@ -1,0 +1,25 @@
+@tailwind components;
+
+@layer components {
+    .table-section-info {
+        @apply pt-8 pl-2 text-xl font-bold;
+    }
+
+    .table-section-container {
+        @apply border border-gray-300;
+    }
+    .table-section-row {
+        @apply flex ;
+    }
+    .table-section-wrapper {
+        @apply odd:w-1/4 even:flex-1 px-2 py-1.5 flex items-center border border-gray-300;
+    }
+
+    .table-section-title {
+        @apply text-base text-title font-bold;
+    }
+
+    .table-section-data {
+        @apply text-base text-title;
+    }
+}
