@@ -43,7 +43,7 @@ const SearchPage = () => {
                 const updatedResults = res.map(item => ({ ...item, selected: false }));
                 setSearchResults(updatedResults);
             })
-    }, [searchParams, resumeSearchInput, resumeSearchLevel]);
+    }, [searchParams]);
 
     // ====== Event Handlers ======
     const resumeSearchKeyDownHandler = (e) => {
@@ -83,7 +83,12 @@ const SearchPage = () => {
         globalContext.setShowDetailItemModal(true)
     }
     const resultItemDownloadClickHandler = (item) => {
-        console.log(item)
+        if (item.url !== "") {
+            window.open(item.url, '_blank')
+        }
+        else {
+            alert("No download link available")
+        }
     }
 
     const stackItemDetailClickHandler = (item) => {
@@ -101,6 +106,14 @@ const SearchPage = () => {
         globalContext.pushToSelectedStack([globalContext.detailItem])
         if (globalContext.showSelectedItemsStack === false) {
             globalContext.toggleSelectedItemsStack()
+        }
+    }
+    const detailItemModalDownloadHandler = () => {
+        if (globalContext.detailItem.url !== "") {
+            window.open(globalContext.detailItem.url, '_blank')
+        }
+        else {
+            alert("No download link available")
         }
     }
 
@@ -238,6 +251,7 @@ const SearchPage = () => {
                 detailItem={globalContext.detailItem}
                 onModalClose={detailItemModalCloseHandler}
                 onAddToList={detailItemModalAddToListHandler}
+                onDownloadClick={detailItemModalDownloadHandler}
             />
 
         </main>

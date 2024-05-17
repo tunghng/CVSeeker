@@ -2,7 +2,7 @@
 import FeatherIcon from 'feather-icons-react'
 import './DetailItemModal.css'
 
-const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddToList }) => {
+const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddToList, onDownloadClick }) => {
 
     if (!detailItem) return null
 
@@ -18,7 +18,8 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                 </div>
 
                 <div className='flex gap-x-3'>
-                    <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'>
+                    <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'
+                        onClick={onDownloadClick}>
                         <FeatherIcon icon="download" className='w-[18px] h-[18px]' strokeWidth={1.6} />
                         <p className='hidden sm:block'>Download</p>
                     </button>
