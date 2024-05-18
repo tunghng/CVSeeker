@@ -19,18 +19,18 @@ class Scrapin(models.Model):
             response = requests.get(url, params=params)
             code = response.status_code
             if(code == 402):
-                return 'Dont have enough credits'
+                return [402, 'Dont have enough credits']
             if(code == 403 or code == 401):
-                return 'API wrong'
+                return [403, 'API wrong']
             if(code == 500):
-                return 'LinkedIn URL wrong'
+                return [500, 'LinkedIn URL wrong']
             if(code == 400):
-                return 'Missing parameters'
+                return [400, 'Missing parameters']
             credits_and_limit = scrapin.update_provider(response.text)
             self.remain_credits = credits_and_limit[0] 
-            return scrapin.filter_to_string(response.text)
+            return [200, scrapin.filter_to_string(response.text)]
         except:
-            return 'failed'
+            return [999, 'failed']
 
 class RelevanceAI(models.Model):
     email_name = models.CharField(default="test", max_length=50)
@@ -52,16 +52,17 @@ class RelevanceAI(models.Model):
         try:
             response = requests.post(self.endpoint, json=data, headers=headers)
             self.remain_credits = self.remain_credits - 4
+            self.save()
             response_json = response.json()
             if(response.status_code == 200):
                 status = response_json.get('status')
                 errors = response_json.get('errors')
                 if(status == 'failed' or len(errors) > 0):
-                    return 'failed'
-            
-            return relevance.filter_to_string(response.text)
+                    if(relevance.is_wrong_url(response.text)):
+                        return [500, 'LinkedIn URL wrong']
+            return [200, relevance.filter_to_string(response.text)]
         except:
-            return 'failed'
+            return [999, 'failed']
         
     def __str__(self) -> str:
         return self.email_name
@@ -70,6 +71,7 @@ class Phantombuster(models.Model):
     email = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
     cookie  = models.CharField(max_length=300)
+    remain_time = models.IntegerField(default=0)
     link_to_setup = models.CharField(max_length=300)
     link_to_launch = models.CharField(max_length=300)
     def __str__(self) -> str:
@@ -79,6 +81,7 @@ class ProviderManagement(models.Model):
     name = models.CharField(max_length=50)
     enable = models.BooleanField(default=True)
     number_account = models.IntegerField()
+    number_errors = models.IntegerField(default=0)
     error_limit = models.IntegerField(default=5)
     def __str__(self) -> str:
         return self.name

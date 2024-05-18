@@ -16,3 +16,9 @@ def recursive_filter(d, keys_to_skip):
         return [recursive_filter(i, keys_to_skip) for i in d]
     else:
         return d
+def is_wrong_url(full_output):
+    datajson = json.loads(full_output)
+    for error in datajson['errors']:
+        if 'body' in error and 'Transformation object_key_filter' in error['body']:
+            return True
+    return False
