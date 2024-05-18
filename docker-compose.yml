@@ -11,7 +11,7 @@ services:
       - MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
       - MYSQL_DATABASE=${DB_MYSQL_DATABASE}
     volumes:
-      - mysql_data:/var/lib/mysql
+#      - mysql_data:/var/lib/mysql
       - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]

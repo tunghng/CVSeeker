@@ -12,6 +12,7 @@ import (
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/huggingface"
 	"CVSeeker/pkg/summarizer"
+	"CVSeeker/pkg/websocket"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -96,6 +97,8 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 		}
 
 		_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, DocumentID: documentID, Status: "Success"})
+
+		websocket.BroadcastNotification("All documents have been processed successfully.")
 	}()
 
 	response := &meta.BasicResponse{
@@ -158,6 +161,8 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 		wg.Wait()
 		close(results)
 		close(errors)
+
+		websocket.BroadcastNotification("All documents have been processed successfully.")
 	}()
 
 	response := &meta.BasicResponse{
@@ -225,7 +230,7 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 	// Upload file to S3 and get the URL
 	key := fmt.Sprintf("%d.docx", time.Now().Unix())
 
-	fileURL, err := _this.s3Client.UploadFile(c.Request.Context(), awsBucketName, key, fileBytes)
+	fileURL, err := _this.s3Client.UploadFile(c, awsBucketName, key, fileBytes)
 	if err != nil {
 		ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
 		return nil, err

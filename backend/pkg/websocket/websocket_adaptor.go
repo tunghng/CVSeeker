@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -130,4 +131,33 @@ func BroadcastMessage(message []byte) {
 			connections = append(connections[:i], connections[i+1:]...)
 		}
 	}
+}
+
+func BroadcastNotification(notification string) {
+	msg, err := NewMessage("notification", notification).Encode()
+	if err != nil {
+		fmt.Println("Error encoding notification message:", err)
+		return
+	}
+
+	connMutex.Lock()
+	defer connMutex.Unlock()
+	for i := len(connections) - 1; i >= 0; i-- {
+		conn := connections[i]
+		if err := conn.sendSafe(msg); err != nil {
+			fmt.Println("Error sending notification:", err)
+			connections = append(connections[:i], connections[i+1:]...)
+		}
+	}
+}
+
+func NewMessage(t, data string) *Message {
+	return &Message{
+		Type: t,
+		Data: data,
+	}
+}
+
+func (m *Message) Encode() ([]byte, error) {
+	return json.Marshal(m)
 }

@@ -128,9 +128,9 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 			ThreadID: thread.ID,
 			ResumeID: id,
 		}
+		err = _this.threadResumeRepo.Create(_this.db, &threadResume)
 		threadResumes = append(threadResumes, threadResume)
 	}
-	err = _this.threadResumeRepo.CreateBulkThreadResume(_this.db, threadResumes)
 
 	// Prepare the response with the thread information
 	response := &meta.BasicResponse{
