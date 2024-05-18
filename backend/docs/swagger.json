@@ -833,6 +833,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },
@@ -899,6 +902,9 @@
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }

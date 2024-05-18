@@ -840,6 +840,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },
@@ -906,6 +909,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }

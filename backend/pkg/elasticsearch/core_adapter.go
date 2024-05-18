@@ -44,7 +44,7 @@ func NewElasticsearchClient(cfgReader *viper.Viper) (IElasticsearchClient, error
 		Addresses: []string{url},
 		Username:  username,
 		Password:  password,
-		Transport: customTransport, // Using custom transport
+		Transport: customTransport,
 		Logger:    &elastictransport.ColorLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true},
 	})
 
