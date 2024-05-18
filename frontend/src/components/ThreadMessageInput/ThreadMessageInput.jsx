@@ -3,7 +3,7 @@ import { useRef, useEffect } from "react";
 import FeatherIcon from "feather-icons-react";
 import './ThreadMessageInput.css';
 
-const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton }) => {
+const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton, disabled }) => {
     const textareaRef = useRef(null);
 
     useEffect(() => {
@@ -17,9 +17,17 @@ const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton }) =>
         }
     }, [value]);
 
+    const handleKeyDown = (e) => {
+        if (!disabled) {
+            onPressEnter(e);
+        }
+    };
+
     const handleClickButton = () => {
-        onClickButton();
-        textareaRef.current.focus();
+        if (!disabled) {
+            onClickButton();
+            textareaRef.current.focus();
+        }
     };
 
     return (
@@ -27,18 +35,18 @@ const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton }) =>
             <textarea
                 ref={textareaRef}
                 id="thread-message-input"
-                className="flex-1 px-3 py-1 my-2 mr-14 peer bg-transparent text-text font-medium text-base outline-none 
-                           resize-none"
+                className="flex-1 px-3 py-1 my-2 mr-14 peer bg-transparent text-text font-medium text-base outline-none resize-none"
                 placeholder="Type a message..."
                 value={value}
                 onChange={onChange}
-                onKeyDown={onPressEnter}
+                onKeyDown={handleKeyDown}
                 rows={1}
             />
 
             <button
                 onClick={handleClickButton}
-                className="absolute right-3 bottom-2 p-1.5 my-button my-button-subtle flex items-center rounded-md transition-all duration-300 ease-in-out"
+                className="absolute right-3 bottom-2 p-1.5 my-button my-button-subtle flex items-center rounded-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={disabled}
             >
                 <FeatherIcon icon="send" className="w-5 h-5" />
             </button>
@@ -47,5 +55,3 @@ const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton }) =>
 };
 
 export default ThreadMessageInput;
-
-

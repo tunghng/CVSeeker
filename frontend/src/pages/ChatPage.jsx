@@ -169,6 +169,7 @@ const ChatPage = () => {
                         onChange={(e) => setThreadInput(e.target.value)}
                         onPressEnter={threadMessageSendKeyDownHandler}
                         onClickButton={threadMessageSendClickHandler}
+                        disabled={isAssistantLoading}
                     />
                 </div>
             </div>
