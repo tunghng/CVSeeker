@@ -3,6 +3,7 @@ import { useState, useContext, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 import getThreadMessage from "../services/chat/getThreadMessage"
+import getThreadResumes from "../services/chat/getThreadResumes"
 import sendThreadMessage from "../services/chat/sendThreadMessage"
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,11 +18,11 @@ const ChatPage = () => {
     // ====== State Management ======
     const globalContext = useContext(GlobalContext);
     let { threadId } = useParams();
-    const [threadInfo, setThreadInfo] = useState(null);
     const [threadMessages, setThreadMessages] = useState([]);
     const [threadInput, setThreadInput] = useState('');
     const [isAssistantLoading, setIsAssistantLoading] = useState(false);
     const [assistantTempMessage, setAssistantTempMessage] = useState('');
+    const [threadResumes, setThreadResumes] = useState([]);
 
     const messagesEndRef = useRef(null);
 
@@ -30,8 +31,15 @@ const ChatPage = () => {
         setThreadMessages([])
         getThreadMessage(threadId)
             .then(res => {
-                setThreadInfo(res)
                 setThreadMessages(res.data)
+            })
+    }, [threadId]);
+
+    useEffect(() => {
+        setThreadResumes([])
+        getThreadResumes(threadId)
+            .then(res => {
+                setThreadResumes(res)
             })
     }, [threadId]);
 
@@ -47,10 +55,18 @@ const ChatPage = () => {
         globalContext.setShowDetailItemModal(true)
     }
     const stackItemRemoveClickHandler = (itemId) => {
-        globalContext.popFromSelectedStack(itemId)
+        return null
     }
     const detailItemModalCloseHandler = () => {
         globalContext.setShowDetailItemModal(false)
+    }
+    const detailItemModalDownloadHandler = () => {
+        if (globalContext.detailItem.url !== "") {
+            window.open(globalContext.detailItem.url, '_blank')
+        }
+        else {
+            alert("No download link available")
+        }
     }
 
     const threadMessageSendKeyDownHandler = async (e) => {
@@ -179,19 +195,24 @@ const ChatPage = () => {
 
             {/* ====== Selected Items Stack ====== */}
             <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} w-full max-w-72 h-[calc(100%-3rem)] fixed  right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
-                <h1 className="text-lg font-semibold">Selected items ({globalContext.selectedItemsStack.length})</h1>
+                <h1 className="text-lg font-semibold">Selected items ({threadResumes.length})</h1>
 
                 <div className="flex-1">
                     {
-                        globalContext.selectedItemsStack.map(item => (
-                            <StackItem
-                                key={item.id}
-                                item={item}
-                                onDetailClick={stackItemDetailClickHandler}
-                                onRemoveClick={stackItemRemoveClickHandler}
-                                showRemoveIcon={false}
-                            />
-                        ))
+                        threadResumes.length === 0 ?
+                            <div className="pt-4 flex justify-center items-center">
+                                <div className="loader"></div>
+                            </div>
+                            :
+                            threadResumes.map(item => (
+                                <StackItem
+                                    key={item.id}
+                                    item={item}
+                                    onDetailClick={stackItemDetailClickHandler}
+                                    onRemoveClick={stackItemRemoveClickHandler}
+                                    showRemoveIcon={false}
+                                />
+                            ))
                     }
                 </div>
 
@@ -220,6 +241,7 @@ const ChatPage = () => {
                 showDetailItemModal={globalContext.showDetailItemModal}
                 detailItem={globalContext.detailItem}
                 onModalClose={detailItemModalCloseHandler}
+                onDownloadClick={detailItemModalDownloadHandler}
             />
         </main>
     )
