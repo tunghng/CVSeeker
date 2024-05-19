@@ -74,6 +74,7 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 	var fullTextContent strings.Builder
 	fullTextContent.WriteString("You will use these information to answer questions from the user: ")
 	for _, resume := range documents {
+		fullTextContent.WriteString(fmt.Sprintf("Name: %s", resume.BasicInfo.FullName))
 		fullTextContent.WriteString(fmt.Sprintf("Summary: %s; Skills: %v; ", resume.Summary, resume.Skills))
 		fullTextContent.WriteString(fmt.Sprintf("Education: %s, %s, GPA: %.2f; ", resume.BasicInfo.University, resume.BasicInfo.EducationLevel, resume.BasicInfo.GPA))
 		fullTextContent.WriteString("Work Experience: ")
