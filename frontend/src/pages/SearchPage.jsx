@@ -13,6 +13,8 @@ import IndeterminateCheckbox from "../components/IndeterminateCheckbox/Indetermi
 import SearchResultList from "../components/SearchResultList/SearchResultList"
 import StackItem from "../components/StackItem/StackItem"
 import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
+import LoadingModal from "../components/LoadingModal/LoadingModal"
+import generateThreadName from "../services/chat/generateThreadName"
 
 const ViewMode = {
     GRID: 'grid',
@@ -28,6 +30,7 @@ const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [resumeSearchInput, setResumeSearchInput] = useState(searchParams.get('query') || '');
     const [resumeSearchLevel, setResumeSearchLevel] = useState(searchParams.get('level') || 0.5);
+    const [isStartChatSession, setIsStartChatSession] = useState(false);
 
     const [resultViewMode, setResultViewMode] = useState(ViewMode.LIST)
 
@@ -100,13 +103,26 @@ const SearchPage = () => {
         globalContext.popFromSelectedStack(itemId)
     }
     const startChatSessionHandler = () => {
+        setIsStartChatSession(true)
         const idsString = globalContext.selectedItemsStack.map(item => item.id).join(', ')
-        startThread(idsString)
+        const timeStr = generateThreadName();
+
+        startThread(idsString, timeStr)
             .then(res => {
                 if (res !== null) {
-                    navigate(`/chat/${res.id}`)
+                    setIsStartChatSession(false);
+                    globalContext.setSelectedItemsStack([]);
+                    globalContext.setShowSelectedItemsStack(false);
+                    globalContext.setSidebarThreads([
+                        {
+                            id: res.id,
+                            name: timeStr,
+                        },
+                        ...globalContext.sidebarThreads
+                    ]);
+                    navigate(`/chat/${res.id}`);
                 }
-            })
+            });
     }
 
     const detailItemModalCloseHandler = () => {
@@ -264,6 +280,9 @@ const SearchPage = () => {
                 onAddToList={detailItemModalAddToListHandler}
                 onDownloadClick={detailItemModalDownloadHandler}
             />
+
+            {/* ====== Loading Modal ====== */}
+            <LoadingModal showLoadingModal={isStartChatSession} />
 
         </main>
     )

@@ -62,3 +62,18 @@
         background-position: 0% 50%, 50% 50%, 100% 100%
     }
 }
+
+.loader-2 {
+    width: 32px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 5px solid var(--primary-subtle-color);
+    border-right-color: var(--primary-color);
+    animation: loader-animation-2 1s infinite linear;
+}
+
+@keyframes loader-animation-2 {
+    to {
+        transform: rotate(1turn)
+    }
+}
