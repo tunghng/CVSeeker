@@ -28,7 +28,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    # command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
+    command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
 
   frontend:
     build: ./frontend
@@ -37,6 +37,9 @@ services:
     depends_on:
       - backend
 
-volumes:
-  mysql_data:
-    driver: local
+  crawler:
+    build: ./crawler
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
