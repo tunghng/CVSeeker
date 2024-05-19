@@ -55,6 +55,7 @@ func BuildContainer() *dig.Container {
 		_ = container.Provide(repositories.NewResumeRepository)
 		_ = container.Provide(repositories.NewThreadResumeRepository)
 		_ = container.Provide(repositories.NewThreadRepository)
+		_ = container.Provide(repositories.NewUploadRepository)
 
 		_ = container.Provide(services.NewDataProcessingService)
 		_ = container.Provide(services.NewSearchService)

@@ -10,6 +10,11 @@ type Response struct {
 	Data interface{} `json:"data" swaggertype:"object"`
 }
 
+type ResumeProcessingResult struct {
+	Id     string `json:"id"` // Assume each resume has a reference or ID.
+	Status string `json:"status"`
+}
+
 type PaginationResponse struct {
 	Meta           meta.Meta       `json:"meta"`
 	PaginationInfo *PaginationInfo `json:"pagination"`

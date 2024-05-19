@@ -1,43 +1,47 @@
 
-import { useRef, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import FeatherIcon from 'feather-icons-react'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom"
+
+import ResumeSearchInput from "../components/ResumeSearchInput/ResumeSearchInput"
+import ResumeSearchSlider from "../components/ResumeSearchSlider/ResumeSearchSlider"
 
 const HomePage = () => {
     // ====== State Management ======
-    const [searchInput, setSearchInput] = useState('')
-    const searchInputDOM = useRef(null)
     const navigate = useNavigate()
+    const [resumeSearchInput, setResumeSearchInput] = useState('');
+    const [resumeSearchLevel, setResumeSearchLevel] = useState(0.5);
 
     // ====== Event Handlers ======
-    const searchKeyDownHandler = (e) => {
-        if (e.key === 'Enter') {
-            navigate(`/search/${searchInput}`)
+    const resumeSearchKeyDownHandler = (e) => {
+        if (e.key === 'Enter' && resumeSearchInput.trim() !== '') {
+            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+        }
+    }
+    const resumeSearchClickHandler = () => {
+        if (resumeSearchInput.trim() !== '') {
+            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
         }
     }
 
     return (
         <main>
-
             {/* ====== Search Input ====== */}
-            <div className="my-container-small pt-6 relative flex items-center">
-                <input
-                    type="text"
-                    className="flex-1 pl-4 pr-11 py-2 peer bg-transparent rounded-full text-text font-medium text-lg outline-none border-2 border-border focus:border-primary transition-all duration-300 ease-in-out"
-                    placeholder="Search..." 
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyDown={searchKeyDownHandler}
-                    required
-                    autoComplete="true"
-                    ref={searchInputDOM}
+            <div className="my-container-small pt-6">
+                <ResumeSearchInput
+                    value={resumeSearchInput}
+                    onChange={(e) => setResumeSearchInput(e.target.value)}
+                    onPressEnter={resumeSearchKeyDownHandler}
+                    onClickButton={resumeSearchClickHandler}
                 />
-
-                <Link to={`/search/${searchInput}`} className="absolute  right-10 sm:right-14 text-text peer-focus:text-primary transition-all duration-300 ease-in-out">
-                    <FeatherIcon icon="search" className="w-6 h-6"/>
-                </Link>
             </div>
 
+            {/* ====== Search Slider ====== */}
+            <div className="my-container-small pt-3">
+                <ResumeSearchSlider
+                    value={resumeSearchLevel}
+                    onChange={(e) => setResumeSearchLevel(e.target.value)}
+                />
+            </div>
         </main>
     )
 }
