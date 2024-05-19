@@ -1,32 +1,62 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
+import { GlobalContext } from "../../contexts/GlobalContext"
+import renameThreadName from '../../services/chat/renameThreadName'
+
 import { Link } from "react-router-dom";
 import FeatherIcon from "feather-icons-react";
+import RenameModal from "../RenameModal/RenameModal";
 
 const SidebarThreadItem = ({ item, isActive }) => {
-    const [showPopup, setShowPopup] = useState(false);
-    const popupRef = useRef(null);
+    // ====== State Management ======
+    const globalContext = useContext(GlobalContext);
+    const [showMorePopup, setShowMorePopup] = useState(false);
+    const morePopupRef = useRef(null);
+    const [showRenameModal, setShowRenameModal] = useState(false);
+    const [newName, setNewName] = useState(item.name);
 
+    // ====== Event Handlers ======
     const moreButtonClickHandler = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        setShowPopup(true);
+        setShowMorePopup(true);
     };
 
     const renameHandler = () => {
-        setShowPopup(false);
-        // Implement rename functionality
+        setShowMorePopup(false);
+        setShowRenameModal(true);
+    };
+    const renameModalCloseHandler = () => {
+        setShowRenameModal(false);
+    };
+    const renameModalRenameHandler = () => {
+        renameThreadName(item.id, newName)
+            .then((res) => {
+                if (res) {
+                    globalContext.setSidebarThreads((prev) => {
+                        const newThreads = prev.map((thread) => {
+                            if (thread.id === item.id) {
+                                return { ...thread, name: newName };
+                            } else {
+                                return thread;
+                            }
+                        });
+                        return newThreads;
+                    });
+                    setShowRenameModal(false);
+                }
+            });
     };
 
     const deleteHandler = () => {
-        setShowPopup(false);
+        setShowMorePopup(false);
         // Implement delete functionality
     };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (popupRef.current && !popupRef.current.contains(event.target)) {
-                setShowPopup(false);
+            if (morePopupRef.current && !morePopupRef.current.contains(event.target)) {
+                setShowMorePopup(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -36,24 +66,36 @@ const SidebarThreadItem = ({ item, isActive }) => {
     }, []);
 
     return (
-        <Link to={`/chat/${item.id}`} className={`thread-item relative group ${(isActive || showPopup) && 'active'}`}>
-            <span>{item.name === '' ? 'New Thread' : item.name}</span>
+        <>
+            <Link to={`/chat/${item.id}`} className={`thread-item relative group ${(isActive || showMorePopup) && 'active'}`}>
+                <span>{item.name === '' ? 'New Thread' : item.name}</span>
 
-            <button
-                className={`ml-3 rounded-md hidden text-text group-hover:block ${showPopup && '!block'} hover:opacity-80 transition-all duration-300 ease-in-out`}
-                onClick={moreButtonClickHandler}
-            >
-                <FeatherIcon icon="more-horizontal" className="w-8 h-8 p-1.5" strokeWidth={1.8} />
-            </button>
+                <button
+                    className={`ml-3 rounded-md hidden text-text group-hover:block ${showMorePopup && '!block'} hover:opacity-80 transition-all duration-300 ease-in-out`}
+                    onClick={moreButtonClickHandler}
+                >
+                    <FeatherIcon icon="more-horizontal" className="w-8 h-8 p-1.5" strokeWidth={1.8} />
+                </button>
 
-            {showPopup && (
-                <div ref={popupRef} className="absolute top-5 left-[calc(100%-20px)] bg-white shadow-md rounded-md border border-border p-2 z-10">
-                    <MorePopup renameHandler={renameHandler} deleteHandler={deleteHandler} />
-                </div>
+                {showMorePopup && (
+                    <div ref={morePopupRef} className="absolute top-5 left-[calc(100%-20px)] bg-white shadow-md rounded-md border border-border p-2 z-10">
+                        <MorePopup renameHandler={renameHandler} deleteHandler={deleteHandler} />
+                    </div>
+                )}
+            </Link>
+
+            {showRenameModal && (
+                <RenameModal
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onClose={renameModalCloseHandler}
+                    onRename={renameModalRenameHandler}
+                />
             )}
-        </Link>
+        </>
     )
 }
+
 
 const MorePopup = ({ renameHandler, deleteHandler }) => {
     return (

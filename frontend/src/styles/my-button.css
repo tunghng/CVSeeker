@@ -24,6 +24,10 @@
         @apply bg-primary-subtle text-primary
                hover:bg-primary hover:text-white;
     }
+    .my-button-secondary {
+        @apply bg-gray-200 text-text
+               hover:bg-gray-300;
+    }
     .my-button-outline-secondary {
         @apply bg-white text-title border-2 border-subtitle
                hover:bg-disable-light
