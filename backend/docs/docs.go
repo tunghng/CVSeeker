@@ -98,7 +98,7 @@ const docTemplate = `{
             }
         },
         "/cvseeker/resumes/search": {
-            "get": {
+            "post": {
                 "description": "Executes a search combining keyword and vector-based queries with customizable boosting on the vector component.",
                 "consumes": [
                     "application/json"
@@ -368,6 +368,24 @@ const docTemplate = `{
                         "name": "threadId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Maximum number of messages to return",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination, specifying an exclusive start point for the list (ID of a message)",
+                        "name": "after",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Cursor for pagination, specifying an exclusive end point for the list (ID of a message)",
+                        "name": "before",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -819,6 +837,12 @@ const docTemplate = `{
                 },
                 "fileBytes": {
                     "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
                 }
             }
         },
@@ -881,7 +905,13 @@ const docTemplate = `{
                     "description": "omitempty to not display if empty",
                     "type": "string"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "status": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }
@@ -940,6 +970,9 @@ const docTemplate = `{
                 },
                 "basic_info": {
                     "$ref": "#/definitions/elasticsearch.BasicInfo"
+                },
+                "id": {
+                    "type": "string"
                 },
                 "project_experience": {
                     "type": "array",

@@ -1,5 +1,7 @@
 package gpt
 
+import "encoding/json"
+
 const (
 	AssistantsSuffix      = "/assistants"
 	AssistantsFilesSuffix = "/files"
@@ -159,6 +161,7 @@ type CreateRunRequest struct {
 	Instructions *string           `json:"instructions,omitempty"`
 	Tools        []AssistantTool   `json:"tools,omitempty"`
 	Metadata     map[string]string `json:"metadata,omitempty"`
+	Stream       bool              `json:"stream"`
 }
 
 type RunResponse struct {
@@ -218,4 +221,23 @@ type UploadFileResponse struct {
 	Object      string `json:"object"`
 	CreatedAt   int64  `json:"created_at"`
 	AssistantID string `json:"assistant_id"`
+}
+
+type StreamedEvent struct {
+	Event string          `json:"event"`
+	Data  json.RawMessage `json:"data"` // Using RawMessage to handle varying data structures
+}
+
+type DeltaMessage struct {
+	ID     string `json:"id"`
+	Object string `json:"object"`
+	Delta  struct {
+		Content []struct {
+			Index int    `json:"index"`
+			Type  string `json:"type"`
+			Text  struct {
+				Value string `json:"value"`
+			} `json:"text"`
+		} `json:"content"`
+	} `json:"delta"`
 }

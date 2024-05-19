@@ -9,16 +9,16 @@ const SidebarThreadItem = ({ item, isActive }) => {
         <Link to={`/chat/${item.id}`}
             className={`thread-item group ${isActive && 'active'}`}
         >
-            <span>{item.name}</span>
+            <span>{item.name === '' ? 'New Thread' : item.name}</span>
 
             <button
-                className="ml-3 rounded-md hidden group-hover:block hover:opacity-80 transition-all duration-300 ease-in-out"
+                className="ml-3 rounded-md hidden text-text group-hover:block hover:opacity-80 transition-all duration-300 ease-in-out"
                 data-tooltip-id="item-tooltip"
                 data-tooltip-content="Show selected items of this thread"
                 data-tooltip-place="top"
                 data-tooltip-delay-show={400}
             >
-                <FeatherIcon icon="inbox" className="w-8 h-8 p-1" strokeWidth={1.8} />
+                <FeatherIcon icon="inbox" className="w-8 h-8 p-1.5" strokeWidth={1.8} />
             </button>
             <Tooltip id="item-tooltip" className="hidden group-hover:block" />
         </Link>

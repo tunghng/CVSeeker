@@ -9,7 +9,7 @@ const Header = () => {
     const globalContext = useContext(GlobalContext);
 
     return (
-        <div className="h-12 px-3 bg-background flex justify-start items-center border-b border-border">
+        <div className="fixed top-0 left-0 z-20 w-full h-12 px-3 bg-background flex justify-start items-center border-b border-border">
 
             {/* ====== Toggle Sidebar Button ====== */}
             <button

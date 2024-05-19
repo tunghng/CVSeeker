@@ -44,7 +44,7 @@ func NewElasticsearchClient(cfgReader *viper.Viper) (IElasticsearchClient, error
 		Addresses: []string{url},
 		Username:  username,
 		Password:  password,
-		Transport: customTransport, // Using custom transport
+		Transport: customTransport,
 		Logger:    &elastictransport.ColorLogger{Output: os.Stdout, EnableRequestBody: true, EnableResponseBody: true},
 	})
 
@@ -165,15 +165,14 @@ func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexNam
 	response := make([]ResumeSummaryDTO, 0, len(mgetResp.Docs))
 	for _, doc := range mgetResp.Docs {
 		if doc.Found {
-			// Assuming content is a JSON string that maps directly to ResumeSummaryDTO
 			var resume ResumeSummaryDTO
 
+			// Handle content and additional fields
 			contentData, ok := doc.Source["content"].(map[string]interface{})
 			if !ok {
 				return nil, fmt.Errorf("content field missing or not correctly formatted as a JSON object")
 			}
 
-			// Marshal the contentData back to JSON string to unmarshal into DTO
 			jsonData, err := json.Marshal(contentData)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal content data: %w", err)
@@ -182,6 +181,10 @@ func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexNam
 			if err := json.Unmarshal(jsonData, &resume); err != nil {
 				return nil, fmt.Errorf("error unmarshaling resume content: %w", err)
 			}
+
+			// Assign the document ID
+			resume.Id = doc.ID
+
 			response = append(response, resume)
 		}
 	}
@@ -295,6 +298,9 @@ func ConvertHitToElasticResponse(hit *types.Hit) (*ResumeSummaryDTO, error) {
 		return nil, fmt.Errorf("an error occurred while unmarshaling hit: %w", err)
 	}
 
+	// Extract the ID from the hit and assign it to the DTO
+	id := hit.Id_ // Assuming hit.ID contains the document's ID, adjust if your actual field name differs
+
 	// Check if the content is a JSON object and handle it directly
 	contentData, ok := source["content"].(map[string]interface{})
 	if !ok {
@@ -311,6 +317,8 @@ func ConvertHitToElasticResponse(hit *types.Hit) (*ResumeSummaryDTO, error) {
 	if err := json.Unmarshal(jsonData, &resume); err != nil {
 		return nil, fmt.Errorf("an error occurred while unmarshaling resume content: %w", err)
 	}
+
+	resume.Id = id // Assigning the extracted ID to the DTO
 
 	return &resume, nil
 }

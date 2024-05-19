@@ -99,6 +99,9 @@ func (_this *ChatbotHandler) SendMessage() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param threadId path string true "Thread ID"
+// @Param limit query int false "Maximum number of messages to return"
+// @Param after query string false "Cursor for pagination, specifying an exclusive start point for the list (ID of a message)"
+// @Param before query string false "Cursor for pagination, specifying an exclusive end point for the list (ID of a message)"
 // @Success  200  {object}  meta.BasicResponse{data=gpt.ListMessagesResponse}
 // @Failure   400,401,404,500  {object}  meta.Error
 // @Security  BearerAuth

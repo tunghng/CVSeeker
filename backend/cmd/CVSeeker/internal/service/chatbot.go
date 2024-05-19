@@ -33,6 +33,7 @@ type ChatbotService struct {
 	elasticClient    elasticsearch.IElasticsearchClient
 	threadRepo       repositories.IThreadRepository
 	threadResumeRepo repositories.IThreadResumeRepository
+	//webSocketHub     *websocket.Hub
 }
 
 type ChatbotServiceArgs struct {
@@ -42,6 +43,7 @@ type ChatbotServiceArgs struct {
 	ElasticClient    elasticsearch.IElasticsearchClient
 	ThreadRepo       repositories.IThreadRepository
 	ThreadResumeRepo repositories.IThreadResumeRepository
+	//WebSocketHub     *websocket.Hub
 }
 
 func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
@@ -51,6 +53,7 @@ func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
 		elasticClient:    args.ElasticClient,
 		threadRepo:       args.ThreadRepo,
 		threadResumeRepo: args.ThreadResumeRepo,
+		//webSocketHub:     args.WebSocketHub,
 	}
 }
 
@@ -125,9 +128,9 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 			ThreadID: thread.ID,
 			ResumeID: id,
 		}
+		err = _this.threadResumeRepo.Create(_this.db, &threadResume)
 		threadResumes = append(threadResumes, threadResume)
 	}
-	err = _this.threadResumeRepo.CreateBulkThreadResume(_this.db, threadResumes)
 
 	// Prepare the response with the thread information
 	response := &meta.BasicResponse{
@@ -156,55 +159,32 @@ func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message
 		return nil, err
 	}
 
-	// Create run for assistant and thread
+	// Create run for assistant and thread with streaming enabled
 	runRequest := gpt.CreateRunRequest{
 		AssistantID: DefaultAssistant,
+		Stream:      true,
 	}
 
-	runResponse, err := _this.assistantClient.CreateRun(threadID, runRequest)
+	// Collect and process streamed responses
+	var messages []string
+	values, err := _this.assistantClient.CreateRunAndStreamResponse(threadID, runRequest)
 	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to create run: %v", err)
+		ginLogger.Gin(c).Errorf("error streaming responses: %v", err)
 		return nil, err
+	}
+	for value := range values {
+		messages = append(messages, value)
 	}
 
-	// Wait for the completion of the run to get the response from the assistant
-	completedRun, err := _this.assistantClient.WaitForRunCompletion(threadID, runResponse.ID)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to wait for run completion: %v", err)
-		return nil, err
-	}
-
-	if completedRun.Status != "completed" {
-		ginLogger.Gin(c).Errorf("run did not complete successfully")
-		return nil, err
-	}
-
-	// Update the 'UpdatedAt' column for the thread
-	if err := _this.threadRepo.UpdateUpdatedAt(_this.db, threadID); err != nil {
-		ginLogger.Gin(c).Errorf("failed to update thread: %v", err)
-		return nil, err
-	}
-
-	//Get current list message
-	listMessageResponse, err := _this.assistantClient.ListMessages(threadID, 2, "", "", "")
-	if err != nil {
-		ginLogger.Gin(c).Errorf("Error when list message: %v", err)
-		return nil, err
-	}
-	if len(listMessageResponse.Data) == 0 {
-		ginLogger.Gin(c).Errorf("Error when get list message: %v", err)
-		return nil, err
-	}
-
+	// Prepare the final response
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
 			Code:    http.StatusOK,
 			Message: "Response retrieved successfully",
 		},
-		Data: listMessageResponse,
+		Data: messages, // Assuming you want to return the collected messages
 	}
 
-	// Return the result of the completed run
 	return response, nil
 }
 
