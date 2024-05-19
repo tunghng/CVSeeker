@@ -3,7 +3,7 @@ import { useRef, useEffect } from "react";
 import FeatherIcon from "feather-icons-react";
 import './ThreadMessageInput.css';
 
-const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton, disabled }) => {
+const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton, disabled, onHeightChange }) => {
     const textareaRef = useRef(null);
 
     useEffect(() => {
@@ -14,6 +14,7 @@ const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton, disa
             maxHeight = textarea.scrollHeight > maxHeight ? maxHeight : textarea.scrollHeight;
             textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
             textarea.style.height = `${maxHeight}px`;
+            onHeightChange(6 + (textarea.offsetHeight - 32)/16);
         }
     }, [value]);
 
@@ -40,6 +41,7 @@ const ThreadMessageInput = ({ value, onChange, onPressEnter, onClickButton, disa
                 value={value}
                 onChange={onChange}
                 onKeyDown={handleKeyDown}
+                autoFocus
                 rows={1}
             />
 

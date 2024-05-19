@@ -23,6 +23,7 @@ const ChatPage = () => {
     const [isAssistantLoading, setIsAssistantLoading] = useState(false);
     const [assistantTempMessage, setAssistantTempMessage] = useState('');
     const [threadResumes, setThreadResumes] = useState([]);
+    const [inputHeight, setInputHeight] = useState(6);
 
     const messagesEndRef = useRef(null);
 
@@ -47,7 +48,7 @@ const ChatPage = () => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [assistantTempMessage, threadMessages]);
+    }, [assistantTempMessage, threadMessages, inputHeight]);
 
     // ====== Event Handlers ======
     const stackItemDetailClickHandler = (item) => {
@@ -152,7 +153,7 @@ const ChatPage = () => {
 
             {/* ====== Thread Messages ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
-                <div className="my-container-medium mt-0 pb-24">
+                <div className="my-container-medium mt-0" style={{ paddingBottom: `${inputHeight}rem` }}>
                     {(threadMessages === null || threadMessages.length === 0) ? (
                         <div className="mt-6 flex flex-col items-center space-y-4">
                             <p className="text-subtitle">Loading messages ...</p>
@@ -186,6 +187,7 @@ const ChatPage = () => {
                         onPressEnter={threadMessageSendKeyDownHandler}
                         onClickButton={threadMessageSendClickHandler}
                         disabled={isAssistantLoading}
+                        onHeightChange={setInputHeight}
                     />
                 </div>
             </div>
