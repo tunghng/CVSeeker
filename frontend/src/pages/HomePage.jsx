@@ -14,12 +14,12 @@ const HomePage = () => {
     // ====== Event Handlers ======
     const resumeSearchKeyDownHandler = (e) => {
         if (e.key === 'Enter' && resumeSearchInput.trim() !== '') {
-            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=${resumeSearchLevel}`)
         }
     }
     const resumeSearchClickHandler = () => {
         if (resumeSearchInput.trim() !== '') {
-            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=${resumeSearchLevel}`)
         }
     }
 

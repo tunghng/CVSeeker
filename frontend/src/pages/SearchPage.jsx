@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 import searchResume from "../services/search/searchResume"
 import startThread from "../services/chat/startThread"
+import generateThreadName from "../services/chat/generateThreadName"
 
 import { Tooltip } from "react-tooltip"
 import FeatherIcon from 'feather-icons-react'
@@ -14,7 +15,7 @@ import SearchResultList from "../components/SearchResultList/SearchResultList"
 import StackItem from "../components/StackItem/StackItem"
 import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
 import LoadingModal from "../components/LoadingModal/LoadingModal"
-import generateThreadName from "../services/chat/generateThreadName"
+import PageButtons from "../components/PageButtons/PageButtons"
 
 const ViewMode = {
     GRID: 'grid',
@@ -30,6 +31,7 @@ const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [resumeSearchInput, setResumeSearchInput] = useState(searchParams.get('query') || '');
     const [resumeSearchLevel, setResumeSearchLevel] = useState(searchParams.get('level') || 0.5);
+    const resumeSearchPage = searchParams.get('page') || 0;
     const [isStartChatSession, setIsStartChatSession] = useState(false);
 
     const [resultViewMode, setResultViewMode] = useState(ViewMode.LIST)
@@ -42,7 +44,7 @@ const SearchPage = () => {
     // ====== Side Effects ======
     useEffect(() => {
         setSearchResults([]);
-        searchResume(resumeSearchInput, resumeSearchLevel)
+        searchResume(resumeSearchInput, resumeSearchLevel, resumeSearchPage - 1)
             .then(res => {
                 const updatedResults = res.map(item => ({ ...item, selected: false }));
                 setSearchResults(updatedResults);
@@ -54,13 +56,13 @@ const SearchPage = () => {
         if (e.key === 'Enter'
             && resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=${resumeSearchLevel}`);
         }
     }
     const resumeSearchClickHandler = () => {
         if (resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=${resumeSearchLevel}`);
         }
     }
 
@@ -205,7 +207,7 @@ const SearchPage = () => {
                 </div>
 
                 {/* ====== Search Results ====== */}
-                <div className="my-container-medium mt-4 pb-10">
+                <div className="my-container-medium min-h-[25rem] mt-4 pb-10">
                     {(searchResults === null || searchResults.length === 0) ? (
                         <div className="mt-6 flex flex-col items-center space-y-4">
                             <p className="text-subtitle">Loading search result ...</p>
@@ -220,6 +222,15 @@ const SearchPage = () => {
                             onItemDownloadClick={resultItemDownloadClickHandler}
                         />
                     )}
+                </div>
+
+                {/* ====== Pagination ====== */}
+                <div className="my-container-medium pb-12 flex justify-center">
+                    <PageButtons
+                        curr={resumeSearchPage}
+                        query={searchParams.get('query')}
+                        level={searchParams.get('level')}
+                    />
                 </div>
             </div>
 

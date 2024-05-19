@@ -36,4 +36,13 @@
     .selected-item-stack-button {
         @apply h-4 w-1 bg-primary rounded-full transform  transition-transform duration-300;
     }
+
+    .page-btn {
+        @apply px-3.5 py-2 flex justify-center items-center text-sm
+        rounded-md transition duration-300 ease-in-out cursor-pointer
+        hover:bg-primary-subtle;
+    }
+    .page-btn-active {
+        @apply !bg-primary text-white font-semibold;
+    }
 }
