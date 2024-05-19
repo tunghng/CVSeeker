@@ -168,7 +168,7 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 					return
 				}
 
-				_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, DocumentID: documentID, Status: "Success"})
+				_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, DocumentID: documentID, Status: "Success", Name: res.Name})
 			}(resume)
 		}
 
@@ -243,10 +243,24 @@ func fetchLinkedInData(urls []string) ([]dtos.ResumeData, error) {
 		return nil, err
 	}
 
-	// Here you can process the LinkedIn data further if needed
-	// For example, modifying the content structure, or integrating additional data
+	// Process each resume to extract the name from the URL
+	for i, resume := range linkedInResumes.Resumes {
+		if name := extractNameFromURL(resume.FileBytes); name != "" {
+			linkedInResumes.Resumes[i].Name = name
+		}
+	}
 
 	return linkedInResumes.Resumes, nil
+}
+
+func extractNameFromURL(url string) string {
+	// Trim the trailing slash if present to ensure proper splitting
+	url = strings.TrimRight(url, "/")
+	parts := strings.Split(url, "/")
+	if len(parts) > 0 {
+		return parts[len(parts)-1] // Return the last part of the URL which is typically the username
+	}
+	return ""
 }
 
 func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText string, file string, isLinkedin bool) (*elasticsearch.ElkResumeDTO, error) {

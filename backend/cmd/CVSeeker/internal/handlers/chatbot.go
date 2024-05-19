@@ -201,3 +201,29 @@ func (_this *ChatbotHandler) UpdateThreadName() gin.HandlerFunc {
 		_this.HandleResponse(c, resp, err)
 	}
 }
+
+// DeleteThreadById
+// @Summary Delete a thread by ID
+// @Description Deletes the specified thread by its ID.
+// @Tags Chatbot
+// @Accept json
+// @Produce json
+// @Param threadId path string true "Thread ID to be deleted"
+// @Success 200 {object} meta.BasicResponse
+// @Failure 400,404,500 {object} meta.Error
+// @Router /cvseeker/resumes/threads/{threadId} [DELETE]
+func (_this *ChatbotHandler) DeleteThreadById() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		threadID := strings.TrimSpace(c.Param("threadId"))
+		if threadID == "" {
+			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
+			return
+		}
+		resp, err := _this.chatbotService.DeleteThreadById(c, threadID)
+		if err != nil {
+			_this.RespondError(c, err)
+			return
+		}
+		_this.HandleResponse(c, resp, nil)
+	}
+}

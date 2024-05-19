@@ -25,6 +25,7 @@ type IChatbotService interface {
 	GetAllThreads(c *gin.Context) (*meta.BasicResponse, error)
 	GetResumesByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error)
 	UpdateThreadName(c *gin.Context, threadID string, newName string) (*meta.BasicResponse, error)
+	DeleteThreadById(c *gin.Context, threadId string) (*meta.BasicResponse, error)
 }
 
 type ChatbotService struct {
@@ -227,6 +228,24 @@ func (_this *ChatbotService) GetAllThreads(c *gin.Context) (*meta.BasicResponse,
 		},
 		Data: threadDTOs,
 	}
+	return response, nil
+}
+
+func (_this *ChatbotService) DeleteThreadById(c *gin.Context, threadId string) (*meta.BasicResponse, error) {
+	err := _this.threadRepo.Delete(_this.db, threadId)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to get all threads: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    http.StatusOK,
+			Message: "Thread deleted successfully",
+		},
+		Data: nil,
+	}
+
 	return response, nil
 }
 
