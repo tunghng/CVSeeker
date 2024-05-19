@@ -6,6 +6,7 @@ import (
 	"CVSeeker/internal/ginLogger"
 	commonMiddleware "CVSeeker/internal/ginMiddleware"
 	"CVSeeker/internal/ginServer"
+	"CVSeeker/pkg/websocket"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 	return func(router *gin.Engine) {
 		// CORS configuration
 		corsConfig := cors.Config{
-			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowOrigins:     []string{"*"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
@@ -46,7 +47,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 			data.GET("/upload", hs.DataProcessingHandler.GetAllUploadsHandler())
 			data.POST("/batch/upload", hs.DataProcessingHandler.ProcessDataBatchHandler())
 
-			data.GET("/search", hs.SearchHandler.HybridSearch())
+			data.POST("/search", hs.SearchHandler.HybridSearch())
 			data.GET("/:id", hs.SearchHandler.GetDocumentByID())
 			data.DELETE("/:id", hs.SearchHandler.DeleteDocumentByID())
 
@@ -55,7 +56,17 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 			data.GET("/thread/:threadId/messages", hs.ChatbotHandler.ListMessage())
 			data.GET("/thread", hs.ChatbotHandler.GetAllThreads())
 			data.GET("/thread/:threadId", hs.ChatbotHandler.GetResumesByThreadID())
+			data.DELETE("/thread/:threadId", hs.ChatbotHandler.DeleteThreadById())
 			data.POST("/thread/:threadId/updateName", hs.ChatbotHandler.UpdateThreadName())
 		}
+
+		router.GET("/ws", func(c *gin.Context) {
+			// Error handling omitted for brevity
+			_, err := websocket.HandleWebSocket(c.Writer, c.Request)
+			if err != nil {
+				// Log error or handle it
+				return
+			}
+		})
 	}
 }

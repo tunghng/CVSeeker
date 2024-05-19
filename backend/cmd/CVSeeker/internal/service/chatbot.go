@@ -25,6 +25,7 @@ type IChatbotService interface {
 	GetAllThreads(c *gin.Context) (*meta.BasicResponse, error)
 	GetResumesByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error)
 	UpdateThreadName(c *gin.Context, threadID string, newName string) (*meta.BasicResponse, error)
+	DeleteThreadById(c *gin.Context, threadId string) (*meta.BasicResponse, error)
 }
 
 type ChatbotService struct {
@@ -71,6 +72,7 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 	var fullTextContent strings.Builder
 	fullTextContent.WriteString("You will use these information to answer questions from the user: ")
 	for _, resume := range documents {
+		fullTextContent.WriteString(fmt.Sprintf("Name: %s", resume.BasicInfo.FullName))
 		fullTextContent.WriteString(fmt.Sprintf("Summary: %s; Skills: %v; ", resume.Summary, resume.Skills))
 		fullTextContent.WriteString(fmt.Sprintf("Education: %s, %s, GPA: %.2f; ", resume.BasicInfo.University, resume.BasicInfo.EducationLevel, resume.BasicInfo.GPA))
 		fullTextContent.WriteString("Work Experience: ")
@@ -125,9 +127,9 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 			ThreadID: thread.ID,
 			ResumeID: id,
 		}
+		err = _this.threadResumeRepo.Create(_this.db, &threadResume)
 		threadResumes = append(threadResumes, threadResume)
 	}
-	err = _this.threadResumeRepo.CreateBulkThreadResume(_this.db, threadResumes)
 
 	// Prepare the response with the thread information
 	response := &meta.BasicResponse{
@@ -156,55 +158,32 @@ func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message
 		return nil, err
 	}
 
-	// Create run for assistant and thread
+	// Create run for assistant and thread with streaming enabled
 	runRequest := gpt.CreateRunRequest{
 		AssistantID: DefaultAssistant,
+		Stream:      true,
 	}
 
-	runResponse, err := _this.assistantClient.CreateRun(threadID, runRequest)
+	// Collect and process streamed responses
+	var messages []string
+	values, err := _this.assistantClient.CreateRunAndStreamResponse(threadID, runRequest)
 	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to create run: %v", err)
+		ginLogger.Gin(c).Errorf("error streaming responses: %v", err)
 		return nil, err
+	}
+	for value := range values {
+		messages = append(messages, value)
 	}
 
-	// Wait for the completion of the run to get the response from the assistant
-	completedRun, err := _this.assistantClient.WaitForRunCompletion(threadID, runResponse.ID)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to wait for run completion: %v", err)
-		return nil, err
-	}
-
-	if completedRun.Status != "completed" {
-		ginLogger.Gin(c).Errorf("run did not complete successfully")
-		return nil, err
-	}
-
-	// Update the 'UpdatedAt' column for the thread
-	if err := _this.threadRepo.UpdateUpdatedAt(_this.db, threadID); err != nil {
-		ginLogger.Gin(c).Errorf("failed to update thread: %v", err)
-		return nil, err
-	}
-
-	//Get current list message
-	listMessageResponse, err := _this.assistantClient.ListMessages(threadID, 2, "", "", "")
-	if err != nil {
-		ginLogger.Gin(c).Errorf("Error when list message: %v", err)
-		return nil, err
-	}
-	if len(listMessageResponse.Data) == 0 {
-		ginLogger.Gin(c).Errorf("Error when get list message: %v", err)
-		return nil, err
-	}
-
+	// Prepare the final response
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
 			Code:    http.StatusOK,
 			Message: "Response retrieved successfully",
 		},
-		Data: listMessageResponse,
+		Data: messages, // Assuming you want to return the collected messages
 	}
 
-	// Return the result of the completed run
 	return response, nil
 }
 
@@ -249,6 +228,24 @@ func (_this *ChatbotService) GetAllThreads(c *gin.Context) (*meta.BasicResponse,
 		},
 		Data: threadDTOs,
 	}
+	return response, nil
+}
+
+func (_this *ChatbotService) DeleteThreadById(c *gin.Context, threadId string) (*meta.BasicResponse, error) {
+	err := _this.threadRepo.Delete(_this.db, threadId)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to get all threads: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    http.StatusOK,
+			Message: "Thread deleted successfully",
+		},
+		Data: nil,
+	}
+
 	return response, nil
 }
 

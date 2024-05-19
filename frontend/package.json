@@ -10,12 +10,16 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "axios": "^1.6.8",
         "feather-icons-react": "^0.7.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-drag-drop-files": "^2.3.10",
+        "react-markdown": "^9.0.1",
+        "react-pdftotext": "^1.2.0",
         "react-router-dom": "^6.23.0",
-        "react-tooltip": "^5.26.4"
+        "react-tooltip": "^5.26.4",
+        "uuid": "^9.0.1"
     },
     "devDependencies": {
         "@types/react": "^18.2.66",

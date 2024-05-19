@@ -5,11 +5,12 @@ const SearchResultList = ({ searchResults, viewMode, onItemSelectClick, onItemDe
 
     return (
         <div className="w-full">
-            <div className="h-10 flex border-b border-border">
-                <div className="w-10"></div>
-                <div className="flex-1 flex items-center text-left font-bold">Name</div>
-                <div className="w-32 flex items-center justify-center font-bold">Imported Date</div>
-                <div className="w-24 sm:w-56"></div>
+            <div className="h-10 flex border-b border-border sticky top-0 bg-slate-300 z-10">
+                <div className="w-12"></div>
+                <div className="w-44 flex items-center text-left font-bold">Full Name</div>
+                <div className="w-32 flex items-center justify-center font-bold">Education</div>
+                <div className="flex-1 flex items-center justify-center font-bold">Majors</div>
+                <div className="w-20 sm:w-48"></div>
             </div>
 
             {searchResults.length === 0 &&

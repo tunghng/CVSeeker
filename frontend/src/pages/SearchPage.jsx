@@ -2,8 +2,8 @@
 import { useState, useContext, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
-
-import search from "../services/search"
+import searchResume from "../services/search/searchResume"
+import startThread from "../services/chat/startThread"
 
 import { Tooltip } from "react-tooltip"
 import FeatherIcon from 'feather-icons-react'
@@ -13,6 +13,8 @@ import IndeterminateCheckbox from "../components/IndeterminateCheckbox/Indetermi
 import SearchResultList from "../components/SearchResultList/SearchResultList"
 import StackItem from "../components/StackItem/StackItem"
 import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
+import LoadingModal from "../components/LoadingModal/LoadingModal"
+import generateThreadName from "../services/chat/generateThreadName"
 
 const ViewMode = {
     GRID: 'grid',
@@ -28,6 +30,7 @@ const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [resumeSearchInput, setResumeSearchInput] = useState(searchParams.get('query') || '');
     const [resumeSearchLevel, setResumeSearchLevel] = useState(searchParams.get('level') || 0.5);
+    const [isStartChatSession, setIsStartChatSession] = useState(false);
 
     const [resultViewMode, setResultViewMode] = useState(ViewMode.LIST)
 
@@ -38,9 +41,12 @@ const SearchPage = () => {
 
     // ====== Side Effects ======
     useEffect(() => {
-        search(resumeSearchInput, resumeSearchLevel)
-            .then(data => setSearchResults(data))
-            .catch(error => console.error(error))
+        setSearchResults([]);
+        searchResume(resumeSearchInput, resumeSearchLevel)
+            .then(res => {
+                const updatedResults = res.map(item => ({ ...item, selected: false }));
+                setSearchResults(updatedResults);
+            })
     }, [searchParams]);
 
     // ====== Event Handlers ======
@@ -81,7 +87,12 @@ const SearchPage = () => {
         globalContext.setShowDetailItemModal(true)
     }
     const resultItemDownloadClickHandler = (item) => {
-        console.log(item)
+        if (item.url !== "") {
+            window.open(item.url, '_blank')
+        }
+        else {
+            alert("No download link available")
+        }
     }
 
     const stackItemDetailClickHandler = (item) => {
@@ -90,6 +101,28 @@ const SearchPage = () => {
     }
     const stackItemRemoveClickHandler = (itemId) => {
         globalContext.popFromSelectedStack(itemId)
+    }
+    const startChatSessionHandler = () => {
+        setIsStartChatSession(true)
+        const idsString = globalContext.selectedItemsStack.map(item => item.id).join(', ')
+        const timeStr = generateThreadName();
+
+        startThread(idsString, timeStr)
+            .then(res => {
+                if (res !== null) {
+                    setIsStartChatSession(false);
+                    globalContext.setSelectedItemsStack([]);
+                    globalContext.setShowSelectedItemsStack(false);
+                    globalContext.setSidebarThreads([
+                        {
+                            id: res.id,
+                            name: timeStr,
+                        },
+                        ...globalContext.sidebarThreads
+                    ]);
+                    navigate(`/chat/${res.id}`);
+                }
+            });
     }
 
     const detailItemModalCloseHandler = () => {
@@ -101,11 +134,19 @@ const SearchPage = () => {
             globalContext.toggleSelectedItemsStack()
         }
     }
+    const detailItemModalDownloadHandler = () => {
+        if (globalContext.detailItem.url !== "") {
+            window.open(globalContext.detailItem.url, '_blank')
+        }
+        else {
+            alert("No download link available")
+        }
+    }
 
     return (
-        <main className="h-full flex overflow-x-hidden">
+        <main className="my-content-wrapper flex">
             {/* ====== Search Result Window ====== */}
-            <div className={`${globalContext.showSelectedItemsStack && 'md:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
+            <div className={`${globalContext.showSelectedItemsStack && 'xl:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
                 {/* ====== Search Input ====== */}
                 <div className="my-container-small pt-6">
                     <ResumeSearchInput
@@ -164,23 +205,30 @@ const SearchPage = () => {
                 </div>
 
                 {/* ====== Search Results ====== */}
-                <div className="my-container-medium mt-4">
-                    <SearchResultList
-                        searchResults={searchResults}
-                        viewMode={resultViewMode}
-                        onItemSelectClick={resultItemClickHandler}
-                        onItemDetailClick={resultItemDetailClickHandler}
-                        onItemDownloadClick={resultItemDownloadClickHandler}
-                    />
+                <div className="my-container-medium mt-4 pb-10">
+                    {(searchResults === null || searchResults.length === 0) ? (
+                        <div className="mt-6 flex flex-col items-center space-y-4">
+                            <p className="text-subtitle">Loading search result ...</p>
+                            <div className="loader"></div>
+                        </div>
+                    ) : (
+                        <SearchResultList
+                            searchResults={searchResults}
+                            viewMode={resultViewMode}
+                            onItemSelectClick={resultItemClickHandler}
+                            onItemDetailClick={resultItemDetailClickHandler}
+                            onItemDownloadClick={resultItemDownloadClickHandler}
+                        />
+                    )}
                 </div>
             </div>
 
 
             {/* ====== Selected Items Stack ====== */}
-            <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} w-full max-w-72 h-[calc(100%-3rem)] fixed  right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
+            <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} z-20 w-full max-w-72 h-[calc(100%-3rem)] fixed right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
                 <h1 className="text-lg font-semibold">Selected items ({globalContext.selectedItemsStack.length})</h1>
 
-                <div className="flex-1">
+                <div className="flex-1 overflow-y-auto mt-3 mb-4">
                     {
                         globalContext.selectedItemsStack.map(item => (
                             <StackItem
@@ -196,6 +244,7 @@ const SearchPage = () => {
 
                 <button
                     className="my-button my-button-primary py-2"
+                    onClick={startChatSessionHandler}
                     data-tooltip-id="start-chat-tooltip"
                     data-tooltip-content="Interact with AI chatbot in just a click!"
                     data-tooltip-place="top"
@@ -229,7 +278,11 @@ const SearchPage = () => {
                 detailItem={globalContext.detailItem}
                 onModalClose={detailItemModalCloseHandler}
                 onAddToList={detailItemModalAddToListHandler}
+                onDownloadClick={detailItemModalDownloadHandler}
             />
+
+            {/* ====== Loading Modal ====== */}
+            <LoadingModal showLoadingModal={isStartChatSession} />
 
         </main>
     )

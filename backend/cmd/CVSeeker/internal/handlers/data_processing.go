@@ -2,6 +2,7 @@ package handlers
 
 import (
 	services "CVSeeker/cmd/CVSeeker/internal/service"
+	"CVSeeker/cmd/CVSeeker/pkg/utils"
 	"CVSeeker/internal/dtos"
 	"CVSeeker/internal/errors"
 	"github.com/gin-gonic/gin"
@@ -51,7 +52,7 @@ func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 		}
 
 		// Process data (example function call, replace with actual processing logic)
-		resp, err := _this.dataProcessingService.ProcessData(c, requestData.Content, requestData.FileBytes)
+		resp, err := _this.dataProcessingService.ProcessData(c, requestData.Content, requestData.FileBytes, requestData.UUID)
 		_this.HandleResponse(c, resp, err)
 	}
 }
@@ -63,11 +64,14 @@ func (_this *DataProcessingHandler) ProcessDataHandler() gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param request body dtos.ResumesRequest true "Batch of resume data including file bytes for each"
+// @Param isLinkedin query bool false "Flag to indicate if the resumes are from LinkedIn"
 // @Success 200 {object} meta.BasicResponse{data=[]dtos.ResumeProcessingResult}
 // @Failure 400,401,404,500 {object} meta.Error
 // @Router /cvseeker/resumes/batch/upload [post]
 func (_this *DataProcessingHandler) ProcessDataBatchHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		isLinkedin := utils.Str2Bool(c.Query("isLinkedin"))
+
 		var requestData dtos.ResumesRequest
 		if err := c.ShouldBindJSON(&requestData); err != nil {
 			_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
@@ -79,15 +83,8 @@ func (_this *DataProcessingHandler) ProcessDataBatchHandler() gin.HandlerFunc {
 			return
 		}
 
-		for _, resume := range requestData.Resumes {
-			if strings.TrimSpace(resume.Content) == "" || strings.TrimSpace(resume.FileBytes) == "" {
-				_this.RespondError(c, errors.NewCusErr(errors.ErrCommonInvalidRequest))
-				return
-			}
-		}
-
 		// Process the batch of resumes
-		resp, err := _this.dataProcessingService.ProcessDataBatch(c, requestData.Resumes)
+		resp, err := _this.dataProcessingService.ProcessDataBatch(c, requestData.Resumes, isLinkedin)
 		_this.HandleResponse(c, resp, err)
 	}
 }

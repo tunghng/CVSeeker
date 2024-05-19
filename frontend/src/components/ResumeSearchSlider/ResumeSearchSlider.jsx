@@ -20,7 +20,7 @@ const ResumeSearchSlider = ({ value, onChange }) => {
                 data-tooltip-content="Keyword-based search: Users input keywords to find information"
                 data-tooltip-place="bottom"
                 data-tooltip-delay-show={200}
-                className="cursor-default"
+                className="cursor-default text-text"
             >
                 Keyword
             </span>
@@ -45,7 +45,7 @@ const ResumeSearchSlider = ({ value, onChange }) => {
                 data-tooltip-content="Context-based search: The search method considers the context to find relevant information"
                 data-tooltip-place="bottom"
                 data-tooltip-delay-show={200}
-                className="cursor-default"
+                className="cursor-default text-text"
             >
                 Context
             </span>

@@ -1,88 +1,112 @@
-# CVSeeker Server
+# CVSeeker Backend Services D
 
-CVSeeker Server is the backend server component for the CVSeeker application, designed to manage and facilitate operations related to job seekers' curriculum vitae (CV) storage, processing, and retrieval. This server also provides functionalities for matching job seekers with potential employers based on criteria specified by both parties.
+## Table of Contents
+- [1. Introduction](#1-introduction)
+- [2. Data Processing Service](#2-data-processing-service)
+- [3. Search Service](#3-search-service)
+- [4. Chatbot Service](#4-chatbot-service)
+- [5. API Endpoints](#5-api-endpoints)
+- [6. Implementation Specifics](#6-implementation-specifics)
 
-## Features
+## 1. Introduction
+CVSeeker is designed to streamline the talent acquisition process, enabling teams to efficiently find and engage candidates within their talent pool. This documentation outlines the backend services that support this application.
 
-- **CV Management**: Allows users to upload, update, and retrieve CVs in various formats.
-- **Matching Algorithm**: Utilizes advanced algorithms to match job seekers with potential employers based on multiple factors like skills, experience, and job preferences.
-- **RESTful API Endpoints**: Provides a set of API endpoints to facilitate communication between the server and client-side applications or third-party integrations.
+**[Insert System Architecture Diagram Placeholder]**
 
-## Project Structure
+## 2. Data Processing Service
+### Workflow
+When a resume is uploaded, the data processing service initiates a background job to handle the file:
+1. **File Storage:** The resume is stored in AWS S3.
+2. **Data Parsing:** The full text of the resume is extracted and formatted using OpenAI's GPT into a predefined JSON structure.
+3. **Vector Embedding:** The text is also sent to a Hugging Face model to be converted into vector format.
+4. **Indexing:** The JSON data, vector array, and S3 link are indexed in Elasticsearch.
+5. **Notification:** A WebSocket sends real-time notifications to the client about the status of the upload.
 
-The project is structured to facilitate a modular and scalable architecture. Each component has a specific role, ensuring separation of concerns and ease of maintenance. Here's a detailed overview of the repository's structure:
-
-### /cmd
-- **/CVSeeker**: This directory contains the main application entry point.
-    - **/internal**:
-        -  **/cfg**: Manages all configuration-related activities for the CVSeeker application
-        -  **/handlers**: Responsible for processing incoming HTTP requests.
-        -  **/providers**: Ensuring that dependencies are managed efficiently across the application using dependency injection.
-        -  **/services**: Include the business logic needed to interact with resources that the application depends on.
-    - **/pkg**: Holds common utilities for reusability.
-    - **/statics**: Configuration files
-    - **main.go**: Primary executable for the CVSeeker server
-
-### /internal
-- **/dtos**: Defines objects that carry data between processes, typically used to aggregate the data and send it to clients.
-- **/errors**: Contains error handling logic and error definitions for the application, centralizing error management in one location.
-- **/ginLogger**: Custom logging functionality.
-- **/ginMiddleware**: Middleware components for the Gin framework.
-- **/ginServer**: Setup and configuration code for the Gin HTTP server.
-- **/handlers**: Methods for handling response, errors in handlers.
-- **/meta**: Metadata utilities or definitions that are used across various parts of the application.
-- **/models**: Domain models representing the core business objects within the application.
-- **/repositories**: Abstractions over the data layer, providing a collection of methods for accessing and manipulating database records.
-
-### /pkg
-- Contains library code that can be used across different projects or within different parts of this application.
-    - **/api**: General components or utilities related to API operations.
-    - **/aws**: Utilities and helpers for interacting with Amazon Web Services.
-    - **/cfg**: Configuration-related code that helps in managing application settings.
-    - **/db**: Database interaction utilities and helpers, potentially abstracting some ORM functionalities or database connections.
-    - **/elasticsearch**: Components specifically for interacting with Elasticsearch, providing search capabilities.
-    - **/gpt**: Utilities or components to interact with OpenAI's GPT models.
-    - **/huggingface**: Integrations or utilities for interacting with Hugging Face APIs or models.
-    - **/logger**: Centralized logging utilities that can be used throughout the application for consistent logging.
-    - **/utils**: Miscellaneous utilities that provide generic functionalities used by various parts of the application.
-
-### Configuration and Miscellaneous
-- **.env**: Stores environment-specific variables that configure various aspects of the application, such as database connections, API keys, and operational parameters.
-- **/go.mod**: Defines the module's dependencies and manages versions, ensuring consistent builds by locking down specific versions of external packages.
-
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-These steps assume that you have **go 1.21** downloaded, here is how to check the version
-
-```bash
-go version 
+### Data Structure Example
+```json
+{
+    "summary": "Provide a concise professional summary based on the resume.",
+    "skills": ["List of skills"],
+    "basic_info": {
+        "full_name": "Invented Full Name",
+        "university": "Generated University Name",
+        "education_level": "BS",
+        "majors": ["List of Majors", "GPA: 3.5"]
+    },
+    "work_experience": [{
+        "job_title": "Title",
+        "company": "Company Name",
+        "location": "Location",
+        "duration": "Duration",
+        "job_summary": "Job responsibilities and achievements"
+    }],
+    "project_experience": [{
+        "project_name": "Project Name",
+        "project_description": "Project details including technologies used"
+    }],
+    "award": [{"award_name": "Award Name"}]
+}
 ```
 
-### Installing
+**[Insert Data Flow Diagram Placeholder]**
 
-A step-by-step guide to setting up a development environment:
+## 3. Search Service
+The search service allows users to perform hybrid searches combining keyword and semantic approaches:
+1. **Query Input:** Users input a search query with a semantic threshold.
+2. **Vectorization:** The query is vectorized using the same Hugging Face model.
+3. **Matching:**
+    - Step 1: Use ANN to narrow down potential matches.
+    - Step 2: Compute cosine similarity with all resumes in the Elasticsearch index.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/tunghng/CVSeeker-server.git
-   cd CVSeeker
-   ```
+Results are presented in the search interface, ranked by match quality.
 
-2. Install dependencies:
-   ```bash
-   go mod tidy
-   ```
+**[Insert Search Workflow Diagram Placeholder]**
 
-3. Set up environment variables:
-   Copy the `.env.example` file to `.env` and modify it with your settings.
+## 4. Chatbot Service
+Users can interact directly with selected resumes through a chat interface powered by OpenAI's Assistant API:
+1. **Session Management:** Users start chat sessions with selected resumes. Each session creates a new thread, and all candidate information is loaded into this thread.
+2. **Interaction:** User messages are processed by the Assistant API, with responses streamed back to the frontend via WebSocket.
+3. **Session Continuity:** Users can revisit previous threads to continue interactions and review associated resumes.
 
-4. Run the server:
-   ```bash
-   go build CVSeeker/cmd/CVSeeker
-   ```
+**[Insert Chatbot Service Workflow Diagram Placeholder]**
 
-    
+## 5. API Endpoints
+### Data Processing Service
+#### Upload Resumes
+- **POST** `/cvseeker/resumes/upload`
+   - **Description:** Processes uploaded resume files and associated metadata as JSON.
+   - **Request Body:** `{ "resumeData": [array of resume files and metadata] }` (required)
+   - **Responses:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `500 Internal Server Error`
+
+### Search Service
+#### Perform Hybrid Search
+- **POST** `/cvseeker/resumes/search`
+   - **Description:** Executes a search combining keyword and vector-based queries.
+   - **Request Body:** `{ "query": "search keywords", "knnBoost": 0.5 }` (required)
+   - **Responses:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `500 Internal Server Error`
+
+### Chatbot Service
+#### Start Chat Session
+- **POST** `/cvseeker/resumes/thread/start`
+   - **Description:** Starts a new chat session using specified document IDs.
+   - **Request Body:** `{ "ids": "comma-separated document IDs", "threadName": "optional name" }` (required)
+   - **Responses:** `200 OK`, `400 Bad Request`, `500 Internal Server Error`
+
+#### Get Messages from a Thread
+- **GET** `/cvseeker/resumes/thread/{threadId}/messages`
+   - **Description:** Retrieves messages from a specified chat thread.
+   - **Path Parameters:** `threadId` (required)
+   - **Query Parameters:** `limit`, `after`, `before` for pagination
+   - **Responses:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `500 Internal Server Error`
+
+#### Send Message to a Thread
+- **POST** `/cvseeker/resumes/thread/{threadId}/send`
+   - **Description:** Sends a message to the specified thread.
+   - **Path Parameters:** `threadId` (required)
+   - **Request Body:** `{ "message": "text" }` (required)
+   - **Responses:** `200 OK`, `400 Bad Request`, `500 Internal Server Error`
+
+## 6. Implementation Specifics
+(Provide details on database connections, security considerations, performance metrics, error handling, etc.)
+
+**[Insert Additional Diagrams or Technical Specification Placeholders as Needed]**

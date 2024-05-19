@@ -133,17 +133,15 @@ class GetFulltext(APIView):
                     # Save successed providers
                     profile = {
                         "content" : result[1],
-                        "link" : urls[i],
+                        "fileBytes" : urls[i],
                     }
                     profiles.append(profile)
                 else:
                     # Save failed providers for handling then
-                    failed_profile = {
-                        "content": result[1] + providers[i].__str__(),
-                        "link": urls[i]
-                    }
-                    profiles.append(failed_profile)
-        response_data = {'profiles': profiles}
+
+                    failed_providers.append(i)
+        response_data = {'resumes': profiles}
+
 
         #Response to client
         return Response(profiles, status=status.HTTP_200_OK)

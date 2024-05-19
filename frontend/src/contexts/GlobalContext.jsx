@@ -12,6 +12,8 @@ function GlobalProvider({ children }) {
         setShowSidebar(!showSidebar);
     }
 
+    const [sidebarThreads, setSidebarThreads] = useState(null); // null -> Loading, [] -> Empty, [data] -> Fetched data
+
 
     // ====== Selected Stack bar state
     const [showSelectedItemsStack, setShowSelectedItemsStack] = useState(false);
@@ -40,8 +42,11 @@ function GlobalProvider({ children }) {
     const value = {
         showSidebar,
         toggleSidebar,
+        sidebarThreads,
+        setSidebarThreads,
 
         showSelectedItemsStack,
+        setShowSelectedItemsStack,
         toggleSelectedItemsStack,
 
         selectedItemsStack,
