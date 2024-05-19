@@ -34,11 +34,9 @@ const SearchResultItem = ({ item, viewMode, onSelectClick, onDetailClick, onDown
 
             <p className='w-44 my-auto text-left text-base font-semibold cursor-default truncate'>{item.basic_info.full_name}</p>
 
-            <p className='w-32 my-auto text-center text-sm cursor-default truncate'>{item.basic_info.education_level}</p>
+            <p className='w-32 my-auto text-center text-sm cursor-default truncate'>{item.basic_info.point}</p>
 
-            <p className='flex-1 my-auto text-center text-sm cursor-default truncate'>
-                {item.basic_info.majors.length > 0 ? item.basic_info.majors.join(', ') : 'N/A'}
-            </p>
+            <p className='flex-1 my-auto text-center text-sm cursor-default truncate'>{item.basic_info.education_level}</p>
 
             <div className="w-20 sm:w-48 flex items-center justify-center gap-x-1">
                 <button

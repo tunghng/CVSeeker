@@ -144,7 +144,7 @@ const SearchPage = () => {
     }
 
     return (
-        <main className="my-content-wrapper flex">
+        <main className="my-content-wrapper flex no-scrollbar">
             {/* ====== Search Result Window ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'xl:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
                 {/* ====== Search Input ====== */}
