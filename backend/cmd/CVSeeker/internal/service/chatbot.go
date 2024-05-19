@@ -10,6 +10,7 @@ import (
 	"CVSeeker/pkg/db"
 	"CVSeeker/pkg/elasticsearch"
 	"CVSeeker/pkg/gpt"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
@@ -23,6 +24,7 @@ type IChatbotService interface {
 	ListMessage(c *gin.Context, request gpt.ListMessageRequest) (*meta.BasicResponse, error)
 	GetAllThreads(c *gin.Context) (*meta.BasicResponse, error)
 	GetResumesByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error)
+	UpdateThreadName(c *gin.Context, threadID string, newName string) (*meta.BasicResponse, error)
 }
 
 type ChatbotService struct {
@@ -65,11 +67,25 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 		return nil, err
 	}
 
-	// Format the documents' content
+	// Format the documents' content from ResumeSummaryDTO
 	var fullTextContent strings.Builder
 	fullTextContent.WriteString("You will use these information to answer questions from the user: ")
-	for _, doc := range documents {
-		fullTextContent.WriteString(doc.Content + " ")
+	for _, resume := range documents {
+		fullTextContent.WriteString(fmt.Sprintf("Summary: %s; Skills: %v; ", resume.Summary, resume.Skills))
+		fullTextContent.WriteString(fmt.Sprintf("Education: %s, %s, GPA: %.2f; ", resume.BasicInfo.University, resume.BasicInfo.EducationLevel, resume.BasicInfo.GPA))
+		fullTextContent.WriteString("Work Experience: ")
+		for _, work := range resume.WorkExperience {
+			fullTextContent.WriteString(fmt.Sprintf("%s at %s, %s; ", work.JobTitle, work.Company, work.Duration))
+		}
+		fullTextContent.WriteString("Projects: ")
+		for _, project := range resume.ProjectExperience {
+			fullTextContent.WriteString(fmt.Sprintf("%s: %s; ", project.ProjectName, project.ProjectDescription))
+		}
+		fullTextContent.WriteString("Awards: ")
+		for _, award := range resume.Award {
+			fullTextContent.WriteString(fmt.Sprintf("%s; ", award.AwardName))
+		}
+		fullTextContent.WriteString(" | ") // Separator for multiple resumes
 	}
 
 	// Create the initial message for the thread
@@ -116,7 +132,7 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 	// Prepare the response with the thread information
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Session started successfully with initial data",
 		},
 		Data: thread,
@@ -182,7 +198,7 @@ func (_this *ChatbotService) SendMessageToChat(c *gin.Context, threadID, message
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Response retrieved successfully",
 		},
 		Data: listMessageResponse,
@@ -228,7 +244,7 @@ func (_this *ChatbotService) GetAllThreads(c *gin.Context) (*meta.BasicResponse,
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "All threads retrieved successfully",
 		},
 		Data: threadDTOs,
@@ -254,10 +270,36 @@ func (_this *ChatbotService) GetResumesByThreadID(c *gin.Context, threadID strin
 
 	response := &meta.BasicResponse{
 		Meta: meta.Meta{
-			Code:    200,
+			Code:    http.StatusOK,
 			Message: "Resume IDs retrieved successfully for the thread",
 		},
 		Data: documents,
+	}
+	return response, nil
+}
+
+func (_this *ChatbotService) UpdateThreadName(c *gin.Context, threadID string, newName string) (*meta.BasicResponse, error) {
+	// Attempt to update the thread name
+	err := _this.threadRepo.UpdateThreadName(_this.db, threadID, newName)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to update thread name: %v", err)
+		return nil, err
+	}
+
+	// Retrieve the updated thread to confirm the change
+	updatedThread, err := _this.threadRepo.FindByID(_this.db, threadID)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to fetch updated thread: %v", err)
+		return nil, err
+	}
+
+	// Prepare the response
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    http.StatusOK,
+			Message: "Thread name updated successfully",
+		},
+		Data: updatedThread,
 	}
 	return response, nil
 }

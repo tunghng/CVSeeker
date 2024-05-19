@@ -18,12 +18,13 @@ import (
 )
 
 type IElasticsearchClient interface {
-	AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error
-	KeywordSearch(ctx context.Context, indexName string, query string) ([]ElasticResponse, error)
-	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error)
-	HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ElasticResponse, error)
-	GetDocumentByID(ctx context.Context, indexName, documentId string) (*ElasticResponse, error)
-	FetchDocumentsByIDs(ctx context.Context, indexName string, documentIDs []string) ([]ElasticResponse, error)
+	AddDocument(ctx context.Context, indexName string, document interface{}) (string, error)
+	KeywordSearch(ctx context.Context, indexName string, query string) ([]ResumeSummaryDTO, error)
+	VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ResumeSummaryDTO, error)
+	DeleteDocumentByID(ctx context.Context, indexName, documentID string) error
+	HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ResumeSummaryDTO, error)
+	GetDocumentByID(ctx context.Context, indexName, documentId string) (*ResumeSummaryDTO, error)
+	FetchDocumentsByIDs(ctx context.Context, indexName string, documentIDs []string) ([]ResumeSummaryDTO, error)
 }
 
 type ElasticsearchClient struct {
@@ -55,36 +56,44 @@ func NewElasticsearchClient(cfgReader *viper.Viper) (IElasticsearchClient, error
 }
 
 // AddDocument adds a new document to the specified index
-func (ec *ElasticsearchClient) AddDocument(ctx context.Context, indexName string, documentId string, document interface{}) error {
+func (ec *ElasticsearchClient) AddDocument(ctx context.Context, indexName string, document interface{}) (string, error) {
 	docJSON, err := json.Marshal(document)
 	if err != nil {
-		return fmt.Errorf("error marshaling document: %w", err)
+		return "", fmt.Errorf("error marshaling document: %w", err)
 	}
 
-	// Prepare the request with the specified index, document ID and document body
+	// Prepare the request with the specified index, document body, and make it refresh immediately
 	req := esapi.IndexRequest{
-		Index:      indexName,
-		DocumentID: documentId,
-		Body:       bytes.NewReader(docJSON),
-		Refresh:    "true", // or use esapi.RefreshTrue if available
+		Index:   indexName,
+		Body:    bytes.NewReader(docJSON),
+		Refresh: "true", // or use esapi.RefreshTrue if available
 	}
 
 	// Perform the request with the given context
 	res, err := req.Do(ctx, ec.client)
 	if err != nil {
-		return fmt.Errorf("error indexing document: %w", err)
+		return "", fmt.Errorf("error indexing document: %w", err)
 	}
 	defer res.Body.Close()
 
+	// Read the response body
 	if res.IsError() {
-		return fmt.Errorf("error response from Elasticsearch: %s", res.String())
+		return "", fmt.Errorf("error response from Elasticsearch: %s", res.String())
 	}
 
-	return nil
+	// Parse the response body to extract the ID
+	var result struct {
+		ID string `json:"_id"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("error parsing response body: %w", err)
+	}
+
+	return result.ID, nil
 }
 
-// GetDocumentByID retrieves a document by its ID from a specific index and converts it to an ElasticResponse.
-func (ec *ElasticsearchClient) GetDocumentByID(ctx context.Context, indexName string, documentID string) (*ElasticResponse, error) {
+// GetDocumentByID retrieves a document by its ID from a specific index and converts it to an ResumeSummaryDTO.
+func (ec *ElasticsearchClient) GetDocumentByID(ctx context.Context, indexName string, documentID string) (*ResumeSummaryDTO, error) {
 	// Create the Get request to Elasticsearch
 	req := esapi.GetRequest{
 		Index:      indexName,
@@ -111,7 +120,7 @@ func (ec *ElasticsearchClient) GetDocumentByID(ctx context.Context, indexName st
 	}
 }
 
-func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexName string, documentIDs []string) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexName string, documentIDs []string) ([]ResumeSummaryDTO, error) {
 	// Construct the request body for the multi-get API
 	docs := make([]map[string]interface{}, len(documentIDs))
 	for i, id := range documentIDs {
@@ -152,23 +161,56 @@ func (ec *ElasticsearchClient) FetchDocumentsByIDs(ctx context.Context, indexNam
 		return nil, fmt.Errorf("error decoding response body: %w", err)
 	}
 
-	// Convert the results to ElasticResponse
-	responses := make([]ElasticResponse, 0, len(mgetResp.Docs))
+	// Convert the results to ResumeSummaryDTO
+	response := make([]ResumeSummaryDTO, 0, len(mgetResp.Docs))
 	for _, doc := range mgetResp.Docs {
 		if doc.Found {
-			response := ElasticResponse{
-				ID:      doc.ID,
-				Content: fmt.Sprintf("%v", doc.Source["content"]),
-				URL:     fmt.Sprintf("%v", doc.Source["url"]),
+			// Assuming content is a JSON string that maps directly to ResumeSummaryDTO
+			var resume ResumeSummaryDTO
+
+			contentData, ok := doc.Source["content"].(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("content field missing or not correctly formatted as a JSON object")
 			}
-			responses = append(responses, response)
+
+			// Marshal the contentData back to JSON string to unmarshal into DTO
+			jsonData, err := json.Marshal(contentData)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal content data: %w", err)
+			}
+
+			if err := json.Unmarshal(jsonData, &resume); err != nil {
+				return nil, fmt.Errorf("error unmarshaling resume content: %w", err)
+			}
+			response = append(response, resume)
 		}
 	}
 
-	return responses, nil
+	return response, nil
 }
 
-func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName string, query string) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) DeleteDocumentByID(ctx context.Context, indexName, documentID string) error {
+	// Create the Delete request to Elasticsearch
+	req := esapi.DeleteRequest{
+		Index:      indexName,
+		DocumentID: documentID,
+	}
+
+	// Perform the request with the provided context
+	res, err := req.Do(ctx, ec.client)
+	if err != nil {
+		return fmt.Errorf("error deleting document: %w", err)
+	}
+	defer res.Body.Close() // Ensure body is closed after the operation
+
+	if res.IsError() {
+		return fmt.Errorf("error response from Elasticsearch while deleting document: %s", res.String())
+	}
+
+	return nil
+}
+
+func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName string, query string) ([]ResumeSummaryDTO, error) {
 	res, err := ec.client.Search().
 		Index(indexName).
 		Query(&types.Query{
@@ -185,7 +227,7 @@ func (ec *ElasticsearchClient) KeywordSearch(ctx context.Context, indexName stri
 	return ConvertHitsToElasticResponses(res.Hits.Hits)
 }
 
-func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName string, vector []float32) ([]ResumeSummaryDTO, error) {
 	res, err := ec.client.Search().
 		Index(indexName).
 		Knn(types.KnnQuery{
@@ -203,7 +245,7 @@ func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 }
 
 // HybridSearchWithBoost perform search combining both semantic and lexiacal search
-func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ElasticResponse, error) {
+func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ResumeSummaryDTO, error) {
 	queryBoost := 1.0 - knnBoost
 
 	// Generate a query vector for the term, replace this with your actual model vector generation
@@ -235,45 +277,40 @@ func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexN
 	return ConvertHitsToElasticResponses(res.Hits.Hits)
 }
 
-func ConvertHitsToElasticResponses(hits []types.Hit) ([]ElasticResponse, error) {
-	var responses []ElasticResponse
+func ConvertHitsToElasticResponses(hits []types.Hit) ([]ResumeSummaryDTO, error) {
+	var resumes []ResumeSummaryDTO
 	for _, hit := range hits {
-		response, err := ConvertHitToElasticResponse(&hit)
+		resume, err := ConvertHitToElasticResponse(&hit)
 		if err != nil {
 			return nil, err
 		}
-		responses = append(responses, *response)
+		resumes = append(resumes, *resume)
 	}
-	return responses, nil
+	return resumes, nil
 }
 
-// ConvertHitToElasticResponse converts a single Elasticsearch hit to an ElasticResponse.
-func ConvertHitToElasticResponse(hit *types.Hit) (*ElasticResponse, error) {
+func ConvertHitToElasticResponse(hit *types.Hit) (*ResumeSummaryDTO, error) {
 	var source map[string]interface{}
 	if err := json.Unmarshal(hit.Source_, &source); err != nil {
 		return nil, fmt.Errorf("an error occurred while unmarshaling hit: %w", err)
 	}
 
-	var content, url string
-	// Handle content field based on its data type in the source
-	if contentVal, ok := source["content"].([]interface{}); ok && len(contentVal) > 0 {
-		content, _ = contentVal[0].(string) // Safely assert to string
-	} else if contentStr, ok := source["content"].(string); ok {
-		content = contentStr
+	// Check if the content is a JSON object and handle it directly
+	contentData, ok := source["content"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("content field missing or not correctly formatted as a JSON object")
 	}
 
-	// Handle url field based on its data type in the source
-	if urlVal, ok := source["url"].([]interface{}); ok && len(urlVal) > 0 {
-		url, _ = urlVal[0].(string) // Safely assert to string
-	} else if urlStr, ok := source["url"].(string); ok {
-		url = urlStr
+	// Marshal the contentData back to JSON string to unmarshal into DTO
+	jsonData, err := json.Marshal(contentData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal content data: %w", err)
 	}
 
-	response := &ElasticResponse{
-		ID:      hit.Id_,
-		Content: content,
-		URL:     url,
+	var resume ResumeSummaryDTO
+	if err := json.Unmarshal(jsonData, &resume); err != nil {
+		return nil, fmt.Errorf("an error occurred while unmarshaling resume content: %w", err)
 	}
 
-	return response, nil
+	return &resume, nil
 }

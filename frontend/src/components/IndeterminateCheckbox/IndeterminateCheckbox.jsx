@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import FeatherIcon from 'feather-icons-react'
 
 const IndeterminateCheckbox = ({ checked, indeterminate, onChange }) => {
+    
     const checkboxRef = useRef(null);
 
     useEffect(() => {
@@ -18,14 +19,14 @@ const IndeterminateCheckbox = ({ checked, indeterminate, onChange }) => {
                 ref={checkboxRef}
                 checked={checked}
                 onChange={onChange}
-                className='cursor-pointer w-5 h-5 peer appearance-none
-                        bg-white border border-subtitle rounded-[4px]
+                className='cursor-pointer w-6 h-6 peer appearance-none
+                        bg-white border-2 border-border rounded-[4px]
                         indeterminate:bg-primary indeterminate:border-primary
                         checked:bg-primary checked:border-primary
                         '
             />
-            <FeatherIcon icon="check" className=" absolute top-[1px] left-[1px] w-[18px] h-[18px] text-white hidden peer-checked:block pointer-events-none" strokeWidth={3}/>
-            <FeatherIcon icon="minus" className=" absolute top-[1px] left-[1px] w-[18px] h-[18px] text-white hidden peer-indeterminate:block pointer-events-none" strokeWidth={3}/>
+            <FeatherIcon icon="check" className={`${checked ? 'block' : 'hidden'} absolute top-1/2 -translate-x-1/2 left-1/2 -translate-y-1/2 w-5 h-5 text-white pointer-events-none`} strokeWidth={3}/>
+            <FeatherIcon icon="minus" className="absolute top-1/2 -translate-x-1/2 left-1/2 -translate-y-1/2 w-5 h-5 text-white hidden peer-indeterminate:block pointer-events-none" strokeWidth={3}/>
         </div>
     );
 

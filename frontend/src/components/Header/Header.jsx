@@ -24,6 +24,7 @@ const Header = () => {
                 }
             </button>
 
+            {/* ====== Logo Image ====== */}
             <div className='absolute left-1/2 transform -translate-x-1/2 flex items-center select-none'>
                 <img
                     src={logocvseeker}

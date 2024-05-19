@@ -9,7 +9,11 @@ type StartChatRequest struct {
 	ThreadName string `json:"threadName"`
 }
 
-type ResumeRequest struct {
+type ResumesRequest struct {
+	Resumes []ResumeData `json:"resumes"`
+}
+
+type ResumeData struct {
 	Content   string `json:"content"`
-	FileBytes string `json:"fileBytes"` // base64 encoded string of the file
+	FileBytes string `json:"fileBytes"`
 }

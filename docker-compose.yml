@@ -11,7 +11,8 @@ services:
       - MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
       - MYSQL_DATABASE=${DB_MYSQL_DATABASE}
     volumes:
-      - ./${DB_LOCAL_DIR}:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+      - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -28,3 +29,14 @@ services:
       mysql:
         condition: service_healthy
     command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"  # Ensure to adjust the port if "serve" is configured differently
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+    driver: local
