@@ -105,6 +105,11 @@ const SearchPage = () => {
         globalContext.popFromSelectedStack(itemId)
     }
     const startChatSessionHandler = () => {
+        if (globalContext.selectedItemsStack.length === 0) {
+            alert("Please select at least one item to start chat session");
+            return;
+        }
+
         setIsStartChatSession(true)
         const idsString = globalContext.selectedItemsStack.map(item => item.id).join(', ')
         const timeStr = generateThreadName();
@@ -189,7 +194,7 @@ const SearchPage = () => {
                     </div>
 
                     {/* ====== View Mode Buttons ====== */}
-                    <div className="flex items-center">
+                    {/* <div className="flex items-center">
                         <p className="mr-2">View as</p>
                         <button
                             className={`my-button my-button-outline-secondary px-3 rounded-l-full ${resultViewMode === ViewMode.LIST && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
@@ -203,7 +208,7 @@ const SearchPage = () => {
                         >
                             <FeatherIcon icon="grid" className="w-5 h-5" />
                         </button>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* ====== Search Results ====== */}

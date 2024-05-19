@@ -13,7 +13,7 @@ const SidebarThreadItem = ({ item, isActive }) => {
     const [showMorePopup, setShowMorePopup] = useState(false);
     const morePopupRef = useRef(null);
     const [showRenameModal, setShowRenameModal] = useState(false);
-    const [newName, setNewName] = useState(item.name);
+    const [newName, setNewName] = useState('');
 
     // ====== Event Handlers ======
     const moreButtonClickHandler = (e) => {
