@@ -34,11 +34,6 @@ const Sidebar = () => {
                     <span>New Search</span>
                 </Link>
 
-                <Link to='/saved' className={`navigation-item ${location.pathname === '/saved' && 'active'}`}>
-                    <FeatherIcon icon="bookmark" className="w-6 h-6" strokeWidth={1.8} />
-                    <span>Saved CV</span>
-                </Link>
-
                 <Link to='/upload' className={`navigation-item ${location.pathname === '/upload' && 'active'}`}>
                     <FeatherIcon icon="upload" className="w-6 h-6" strokeWidth={1.8} />
                     <span>Upload CV</span>
