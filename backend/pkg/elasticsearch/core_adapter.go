@@ -260,8 +260,8 @@ func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexN
 			Field:         "embedding", // Ensure this field matches your schema
 			QueryVector:   queryVector,
 			Boost:         &knnBoost,
-			K:             100,
-			NumCandidates: 100, // Adj	ust the number of candidates as needed
+			K:             60,
+			NumCandidates: 200, // Adj	ust the number of candidates as needed
 		}).
 		Query(&types.Query{
 			Match: map[string]types.MatchQuery{
@@ -299,7 +299,9 @@ func ConvertHitToElasticResponse(hit *types.Hit) (*ResumeSummaryDTO, error) {
 	}
 
 	// Extract the ID from the hit and assign it to the DTO
-	id := hit.Id_ // Assuming hit.ID contains the document's ID, adjust if your actual field name differs
+	id := hit.Id_
+
+	score := float64(hit.Score_)
 
 	// Check if the content is a JSON object and handle it directly
 	contentData, ok := source["content"].(map[string]interface{})
@@ -318,7 +320,8 @@ func ConvertHitToElasticResponse(hit *types.Hit) (*ResumeSummaryDTO, error) {
 		return nil, fmt.Errorf("an error occurred while unmarshaling resume content: %w", err)
 	}
 
-	resume.Id = id // Assigning the extracted ID to the DTO
+	resume.Id = id
+	resume.Point = score
 
 	return &resume, nil
 }

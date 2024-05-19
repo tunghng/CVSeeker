@@ -14,6 +14,7 @@ type ResumeSummaryDTO struct {
 	ProjectExperience []ProjectExperience `json:"project_experience"`
 	Award             []Award             `json:"award"`
 	URL               string              `json:"url"`
+	Point             float64             `json:"point"`
 }
 
 type BasicInfo struct {
