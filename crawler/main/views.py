@@ -6,6 +6,77 @@ from rest_framework import status
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .models import Scrapin, RelevanceAI, Phantombuster, ProviderManagement
 
+def get_provider():
+    enable_services = ProviderManagement.objects.filter(enable=True)
+    useable_providers = []
+    index_providers = []
+    for service in enable_services:
+        if(service.id == 1):
+            scrapin_providers = Scrapin.objects.filter(remain_credits__gt=0)
+            index_providers.append(len(index_providers) + len(scrapin_providers))
+            useable_providers = useable_providers +scrapin_providers
+
+        if(service.id == 2):
+            rele_providers = RelevanceAI.objects.filter(remain_credits__gt=0)
+            index_providers.append(len(index_providers) + len(rele_providers))
+            useable_providers = useable_providers + rele_providers
+        if(service.id == 3):
+            phantom_providers = Phantombuster.objects.filter(remain_time__gt=10) 
+            index_providers.append(len(index_providers) + len(phantom_providers))
+            useable_providers = useable_providers + phantom_providers
+    return [useable_providers, index_providers]
+
+def scrape_profiles():
+    pass
+
+def crawl_profiles(services, providers, positions, times, urls):
+    profiles = [] # Store resutls
+    failed_providers = [] # Store failed provider for handling then
+    # Multithread for crawling
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = []
+        for i in range(len(urls)):
+            future = executor.submit(providers[i].get_profile_fulltext_jsonstring, urls[i])
+            futures.append((i, future)) # Store result with order each thread
+        # Get results
+        for i, future in futures:
+            result = future.result()
+            if(result[0] == 200 or result[0] == 500 or result[0] == 402):
+                # Save successed providers
+                profile = {
+                    "content" : result[1],
+                    "link" : urls[i],
+                }
+                profiles.append(profile)
+            else:
+                # Save failed providers for update
+                failed_providers.append(i)
+    if(len(failed_providers) == 0):
+        return [profiles, failed_providers]
+    else:
+        update_failed_providers(services, failed_providers, positions)
+
+        # when trying times less than 3
+        if(times <= 3):
+            resend_urls = [urls[pos] for pos in failed_providers]
+            profiles.append(crawl_profiles(services, providers, positions, times+1, resend_urls)[0])
+        else:
+            return [profiles, failed_providers]
+
+            
+
+def update_failed_providers(services, failed_list, positions):
+    for pos in failed_list:
+        for i in positions:
+            if pos < positions[i]:
+                services[i].number_errors += 1
+                services[i].save()
+                break
+
+
+
+
+
 class GetFulltext(APIView):
     def get(self, request):
         # Get parameters list_url from request
@@ -33,7 +104,7 @@ class GetFulltext(APIView):
         number_phantom = len(phantom_providers)
 
         # Checking providers's responsiveness to urls
-        providers = [None] * number_links
+        providers = []
         if(number_rele >= number_links):
             providers = rele_providers
         else:
@@ -67,11 +138,15 @@ class GetFulltext(APIView):
                     profiles.append(profile)
                 else:
                     # Save failed providers for handling then
-                    failed_providers.append(i)
+                    failed_profile = {
+                        "content": result[1] + providers[i].__str__(),
+                        "link": urls[i]
+                    }
+                    profiles.append(failed_profile)
         response_data = {'profiles': profiles}
 
         #Response to client
-        return Response(response_data, status=status.HTTP_200_OK)
+        return Response(profiles, status=status.HTTP_200_OK)
     
 
 
