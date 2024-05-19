@@ -87,7 +87,15 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                                 <p className='table-section-title'>Skills</p>
                             </div>
                             <div className='table-section-wrapper'>
-                                <p className='table-section-data'>{detailItem.skills.length > 0 ? detailItem.skills.join(', ') : 'N/A'}</p>
+                                <ul>
+                                    {detailItem.skills.length > 0 ?
+                                        detailItem.skills.map((skill, index) => (
+                                            <li key={index} className='table-section-data before:content-["•"] before:mr-2'>
+                                                {skill}
+                                            </li>
+                                        ))
+                                        : 'None'}
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -98,7 +106,15 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                                 <p className='table-section-title'>Awards</p>
                             </div>
                             <div className='table-section-wrapper'>
-                                <p className='table-section-data'>{detailItem.award.length > 0 ? detailItem.award.join(', ') : 'N/A'}</p>
+                                <ul>
+                                    {detailItem.award.length > 0 ?
+                                        detailItem.award.map((award, index) => (
+                                            <li key={index} className='table-section-data before:content-["•"] before:mr-2'>
+                                                {award.award_name}
+                                            </li>
+                                        ))
+                                        : 'None'}
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -117,7 +133,9 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                             </div>
                         ))
                         :
-                        <p className='mt-2 px-2'>None</p>}
+                        <p className='mt-2 px-2'>None</p>
+                    }
+
 
                     <h1 className='table-section-info'>Project experience</h1>
                     {detailItem.project_experience.length > 0
@@ -129,8 +147,8 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                             </div>
                         ))
                         :
-                        <p className='mt-2 px-2'>None</p>}
-
+                        <p className='mt-2 px-2'>None</p>
+                    }
 
                 </div>
             </div>
