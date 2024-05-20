@@ -33,6 +33,7 @@ const SearchPage = () => {
     const [resumeSearchLevel, setResumeSearchLevel] = useState(searchParams.get('level') || 0.5);
     const resumeSearchPage = (searchParams.get('page') || 1) < 1 ? 1 : (searchParams.get('page') || 1);
     const [isStartChatSession, setIsStartChatSession] = useState(false);
+    const [isNoResult, setIsNoResult] = useState(false);
 
     const [resultViewMode, setResultViewMode] = useState(ViewMode.LIST)
 
@@ -44,8 +45,14 @@ const SearchPage = () => {
     // ====== Side Effects ======
     useEffect(() => {
         setSearchResults([]);
-        searchResume(resumeSearchInput, resumeSearchLevel, resumeSearchPage - 1)
+        searchResume(resumeSearchInput, resumeSearchLevel, resumeSearchPage)
             .then(res => {
+                if (res === null) {
+                    setIsNoResult(true);
+                    setSearchResults([]);
+                    return;
+                }
+                setIsNoResult(false);
                 const updatedResults = res.map(item => ({ ...item, selected: false }));
                 setSearchResults(updatedResults);
             })
@@ -213,20 +220,26 @@ const SearchPage = () => {
 
                 {/* ====== Search Results ====== */}
                 <div className="my-container-medium min-h-[25rem] mt-4 pb-10">
-                    {(searchResults === null || searchResults.length === 0) ? (
-                        <div className="mt-6 flex flex-col items-center space-y-4">
-                            <p className="text-subtitle">Loading search result ...</p>
-                            <div className="loader"></div>
-                        </div>
-                    ) : (
-                        <SearchResultList
-                            searchResults={searchResults}
-                            viewMode={resultViewMode}
-                            onItemSelectClick={resultItemClickHandler}
-                            onItemDetailClick={resultItemDetailClickHandler}
-                            onItemDownloadClick={resultItemDownloadClickHandler}
-                        />
-                    )}
+                    {
+                        isNoResult ? (
+                            <p className="text-subtitle text-center">No result found</p>
+                        )
+                            :
+                            (searchResults && searchResults.length === 0) ? (
+                                <div className="mt-6 flex flex-col items-center space-y-4">
+                                    <p className="text-subtitle">Loading search result ...</p>
+                                    <div className="loader"></div>
+                                </div>
+                            ) : (
+                                <SearchResultList
+                                    searchResults={searchResults}
+                                    viewMode={resultViewMode}
+                                    onItemSelectClick={resultItemClickHandler}
+                                    onItemDetailClick={resultItemDetailClickHandler}
+                                    onItemDownloadClick={resultItemDownloadClickHandler}
+                                />
+                            )
+                    }
                 </div>
 
                 {/* ====== Pagination ====== */}

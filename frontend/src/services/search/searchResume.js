@@ -1,10 +1,12 @@
 
 import axiosInstance from "../configs";
 
-export default async function searchResume(text, level, page = 0, size = 15) {
+export default async function searchResume(text, level, page = 1, size = 15) {
+
+    let from = (page - 1) * size;
 
     try {
-        let res = await axiosInstance.post(`/search?knnBoost=${level}&from=${page}&size=${size}`, {
+        let res = await axiosInstance.post(`/search?knnBoost=${level}&from=${from}&size=${size}`, {
             content: text
         })
 
