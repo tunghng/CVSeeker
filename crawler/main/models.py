@@ -60,7 +60,9 @@ class RelevanceAI(models.Model):
                 if(status == 'failed' or len(errors) > 0):
                     if(relevance.is_wrong_url(response.text)):
                         return [500, 'LinkedIn URL wrong']
-            return [200, relevance.filter_to_string(response.text)]
+                return [200, relevance.filter_to_string(response.text)]
+            else:
+                return [response.status_code, 'failed']
         except:
             return [999, 'failed']
         
