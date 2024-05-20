@@ -63,13 +63,13 @@ const SearchPage = () => {
         if (e.key === 'Enter'
             && resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=1`);
         }
     }
     const resumeSearchClickHandler = () => {
         if (resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=1`);
         }
     }
 
@@ -172,12 +172,12 @@ const SearchPage = () => {
                 </div>
 
                 {/* ====== Search Slider ====== */}
-                <div className="my-container-small pt-3">
+                {/* <div className="my-container-small pt-3">
                     <ResumeSearchSlider
                         value={resumeSearchLevel}
                         onChange={(e) => setResumeSearchLevel(e.target.value)}
                     />
-                </div>
+                </div> */}
 
                 {/* ====== Actions Toolbar ====== */}
                 <div className="my-container-medium flex justify-between mt-3 h-10">

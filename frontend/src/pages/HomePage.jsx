@@ -14,12 +14,12 @@ const HomePage = () => {
     // ====== Event Handlers ======
     const resumeSearchKeyDownHandler = (e) => {
         if (e.key === 'Enter' && resumeSearchInput.trim() !== '') {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=${resumeSearchLevel}`)
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`)
         }
     }
     const resumeSearchClickHandler = () => {
         if (resumeSearchInput.trim() !== '') {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=${resumeSearchLevel}`)
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`)
         }
     }
 
@@ -36,12 +36,12 @@ const HomePage = () => {
             </div>
 
             {/* ====== Search Slider ====== */}
-            <div className="my-container-small pt-3">
+            {/* <div className="my-container-small pt-3">
                 <ResumeSearchSlider
                     value={resumeSearchLevel}
                     onChange={(e) => setResumeSearchLevel(e.target.value)}
                 />
-            </div>
+            </div> */}
         </main>
     )
 }
