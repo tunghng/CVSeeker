@@ -2,6 +2,8 @@
 import { useContext } from "react"
 import { GlobalContext } from "../contexts/GlobalContext"
 import { Outlet } from "react-router-dom"
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Header from '../components/Header/Header'
 import Sidebar from '../components/Sidebar/Sidebar'
@@ -24,6 +26,9 @@ const Layout = () => {
                     <Outlet />
                 </div>
             </div>
+
+            {/* ====== Toast Notification ====== */}
+            <ToastContainer />
         </div>
     )
 }

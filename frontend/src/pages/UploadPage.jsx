@@ -6,6 +6,7 @@ import getUploadedFiles from "../services/data-processing/getUploadedFiles";
 import getResume from "../services/data-processing/getResume";
 import { connectSocket, disconnect } from "../services/data-processing/connectSocket";
 
+import { toast } from 'react-toastify';
 import fileicon from '../assets/images/file.png';
 import FeatherIcon from 'feather-icons-react';
 import { FileUploader } from "react-drag-drop-files";
@@ -87,7 +88,19 @@ const UploadPage = () => {
         console.log('Message from server: ', message);
         if (message === '{"type":"notification","data":"All documents have been processed successfully."}') {
             disconnect();
+            showToast('Upload successful!');
         }
+    };
+    const showToast = (message) => {
+        toast.success(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
     };
 
     const closeUploadProcessModal = () => {

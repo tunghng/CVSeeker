@@ -18,6 +18,7 @@
         "react-markdown": "^9.0.1",
         "react-pdftotext": "^1.2.0",
         "react-router-dom": "^6.23.0",
+        "react-toastify": "^10.0.5",
         "react-tooltip": "^5.26.4",
         "uuid": "^9.0.1"
     },
