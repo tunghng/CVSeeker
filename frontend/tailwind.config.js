@@ -11,6 +11,10 @@ export default {
                 'primary-hover': '#045adb',
                 'primary-subtle': '#CFE2FF',
                 'secondary-subtle': '#DEE2E6',
+                'success-subtle': '#C7EDD9',
+                'success-primary' : '#41AF79',
+                'danger-subtle': '#FBBFBF',
+                'danger-primary': '#DC3545',
 
                 'disable-light': '#E9ECEF',
 

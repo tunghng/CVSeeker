@@ -2,6 +2,7 @@
 import { useState } from "react";
 import processUploadFiles from "../services/data-processing/processUploadFiles";
 import uploadPdfFiles from "../services/data-processing/uploadPdfFiles";
+import uploadLinkedProfile from "../services/data-processing/uploadLinkedProfile";
 import getUploadedFiles from "../services/data-processing/getUploadedFiles";
 import getResume from "../services/data-processing/getResume";
 import { connectSocket, disconnect } from "../services/data-processing/connectSocket";
@@ -32,12 +33,26 @@ const UploadPage = () => {
     // ====== Event Handlers ======
     const linkedinUploadKeyDownHandler = (e) => {
         if (e.key === 'Enter' && urlInput.trim() !== '') {
-            console.log(urlInput.trim())
+            const profile = {
+                fileBytes: urlInput,
+            }
+            uploadLinkedProfile([profile])
+                .then((res) => {
+                    setUrlInput('');
+                    showToast('Upload successful!');
+                });
         }
     }
     const linkedinUploadClickHandler = () => {
         if (urlInput.trim() !== '') {
-            console.log(urlInput.trim())
+            const profile = {
+                fileBytes: urlInput,
+            }
+            uploadLinkedProfile([profile])
+                .then((res) => {
+                    setUrlInput('');
+                    showToast('Upload successful!');
+                });
         }
     }
 
