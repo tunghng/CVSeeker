@@ -34,9 +34,7 @@ const UploadPage = () => {
     const linkedinUploadKeyDownHandler = (e) => {
         if (e.key === 'Enter' && urlInput.trim() !== '') {
             const profile = {
-                content: "",
                 fileBytes: urlInput,
-                uuid: "",
             }
             uploadLinkedProfile([profile])
                 .then((res) => {
@@ -47,7 +45,14 @@ const UploadPage = () => {
     }
     const linkedinUploadClickHandler = () => {
         if (urlInput.trim() !== '') {
-
+            const profile = {
+                fileBytes: urlInput,
+            }
+            uploadLinkedProfile([profile])
+                .then((res) => {
+                    setUrlInput('');
+                    showToast('Upload successful!');
+                });
         }
     }
 
