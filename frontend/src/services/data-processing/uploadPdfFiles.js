@@ -9,9 +9,8 @@ export default async function uploadPdfFiles(textFiles) {
         });
 
         res = res.data.meta.code === 200 ? res.data.data : { error: res.data.meta.message }
-        console.log(res)
         
-        // return res
+        return res
     }
 
     catch (err) {

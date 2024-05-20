@@ -1,23 +1,17 @@
 
 export default async function convertFileBytes(file) {
-
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         
-        reader.onload = () => {
-            const arrayBuffer = reader.result;
-            const bytes = new Uint8Array(arrayBuffer);
-            
-            const decoder = new TextDecoder("utf-8");
-            const str = decoder.decode(bytes);
-            
-            resolve(str);
+        reader.onloadend = () => {
+            resolve(reader.result.split(',')[1]);
         };
         
-        reader.onerror = () => {
-            reject(new Error("Failed to read file"));
+        reader.onerror = (error) => {
+            reject(error);
         };
         
-        reader.readAsArrayBuffer(file);
+        reader.readAsDataURL(file);
     });
 }
+
