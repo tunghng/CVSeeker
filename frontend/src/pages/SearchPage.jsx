@@ -31,7 +31,7 @@ const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [resumeSearchInput, setResumeSearchInput] = useState(searchParams.get('query') || '');
     const [resumeSearchLevel, setResumeSearchLevel] = useState(searchParams.get('level') || 0.5);
-    const resumeSearchPage = searchParams.get('page') || 0;
+    const resumeSearchPage = (searchParams.get('page') || 1) < 1 ? 1 : (searchParams.get('page') || 1);
     const [isStartChatSession, setIsStartChatSession] = useState(false);
 
     const [resultViewMode, setResultViewMode] = useState(ViewMode.LIST)
