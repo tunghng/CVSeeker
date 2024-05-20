@@ -224,7 +224,7 @@ func (_this *DataProcessingService) GetAllUploads(c *gin.Context) (*meta.BasicRe
 }
 
 func fetchLinkedInData(urls []string) ([]dtos.ResumeData, error) {
-	apiUrl := "http://127.0.0.1:8000/api/getfulltext/?list_url=" + strings.Join(urls, ",")
+	apiUrl := "http://crawler:8000/api/getfulltext/?list_url=" + strings.Join(urls, ",")
 	resp, err := http.Get(apiUrl)
 	if err != nil {
 		return nil, err

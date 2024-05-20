@@ -44,3 +44,5 @@ services:
     depends_on:
       - backend
     hostname: crawler
+
+
