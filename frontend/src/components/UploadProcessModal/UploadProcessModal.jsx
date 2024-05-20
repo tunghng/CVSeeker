@@ -15,12 +15,12 @@ const UploadProcessModal = ({ showUploadProcessModal, uploadedFiles, onClose, on
                             {uploadedFiles.map((file, index) => (
                                 <div key={index} className={`mt-4 px-3 py-2 flex justify-between items-center rounded-xl 
                                     ${file.status === "Processing" && `bg-disable-light`}
-                                    ${file.status === "Failed" && `bg-red-100`}
-                                    ${file.status === "Success" && `bg-green-200/50`}`}>
+                                    ${file.status === "Failed" && `bg-danger-subtle`}
+                                    ${file.status === "Success" && `bg-success-subtle/50`}`}>
                                     <div>
-                                        <h3 className={`text-lg font-semibold
+                                        <h3 className={`text-lg font-bold
                                             ${file.status === "Processing" && `text-text`}
-                                            ${file.status === "Failed" && `text-red-500`}
+                                            ${file.status === "Failed" && `text-danger-primary`}
                                             ${file.status === "Success" && `text-green-600/90`}
                                         `}>
                                             {file.name === "" ? "Pending" : file.name}
@@ -31,7 +31,7 @@ const UploadProcessModal = ({ showUploadProcessModal, uploadedFiles, onClose, on
                                     </div>
 
                                     {file.status === "Success" && (
-                                        <button className="my-button bg-green-600/80 text-white flex items-center py-1 rounded-full"
+                                        <button className="my-button bg-green-600/70 hover:bg-green-600/90 text-white flex items-center py-1 rounded-full"
                                             onClick={() => onDetail(file)}>
                                             <FeatherIcon icon="info" className="w-5 h-5 mr-1" strokeWidth={2} />
                                             Detail
