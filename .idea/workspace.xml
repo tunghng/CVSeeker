@@ -4,16 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c71fc09f-7e08-4613-9c1a-004d2a6e0479" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CVSeeker.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CVSeeker.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.idea/backend.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/chatbot.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/chatbot.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pkg/elasticsearch/core_adapter.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pkg/elasticsearch/core_adapter.go" afterDir="false" />
+    <list default="true" id="e99ca8cf-e1b4-47b5-b987-5815e76fd79e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,9 +21,9 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
+  "associatedIndex": 2
 }]]></component>
-  <component name="ProjectId" id="2gieJ0jCY2MxrlaC5ylgkUX70TW" />
+  <component name="ProjectId" id="2gjYuAOtw2djl0AmzpuHSY3tqSf" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -56,7 +49,6 @@
     <configuration name="go build CVSeeker/cmd/CVSeeker" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
       <module name="CVSeeker" />
       <working_directory value="$PROJECT_DIR$/backend/cmd/CVSeeker" />
-      <go_parameters value="-i" />
       <EXTENSION ID="net.ashald.envfile">
         <option name="IS_ENABLED" value="true" />
         <option name="IS_SUBST" value="false" />
@@ -93,18 +85,13 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/chatbot.go</url>
-          <line>121</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/handlers/chatbot.go</url>
-          <line>162</line>
+          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go</url>
+          <line>225</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/handlers/chatbot.go</url>
-          <line>140</line>
+          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go</url>
+          <line>117</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>

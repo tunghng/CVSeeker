@@ -264,12 +264,8 @@ func extractNameFromURL(url string) string {
 }
 
 func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText string, file string, isLinkedin bool) (*elasticsearch.ElkResumeDTO, error) {
-	var prompt string
-	if isLinkedin == false {
-		prompt = generatePrompt(fullText)
-	} else {
-		prompt = generatePromptLinkedin(fullText)
-	}
+	prompt := generatePrompt(fullText)
+
 	model := viper.GetString(cfg.ChatGptModel)
 	textEmbeddingModel := viper.GetString(cfg.HuggingfaceModel)
 	awsBucketName := viper.GetString(cfg.AwsBucket)
@@ -325,46 +321,6 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 }
 
 func generatePrompt(fullText string) string {
-	var sb strings.Builder
-	sb.WriteString("Full text of the resume:\n\n")
-	sb.WriteString(fullText)
-	sb.WriteString("\n\nPlease transform the above resume text into a well-structured JSON. The JSON should have the following structure and order:\n\n")
-	sb.WriteString(`{
-  "summary": "[Provide a concise professional summary based on the resume. Include key skills and experiences.]",
-  "skills": ["List all relevant skills derived from the resume, each as a separate element in the array."],
-  "basic_info": {
-    "full_name": "[Invent a full name that sounds realistic and appropriate for the professional field]",
-    "university": "[Generate a university name that fits the education level and field of study]",
-    "education_level": "[Assign an education level, e.g., BS, MS, PhD, appropriate for the resume context]",
-    "majors": ["Create a list of majors that align with the professional background and education level]",
-    "GPA": [Generate a GPA as a number that is plausible for the given educational background, or use null if not applicable]
-  },
-  "work_experience": [
-    {
-      "job_title": "[Title of the position]",
-      "company": "[Name of the company]",
-      "location": "[Location of the job]",
-      "duration": "[Duration of the job in years or months, e.g., '2 years']",
-      "job_summary": "[A brief summary of job responsibilities and achievements]"
-    }
-  ],
-  "project_experience": [
-    {
-      "project_name": "[Name of the project]",
-      "project_description": "[A detailed description of the project, including technologies used and outcomes]"
-    }
-  ],
-  "award": [
-    {
-      "award_name": "[Name of any award received, empty array if none]"
-    }
-  ]
-}`)
-	sb.WriteString("\n\nAll details in the 'basic_info' section should be invented but must sound logical and realistic, appropriate for the professional context. Ensure the details are consistent with typical professional and educational backgrounds relevant to the data in the rest of the resume. For other sections, ensure all entries are derived from the resume's content, maintaining consistency and accuracy with the original information. Provide clear, precise language to avoid ambiguities and ensure data types match the expected format.")
-	return sb.String()
-}
-
-func generatePromptLinkedin(fullText string) string {
 	var sb strings.Builder
 	sb.WriteString("Full text of the resume:\n\n")
 	sb.WriteString(fullText)
