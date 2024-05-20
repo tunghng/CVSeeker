@@ -2,12 +2,16 @@
 import { useState } from "react";
 import processUploadFiles from "../services/data-processing/processUploadFiles";
 import uploadPdfFiles from "../services/data-processing/uploadPdfFiles";
+import getUploadedFiles from "../services/data-processing/getUploadedFiles";
+import getResume from "../services/data-processing/getResume";
+import { connectSocket, disconnect } from "../services/data-processing/connectSocket";
 
 import fileicon from '../assets/images/file.png';
-import { FileUploader } from "react-drag-drop-files";
 import FeatherIcon from 'feather-icons-react';
+import { FileUploader } from "react-drag-drop-files";
 import LinkedinUploadInput from "../components/LinkedinUploadInput/LinkedinUploadInput";
-import { connectSocket, disconnect } from "../services/data-processing/connectSocket";
+import UploadProcessModal from "../components/UploadProcessModal/UploadProcessModal";
+import DetailItemModal from "../components/DetailItemModal/DetailItemModal";
 
 const fileTypes = ["PDF"];
 
@@ -19,6 +23,10 @@ const UploadPage = () => {
     const [files, setFiles] = useState([]);
     const [processedFiles, setProcessedFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showUploadProcessModal, setShowUploadProcessModal] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [showDetailItemModal, setShowDetailItemModal] = useState(false);
+    const [detailItem, setDetailItem] = useState(null);
 
     // ====== Event Handlers ======
     const linkedinUploadKeyDownHandler = (e) => {
@@ -82,10 +90,44 @@ const UploadPage = () => {
         }
     };
 
+    const closeUploadProcessModal = () => {
+        setShowUploadProcessModal(false);
+    };
+    const openUploadProcessModal = () => {
+        setShowUploadProcessModal(true);
+        getUploadedFiles()
+            .then((res) => {
+                setUploadedFiles(res);
+            });
+    };
+
+    const detailItemModalOpenHandler = (item) => {
+        setShowDetailItemModal(true);
+        getResume(item.documentId)
+            .then((res) => {
+                setDetailItem(res);
+            });
+    };
+    const detailItemModalCloseHandler = () => {
+        setShowDetailItemModal(false);
+    };
+    const detailItemModalDownloadHandler = () => {
+        console.log('Download clicked');
+    };
+
+
     return (
         <main className="my-content-wrapper">
             <div className="my-container-medium pt-6 pb-8">
-                <h1 className="text-2xl font-bold text-title">Upload profile</h1>
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold text-title">Upload profile</h1>
+                    <button className="my-button my-button-subtle flex items-center py-2"
+                        onClick={openUploadProcessModal}
+                    >
+                        <FeatherIcon icon="inbox" className="w-6 h-6 mr-1" strokeWidth={2} />
+                        History
+                    </button>
+                </div>
 
                 {/* ====== Upload by link profile ====== */}
                 <h2 className="mt-4 text-lg text-text">Upload profile by Linkedin Url</h2>
@@ -149,6 +191,22 @@ const UploadPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* ====== Upload Process Modal ====== */}
+            <UploadProcessModal
+                showUploadProcessModal={showUploadProcessModal}
+                onClose={closeUploadProcessModal}
+                uploadedFiles={uploadedFiles}
+                onDetail={detailItemModalOpenHandler}
+            />
+
+            {/* ====== Detail Item Modal ====== */}
+            <DetailItemModal
+                showDetailItemModal={showDetailItemModal}
+                detailItem={detailItem}
+                onModalClose={detailItemModalCloseHandler}
+                onDownloadClick={detailItemModalDownloadHandler}
+            />
         </main>
     )
 }
