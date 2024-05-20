@@ -1,5 +1,5 @@
 
-const RenameModal = ({ value, onChange, onClose, onRename }) => {
+const RenameThreadModal = ({ value, onChange, onClose, onRename }) => {
 
     return (
         <div className="fixed top-0 left-0 w-screen h-screen z-50 flex items-center justify-center"
@@ -30,4 +30,5 @@ const RenameModal = ({ value, onChange, onClose, onRename }) => {
         </div>
     )
 }
-export default RenameModal
+
+export default RenameThreadModal

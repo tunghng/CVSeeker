@@ -2,10 +2,12 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { GlobalContext } from "../../contexts/GlobalContext"
 import renameThreadName from '../../services/chat/renameThreadName'
+import deleteThreadMessage from "../../services/chat/deleteThreadMessage";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FeatherIcon from "feather-icons-react";
-import RenameModal from "../RenameModal/RenameModal";
+import RenameThreadModal from "../RenameThreadModal/RenameThreadModal";
+import DeleteThreadModal from "../DeleteThreadModal/DeleteThreadModal";
 
 const SidebarThreadItem = ({ item, isActive }) => {
     // ====== State Management ======
@@ -13,7 +15,9 @@ const SidebarThreadItem = ({ item, isActive }) => {
     const [showMorePopup, setShowMorePopup] = useState(false);
     const morePopupRef = useRef(null);
     const [showRenameModal, setShowRenameModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [newName, setNewName] = useState('');
+    const navigate = useNavigate();
 
     // ====== Event Handlers ======
     const moreButtonClickHandler = (e) => {
@@ -50,7 +54,21 @@ const SidebarThreadItem = ({ item, isActive }) => {
 
     const deleteHandler = () => {
         setShowMorePopup(false);
-        // Implement delete functionality
+        setShowDeleteModal(true);
+    };
+    const deleteModalCloseHandler = () => {
+        setShowDeleteModal(false);
+    };
+    const deleteModalDeleteHandler = () => {
+        deleteThreadMessage(item.id)
+            .then((res) => {
+                globalContext.setSidebarThreads((prev) => {
+                    const newThreads = prev.filter((thread) => thread.id !== item.id);
+                    return newThreads;
+                });
+                setShowDeleteModal(false);
+                navigate('/');
+            });
     };
 
     useEffect(() => {
@@ -85,11 +103,18 @@ const SidebarThreadItem = ({ item, isActive }) => {
             </Link>
 
             {showRenameModal && (
-                <RenameModal
+                <RenameThreadModal
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     onClose={renameModalCloseHandler}
                     onRename={renameModalRenameHandler}
+                />
+            )}
+
+            {showDeleteModal && (
+                <DeleteThreadModal
+                    onClose={deleteModalCloseHandler}
+                    onDelete={deleteModalDeleteHandler}
                 />
             )}
         </>

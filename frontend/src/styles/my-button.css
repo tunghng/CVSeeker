@@ -16,6 +16,10 @@
         @apply bg-primary text-white
                hover:bg-primary-hover hover:text-white;
     }
+    .my-button-danger {
+        @apply bg-red-500 text-white
+               hover:bg-red-600 hover:text-white;
+    }
     .my-button-outline {
         @apply bg-white text-primary border-2 border-primary
                hover:bg-primary hover:text-white;
