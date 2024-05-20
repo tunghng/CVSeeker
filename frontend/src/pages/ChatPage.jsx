@@ -127,7 +127,7 @@ const ChatPage = () => {
                 setIsAssistantLoading(false);
                 renderAssistantMessage(message.join(''));
             }
-        }, 100);
+        }, 50);
     };
 
     const renderAssistantMessage = (message) => {
