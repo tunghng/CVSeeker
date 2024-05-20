@@ -7,6 +7,7 @@ import fileicon from '../assets/images/file.png';
 import { FileUploader } from "react-drag-drop-files";
 import FeatherIcon from 'feather-icons-react';
 import LinkedinUploadInput from "../components/LinkedinUploadInput/LinkedinUploadInput";
+import { connectSocket, disconnect } from "../services/data-processing/connectSocket";
 
 const fileTypes = ["PDF"];
 
@@ -69,7 +70,17 @@ const UploadPage = () => {
 
     const uploadFilesHandler = async () => {
         await uploadPdfFiles(processedFiles);
-    }
+        setFiles([]);
+
+        connectSocket(handleSocketMessage);
+    };
+
+    const handleSocketMessage = (message) => {
+        console.log('Message from server: ', message);
+        if (message === '{"type":"notification","data":"All documents have been processed successfully."}') {
+            disconnect();
+        }
+    };
 
     return (
         <main className="my-content-wrapper">
