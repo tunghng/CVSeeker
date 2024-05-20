@@ -46,12 +46,12 @@ class GetFulltext(APIView):
                     if i not in successed: 
                         profile = {
                             "content" : result[1],
-                            "link" : urls[i],
+                            "fileBytes" : urls[i],
                         }
                         successed.append(i)
                         profiles.append(profile)
 
-        response_data = {'profiles': profiles}
+        response_data = {'resumes': profiles}
         #Response to client
         return Response(response_data, status=status.HTTP_200_OK)
 

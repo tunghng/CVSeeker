@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e99ca8cf-e1b4-47b5-b987-5815e76fd79e" name="Changes" comment="">
+    <list default="true" id="fe974652-f87c-4c25-8169-8532af508f73" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pkg/elasticsearch/core_adapter.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pkg/elasticsearch/core_adapter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crawler/crawler/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/crawler/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crawler/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,9 +25,9 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
+  "associatedIndex": 3
 }]]></component>
-  <component name="ProjectId" id="2gjYuAOtw2djl0AmzpuHSY3tqSf" />
+  <component name="ProjectId" id="2gjldVmgEsYLCEHUqoMOnUANAlV" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -46,9 +50,19 @@
   }
 }]]></component>
   <component name="RunManager">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="CVSeeker" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build CVSeeker/cmd/CVSeeker" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
       <module name="CVSeeker" />
       <working_directory value="$PROJECT_DIR$/backend/cmd/CVSeeker" />
+      <go_parameters value="-i" />
       <EXTENSION ID="net.ashald.envfile">
         <option name="IS_ENABLED" value="true" />
         <option name="IS_SUBST" value="false" />
@@ -80,21 +94,5 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go</url>
-          <line>225</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go</url>
-          <line>117</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

@@ -249,8 +249,6 @@ func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 
 // HybridSearchWithBoost perform search combining both semantic and lexiacal search
 func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ResumeSummaryDTO, error) {
-	queryBoost := 1.0 - knnBoost
-
 	res, err := ec.client.Search().
 		Index(indexName).
 		From(from).
@@ -258,17 +256,8 @@ func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexN
 		Knn(types.KnnQuery{
 			Field:         "embedding",
 			QueryVector:   queryVector,
-			Boost:         &knnBoost,
-			K:             60,
-			NumCandidates: 200, // Adj	ust the number of candidates as needed
-		}).
-		Query(&types.Query{
-			Match: map[string]types.MatchQuery{
-				"content": {
-					Query: query,
-					Boost: &queryBoost,
-				},
-			},
+			K:             150,
+			NumCandidates: 200,
 		}).
 		Do(ctx)
 

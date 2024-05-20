@@ -117,21 +117,21 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData, isLinkedin bool) (*meta.BasicResponse, error) {
 	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 
-	if isLinkedin {
-		linkedInUrls := make([]string, len(resumes))
-		for i, resume := range resumes {
-			linkedInUrls[i] = resume.FileBytes // Assuming FileBytes contains the LinkedIn URL
-		}
-
-		processedResumes, err := fetchLinkedInData(linkedInUrls)
-		if err != nil {
-			return nil, err
-		}
-		resumes = processedResumes // Replace or merge as necessary
-	}
-
 	// Start processing in the background
 	go func() {
+		if isLinkedin {
+			linkedInUrls := make([]string, len(resumes))
+			for i, resume := range resumes {
+				linkedInUrls[i] = resume.FileBytes // Assuming FileBytes contains the LinkedIn URL
+			}
+
+			processedResumes, err := fetchLinkedInData(linkedInUrls)
+			if err != nil {
+				return
+			}
+			resumes = processedResumes // Replace or merge as necessary
+		}
+
 		var wg sync.WaitGroup
 		results := make(chan *dtos.ResumeProcessingResult, len(resumes))
 		errors := make(chan error, len(resumes))
@@ -144,6 +144,7 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 				// Create initial upload record for each document
 				initialUpload := &models.Upload{
 					Status: "Processing",
+					Name:   res.Name,
 				}
 
 				createdUpload, err := _this.uploadRepo.Create(_this.db, initialUpload)
@@ -154,7 +155,7 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 
 				elkResume, err := _this.createElkResume(c, res.Content, res.FileBytes, isLinkedin)
 				if err != nil {
-					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed"})
+					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed", Name: res.Name})
 					ginLogger.Gin(c).Errorf("failed to create elk resume: %v", err)
 					errors <- err
 					return
@@ -162,7 +163,7 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 
 				documentID, err := _this.elasticClient.AddDocument(c, elasticDocumentName, elkResume)
 				if err != nil {
-					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed"})
+					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed", Name: res.Name})
 					ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
 					errors <- err
 					return
@@ -223,7 +224,7 @@ func (_this *DataProcessingService) GetAllUploads(c *gin.Context) (*meta.BasicRe
 }
 
 func fetchLinkedInData(urls []string) ([]dtos.ResumeData, error) {
-	apiUrl := "http://0.0.0.0:8000/api/getfulltext/?list_url=" + strings.Join(urls, ",")
+	apiUrl := "http://127.0.0.1:8000/api/getfulltext/?list_url=" + strings.Join(urls, ",")
 	resp, err := http.Get(apiUrl)
 	if err != nil {
 		return nil, err
