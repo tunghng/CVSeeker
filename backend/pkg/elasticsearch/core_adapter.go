@@ -251,13 +251,12 @@ func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ResumeSummaryDTO, error) {
 	queryBoost := 1.0 - knnBoost
 
-	// Generate a query vector for the term, replace this with your actual model vector generation
 	res, err := ec.client.Search().
 		Index(indexName).
 		From(from).
 		Size(size).
 		Knn(types.KnnQuery{
-			Field:         "embedding", // Ensure this field matches your schema
+			Field:         "embedding",
 			QueryVector:   queryVector,
 			Boost:         &knnBoost,
 			K:             60,

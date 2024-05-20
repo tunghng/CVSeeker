@@ -70,7 +70,7 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 
 	// Format the documents' content from ResumeSummaryDTO
 	var fullTextContent strings.Builder
-	fullTextContent.WriteString("You will use these information to answer questions from the user: ")
+	fullTextContent.WriteString("You will use these information to answer questions from the user while using markdown for clarity: ")
 	for _, resume := range documents {
 		fullTextContent.WriteString(fmt.Sprintf("Name: %s", resume.BasicInfo.FullName))
 		fullTextContent.WriteString(fmt.Sprintf("Summary: %s; Skills: %v; ", resume.Summary, resume.Skills))
@@ -258,11 +258,14 @@ func (_this *ChatbotService) GetResumesByThreadID(c *gin.Context, threadID strin
 		return nil, err
 	}
 
-	// Fetch documents from Elasticsearch
-	documents, err := _this.elasticClient.FetchDocumentsByIDs(c, elasticDocumentName, resumeIDs)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to fetch documents: %v", err)
-		return nil, err
+	var documents []*elasticsearch.ResumeSummaryDTO
+	for _, resumeID := range resumeIDs {
+		document, err := _this.elasticClient.GetDocumentByID(c, elasticDocumentName, resumeID)
+		if err != nil {
+			ginLogger.Gin(c).Errorf("failed to fetch document by ID: %v", err)
+			continue // or return nil, err if you prefer to fail on the first error
+		}
+		documents = append(documents, document)
 	}
 
 	response := &meta.BasicResponse{
