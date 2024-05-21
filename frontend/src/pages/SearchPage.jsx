@@ -244,11 +244,14 @@ const SearchPage = () => {
 
                 {/* ====== Pagination ====== */}
                 <div className="my-container-medium pb-12 flex justify-center">
-                    <PageButtons
-                        curr={resumeSearchPage}
-                        query={searchParams.get('query')}
-                        level={searchParams.get('level')}
-                    />
+                    {
+                        searchResults && searchResults.length > 0 &&
+                        <PageButtons
+                            curr={resumeSearchPage}
+                            query={searchParams.get('query')}
+                            level={searchParams.get('level')}
+                        />
+                    }
                 </div>
             </div>
 
