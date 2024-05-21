@@ -39,7 +39,7 @@ const UploadPage = () => {
             uploadLinkedProfile([profile])
                 .then((res) => {
                     setUrlInput('');
-                    showToast('Upload successful!');
+                    showUploadedToast('Profile will be processed immediately!');
                 });
         }
     }
@@ -51,7 +51,7 @@ const UploadPage = () => {
             uploadLinkedProfile([profile])
                 .then((res) => {
                     setUrlInput('');
-                    showToast('Upload successful!');
+                    showUploadedToast('Profile will be processed immediately!');
                 });
         }
     }
@@ -95,24 +95,35 @@ const UploadPage = () => {
     const uploadFilesHandler = async () => {
         await uploadPdfFiles(processedFiles);
         setFiles([]);
-
+        showUploadedToast('Profile will be processed immediately!');
         connectSocket(handleSocketMessage);
     };
 
     const handleSocketMessage = (message) => {
-        console.log('Message from server: ', message);
         if (message === '{"type":"notification","data":"All documents have been processed successfully."}') {
             disconnect();
-            showToast('Upload successful!');
+            showFinishProcessToast('Complete profile processing!');
         }
     };
-    const showToast = (message) => {
+    const showFinishProcessToast = (message) => {
         toast.success(message, {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,
             closeOnClick: true,
-            pauseOnHover: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            onClick: () => navigate('/upload'),
+        });
+    };
+    const showUploadedToast = (message) => {
+        toast.success(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
             draggable: true,
             progress: undefined,
         });
@@ -140,16 +151,15 @@ const UploadPage = () => {
         setShowDetailItemModal(false);
     };
     const detailItemModalDownloadHandler = () => {
-        console.log('Download clicked');
+        window.open(detailItem.url, '_blank');
     };
-
 
     return (
         <main className="my-content-wrapper">
             <div className="my-container-medium pt-6 pb-8">
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold text-title">Upload profile</h1>
-                    <button className="my-button my-button-subtle flex items-center py-2"
+                    <button className="my-button my-button-subtle rounded-full flex items-center py-2 px-4"
                         onClick={openUploadProcessModal}
                     >
                         <FeatherIcon icon="inbox" className="w-6 h-6 mr-1" strokeWidth={2} />
