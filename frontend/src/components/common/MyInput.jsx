@@ -13,7 +13,8 @@ const MyInput = ({
     icon = "",
     textClassName = "",
     text = "",
-    disabled = false
+    disabled = false,
+    autoFocus = true
 }) => {
 
     const handleKeyPress = (e) => {
@@ -37,6 +38,7 @@ const MyInput = ({
                 value={value}
                 onChange={onChange}
                 onKeyDown={handleKeyPress}
+                autoFocus={autoFocus}
             />
 
             {(icon || text) && (

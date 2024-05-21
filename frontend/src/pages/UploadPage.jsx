@@ -186,6 +186,8 @@ const UploadPage = () => {
                     multiple={true}
                     types={fileTypes}
                     onTypeError={() => setError('Invalid file type. Please upload only PDF files.')}
+                    maxSize={1}
+                    onSizeError={() => setError('File size is too large. Maximum size is 1MB.')}
                     children={<CustomFileUploader isDragging={isDragging} />}
                     dropMessageStyle={{ display: "none" }}
                     onDraggingStateChange={dragStateChangeHandler}

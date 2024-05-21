@@ -23,6 +23,7 @@ const LinkedinUploadInput = ({ value, onChange, onPressEnter, onClickButton }) =
                             h-full pl-3 pr-4 rounded-l-none !right-0`}
             iconClassName='!w-5 !h-5'
             disabled={!checkValidUrl(value)}
+            autoFocus={false}
         />
     )
 }
