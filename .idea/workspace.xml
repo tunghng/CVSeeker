@@ -7,9 +7,6 @@
     <list default="true" id="fe974652-f87c-4c25-8169-8532af508f73" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pkg/elasticsearch/core_adapter.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pkg/elasticsearch/core_adapter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crawler/crawler/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/crawler/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crawler/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/main/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -94,5 +91,16 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/backend/cmd/CVSeeker/internal/service/data_processing.go</url>
+          <line>227</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
