@@ -40,6 +40,7 @@ const UploadPage = () => {
                 .then((res) => {
                     setUrlInput('');
                     showUploadedToast('Profile will be processed immediately!');
+                    connectSocket(handleSocketMessage);
                 });
         }
     }
@@ -52,6 +53,7 @@ const UploadPage = () => {
                 .then((res) => {
                     setUrlInput('');
                     showUploadedToast('Profile will be processed immediately!');
+                    connectSocket(handleSocketMessage);
                 });
         }
     }
@@ -114,7 +116,6 @@ const UploadPage = () => {
             pauseOnHover: false,
             draggable: true,
             progress: undefined,
-            onClick: () => navigate('/upload'),
         });
     };
     const showUploadedToast = (message) => {
