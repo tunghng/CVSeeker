@@ -38,6 +38,9 @@ const ChatPage = () => {
 
     useEffect(() => {
         setThreadResumes([])
+        if (globalContext.showSelectedItemsStack === false) {
+            globalContext.toggleSelectedItemsStack()
+        }
         getThreadResumes(threadId)
             .then(res => {
                 setThreadResumes(res)
