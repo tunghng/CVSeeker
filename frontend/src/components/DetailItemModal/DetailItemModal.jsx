@@ -38,9 +38,9 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                 <div className='my-container-medium pb-10 bg-background'
                     onClick={(e) => e.stopPropagation()}>
 
-                    <h1 className='table-section-info'>{detailItem?.basic_info.full_name}</h1>
+                    <h1 className='table-section-info border-0'>{detailItem?.basic_info.full_name}</h1>
 
-                    <h2 className='pt-3 pb-4 px-2'>{detailItem?.summary}</h2>
+                    <h2 className='pt-1 pb-4 px-2'>{detailItem?.summary}</h2>
 
                     <div className='table-section-container'>
                         <div className='table-section-row'>
@@ -125,8 +125,8 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                         detailItem.work_experience.map((work, index) => (
                             <div key={index} className='mt-2 px-2 space-y-1'>
                                 <div className='flex justify-between'>
-                                    <p className='table-section-title text-lg'>{work.job_title}</p>
-                                    <p className='table-section-data italic'>{work.duration}</p>
+                                    <p className='table-section-title text-lg font-bold'>{work.job_title}</p>
+                                    <p className='table-section-data italic font-bold'>{work.duration}</p>
                                 </div>
                                 <p>Company: {work.company} ({work.location})</p>
                                 <p>Summary: {work.job_summary}</p>
@@ -142,7 +142,7 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
                         ?
                         detailItem.project_experience.map((project, index) => (
                             <div key={index} className='mt-2 px-2 space-y-1'>
-                                <p className='table-section-title text-lg'>{project.project_name}</p>
+                                <p className='table-section-title text-lg font-bold'>{project.project_name}</p>
                                 <p className='table-section-data'>{project.project_description}</p>
                             </div>
                         ))
