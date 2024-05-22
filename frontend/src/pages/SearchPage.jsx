@@ -7,9 +7,7 @@ import startThread from "../services/chat/startThread"
 import generateThreadName from "../services/chat/generateThreadName"
 
 import { Tooltip } from "react-tooltip"
-import FeatherIcon from 'feather-icons-react'
 import ResumeSearchInput from "../components/ResumeSearchInput/ResumeSearchInput"
-import ResumeSearchSlider from "../components/ResumeSearchSlider/ResumeSearchSlider"
 import IndeterminateCheckbox from "../components/IndeterminateCheckbox/IndeterminateCheckbox"
 import SearchResultList from "../components/SearchResultList/SearchResultList"
 import StackItem from "../components/StackItem/StackItem"

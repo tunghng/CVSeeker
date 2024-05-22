@@ -16,7 +16,7 @@ const UploadProcessModal = ({ showUploadProcessModal, uploadedFiles, onClose, on
                                 <div key={index} className={`mt-4 px-3 py-2 flex justify-between items-center rounded-xl 
                                     ${file.status === "Processing" && `bg-disable-light`}
                                     ${file.status === "Failed" && `bg-danger-subtle`}
-                                    ${file.status === "Success" && `bg-success-subtle/50`}`}>
+                                    ${file.status === "Success" && `bg-success-subtle/70`}`}>
                                     <div>
                                         <h3 className={`text-lg font-bold
                                             ${file.status === "Processing" && `text-text`}

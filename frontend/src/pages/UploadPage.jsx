@@ -143,6 +143,7 @@ const UploadPage = () => {
 
     const detailItemModalOpenHandler = (item) => {
         setShowDetailItemModal(true);
+        setDetailItem(null);
         getResume(item.documentId)
             .then((res) => {
                 setDetailItem(res);
