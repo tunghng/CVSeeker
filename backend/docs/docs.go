@@ -46,6 +46,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dtos.ResumesRequest"
                         }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Flag to indicate if the resumes are from LinkedIn",
+                        "name": "isLinkedin",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -567,6 +573,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/cvseeker/resumes/threads/{threadId}": {
+            "delete": {
+                "description": "Deletes the specified thread by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Chatbot"
+                ],
+                "summary": "Delete a thread by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Thread ID to be deleted",
+                        "name": "threadId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/meta.BasicResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/meta.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/cvseeker/resumes/upload": {
             "get": {
                 "description": "Fetches a list of all upload records sorted from the most recent to the oldest",
@@ -973,6 +1029,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "point": {
+                    "type": "number"
                 },
                 "project_experience": {
                     "type": "array",

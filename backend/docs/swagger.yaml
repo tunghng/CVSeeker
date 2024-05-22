@@ -99,6 +99,8 @@ definitions:
         $ref: '#/definitions/elasticsearch.BasicInfo'
       id:
         type: string
+      point:
+        type: number
       project_experience:
         items:
           $ref: '#/definitions/elasticsearch.ProjectExperience'
@@ -326,6 +328,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dtos.ResumesRequest'
+      - description: Flag to indicate if the resumes are from LinkedIn
+        in: query
+        name: isLinkedin
+        type: boolean
       produces:
       - application/json
       responses:
@@ -654,6 +660,39 @@ paths:
           schema:
             $ref: '#/definitions/meta.Error'
       summary: Start a new chat session
+      tags:
+      - Chatbot
+  /cvseeker/resumes/threads/{threadId}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the specified thread by its ID.
+      parameters:
+      - description: Thread ID to be deleted
+        in: path
+        name: threadId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/meta.BasicResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/meta.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/meta.Error'
+      summary: Delete a thread by ID
       tags:
       - Chatbot
   /cvseeker/resumes/upload:
