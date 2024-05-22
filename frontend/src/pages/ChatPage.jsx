@@ -204,7 +204,7 @@ const ChatPage = () => {
 
                 <div className="flex-1 overflow-y-auto">
                     {
-                        threadResumes.length === 0 ?
+                        threadResumes && threadResumes.length === 0 ?
                             <div className="pt-4 flex justify-center items-center">
                                 <div className="loader"></div>
                             </div>

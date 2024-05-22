@@ -33,6 +33,10 @@ function GlobalProvider({ children }) {
         const newStack = selectedItemsStack.filter(item => item.id !== itemId);
         setSelectedItemsStack(newStack);
     }
+
+    const isItemSelected = (itemId) => {
+        return selectedItemsStack.some(item => item.id === itemId);
+    }
     
     // ====== Detailed Item Modal state
     const [showDetailItemModal, setShowDetailItemModal] = useState(false);
@@ -53,6 +57,7 @@ function GlobalProvider({ children }) {
         setSelectedItemsStack,
         pushToSelectedStack,
         popFromSelectedStack,
+        isItemSelected,
 
         showDetailItemModal,
         setShowDetailItemModal,

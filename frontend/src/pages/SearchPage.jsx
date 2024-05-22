@@ -7,9 +7,7 @@ import startThread from "../services/chat/startThread"
 import generateThreadName from "../services/chat/generateThreadName"
 
 import { Tooltip } from "react-tooltip"
-import FeatherIcon from 'feather-icons-react'
 import ResumeSearchInput from "../components/ResumeSearchInput/ResumeSearchInput"
-import ResumeSearchSlider from "../components/ResumeSearchSlider/ResumeSearchSlider"
 import IndeterminateCheckbox from "../components/IndeterminateCheckbox/IndeterminateCheckbox"
 import SearchResultList from "../components/SearchResultList/SearchResultList"
 import StackItem from "../components/StackItem/StackItem"
@@ -53,7 +51,7 @@ const SearchPage = () => {
                     return;
                 }
                 setIsNoResult(false);
-                const updatedResults = res.map(item => ({ ...item, selected: false }));
+                const updatedResults = res.map(item => ({ ...item, selected: globalContext.isItemSelected(item.id) }));
                 setSearchResults(updatedResults);
             })
     }, [searchParams]);
@@ -63,13 +61,13 @@ const SearchPage = () => {
         if (e.key === 'Enter'
             && resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=1`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`);
         }
     }
     const resumeSearchClickHandler = () => {
         if (resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=1`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`);
         }
     }
 
@@ -195,7 +193,12 @@ const SearchPage = () => {
                                 <button
                                     className="my-button my-button-outline"
                                     onClick={addResultToStackHandler}
+                                    data-tooltip-id="add-list-tooltip"
+                                    data-tooltip-content="Add selected items to List"
+                                    data-tooltip-place="bottom"
+                                    data-tooltip-delay-show={700}
                                 >Add to List</button>
+                                <Tooltip id="add-list-tooltip" className="z-50" />
                             </>
                         }
                     </div>
@@ -278,7 +281,7 @@ const SearchPage = () => {
                     className="my-button my-button-primary py-2"
                     onClick={startChatSessionHandler}
                     data-tooltip-id="start-chat-tooltip"
-                    data-tooltip-content="Interact with AI chatbot in just a click!"
+                    data-tooltip-content="Analyze profiles with AI Chatbot ✨"
                     data-tooltip-place="top"
                     data-tooltip-delay-show={200}>
                     Start Chat Session

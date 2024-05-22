@@ -10,13 +10,13 @@ const UploadProcessModal = ({ showUploadProcessModal, uploadedFiles, onClose, on
                 <h2 className="text-lg font-semibold">Uploaded Files</h2>
 
                 <div>
-                    {uploadedFiles.length > 0 ? (
+                    {uploadedFiles && uploadedFiles.length > 0 ? (
                         <div className="mt-4">
                             {uploadedFiles.map((file, index) => (
                                 <div key={index} className={`mt-4 px-3 py-2 flex justify-between items-center rounded-xl 
                                     ${file.status === "Processing" && `bg-disable-light`}
                                     ${file.status === "Failed" && `bg-danger-subtle`}
-                                    ${file.status === "Success" && `bg-success-subtle/50`}`}>
+                                    ${file.status === "Success" && `bg-success-subtle/70`}`}>
                                     <div>
                                         <h3 className={`text-lg font-bold
                                             ${file.status === "Processing" && `text-text`}

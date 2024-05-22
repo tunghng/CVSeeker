@@ -105,6 +105,10 @@ const UploadPage = () => {
         if (message === '{"type":"notification","data":"All documents have been processed successfully."}') {
             disconnect();
             showFinishProcessToast('Complete profile processing!');
+            getUploadedFiles()
+                .then((res) => {
+                    setUploadedFiles(res);
+                });
         }
     };
     const showFinishProcessToast = (message) => {
@@ -143,6 +147,7 @@ const UploadPage = () => {
 
     const detailItemModalOpenHandler = (item) => {
         setShowDetailItemModal(true);
+        setDetailItem(null);
         getResume(item.documentId)
             .then((res) => {
                 setDetailItem(res);
@@ -152,7 +157,12 @@ const UploadPage = () => {
         setShowDetailItemModal(false);
     };
     const detailItemModalDownloadHandler = () => {
-        window.open(detailItem.url, '_blank');
+        if (detailItem.url !== "") {
+            window.open(detailItem.url, '_blank');
+        }
+        else {
+            alert("No download link available")
+        }
     };
 
     return (
@@ -203,7 +213,7 @@ const UploadPage = () => {
 
                 {/* ====== Uploaded files ====== */}
                 <div className="flex flex-col">
-                    {files.length > 0 && (
+                    {files && files.length > 0 && (
                         <>
                             {files.map((file, index) => (
                                 <div key={index} className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">
