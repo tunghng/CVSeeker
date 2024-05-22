@@ -213,7 +213,7 @@ const UploadPage = () => {
 
                 {/* ====== Uploaded files ====== */}
                 <div className="flex flex-col">
-                    {files.length > 0 && (
+                    {files && files.length > 0 && (
                         <>
                             {files.map((file, index) => (
                                 <div key={index} className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">

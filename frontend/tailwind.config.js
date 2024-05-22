@@ -17,6 +17,7 @@ export default {
                 'danger-primary': '#DC3545',
 
                 'disable-light': '#E9ECEF',
+                'disable-dark': '#C2C7CD',
 
                 'border': '#DEE2E6',
 

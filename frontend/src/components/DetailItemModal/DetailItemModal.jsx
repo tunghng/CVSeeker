@@ -21,21 +21,25 @@ const DetailItemModal = ({ showDetailItemModal, detailItem, onModalClose, onAddT
             <div className='fixed w-full h-14 px-6 flex justify-between items-center bg-black/80'
                 onClick={(e) => e.stopPropagation()}>
                 <div className='flex items-baseline gap-x-6'>
-                    <h1 className='text-xl text-white'>{detailItem?.basic_info.full_name}</h1>
+                    <h1 className='text-xl text-white'>{detailItem ? detailItem.basic_info.full_name : 'Loading...'}</h1>
                 </div>
 
                 <div className='flex gap-x-3'>
-                    <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'
-                        onClick={onDownloadClick}>
-                        <FeatherIcon icon="download" className='w-[18px] h-[18px]' strokeWidth={1.6} />
-                        <p className='hidden sm:block'>Download</p>
-                    </button>
-                    {onAddToList && (
-                        <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'
-                            onClick={onAddToList}>
-                            <FeatherIcon icon="plus" className='w-[18px] h-[18px]' strokeWidth={1.6} />
-                            <p className='hidden sm:block'>Add to List</p>
-                        </button>
+                    {detailItem && (
+                        <>
+                            <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'
+                                onClick={onDownloadClick}>
+                                <FeatherIcon icon="download" className='w-[18px] h-[18px]' strokeWidth={1.6} />
+                                <p className='hidden sm:block'>Download</p>
+                            </button>
+                            {onAddToList && (
+                                <button className='px-3 py-2 sm:py-1 bg-white/20 text-base text-white rounded-full flex items-center gap-x-1 hover:bg-white/30'
+                                    onClick={onAddToList}>
+                                    <FeatherIcon icon="plus" className='w-[18px] h-[18px]' strokeWidth={1.6} />
+                                    <p className='hidden sm:block'>Add to List</p>
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
