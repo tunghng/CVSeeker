@@ -2,7 +2,7 @@
 
 @layer components {
     .table-section-info {
-        @apply pt-8 pl-2 text-xl font-bold;
+        @apply pt-10 pl-2 pb-2 text-xl font-bold border-b border-title;
     }
 
     .table-section-container {

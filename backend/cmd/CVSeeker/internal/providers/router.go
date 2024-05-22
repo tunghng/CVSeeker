@@ -56,6 +56,7 @@ func setupRouter(hs *handlers.Handlers) ginServer.GinRoutingFn {
 			data.GET("/thread/:threadId/messages", hs.ChatbotHandler.ListMessage())
 			data.GET("/thread", hs.ChatbotHandler.GetAllThreads())
 			data.GET("/thread/:threadId", hs.ChatbotHandler.GetResumesByThreadID())
+			data.DELETE("/thread/:threadId", hs.ChatbotHandler.DeleteThreadById())
 			data.POST("/thread/:threadId/updateName", hs.ChatbotHandler.UpdateThreadName())
 		}
 

@@ -16,6 +16,10 @@
         @apply bg-primary text-white
                hover:bg-primary-hover hover:text-white;
     }
+    .my-button-danger {
+        @apply bg-red-500 text-white
+               hover:bg-red-600 hover:text-white;
+    }
     .my-button-outline {
         @apply bg-white text-primary border-2 border-primary
                hover:bg-primary hover:text-white;
@@ -24,6 +28,10 @@
         @apply bg-primary-subtle text-primary
                hover:bg-primary hover:text-white;
     }
+    .my-button-secondary {
+        @apply bg-gray-200 text-text
+               hover:bg-gray-300;
+    }
     .my-button-outline-secondary {
         @apply bg-white text-title border-2 border-subtitle
                hover:bg-disable-light
@@ -31,5 +39,14 @@
 
     .selected-item-stack-button {
         @apply h-4 w-1 bg-primary rounded-full transform  transition-transform duration-300;
+    }
+
+    .page-btn {
+        @apply px-3.5 py-2 flex justify-center items-center text-sm
+        rounded-md transition duration-300 ease-in-out cursor-pointer
+        hover:bg-primary-subtle;
+    }
+    .page-btn-active {
+        @apply !bg-primary text-white font-semibold;
     }
 }

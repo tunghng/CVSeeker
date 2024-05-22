@@ -2,7 +2,7 @@
 import ReactMarkdown from 'react-markdown'
 
 const ThreadMessageItem = ({ item }) => {
-    if (item.content[0].text.value.startsWith('You will use these information')) {
+    if (item && item.content[0].text.value.startsWith('You will use these information')) {
         return null;
     }
 

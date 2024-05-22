@@ -9,7 +9,7 @@ const ResumeSearchInput = ({ value, onChange, onPressEnter, onClickButton }) => 
             onChange={onChange}
             onPressEnter={onPressEnter}
             onClickButton={onClickButton}
-            placeholder="Enter desired CV description..."
+            placeholder="Search desired resume description..."
             icon="search"
         />
     );

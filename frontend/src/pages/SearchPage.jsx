@@ -4,15 +4,16 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { GlobalContext } from "../contexts/GlobalContext"
 import searchResume from "../services/search/searchResume"
 import startThread from "../services/chat/startThread"
+import generateThreadName from "../services/chat/generateThreadName"
 
 import { Tooltip } from "react-tooltip"
-import FeatherIcon from 'feather-icons-react'
 import ResumeSearchInput from "../components/ResumeSearchInput/ResumeSearchInput"
-import ResumeSearchSlider from "../components/ResumeSearchSlider/ResumeSearchSlider"
 import IndeterminateCheckbox from "../components/IndeterminateCheckbox/IndeterminateCheckbox"
 import SearchResultList from "../components/SearchResultList/SearchResultList"
 import StackItem from "../components/StackItem/StackItem"
 import DetailItemModal from "../components/DetailItemModal/DetailItemModal"
+import LoadingModal from "../components/LoadingModal/LoadingModal"
+import PageButtons from "../components/PageButtons/PageButtons"
 
 const ViewMode = {
     GRID: 'grid',
@@ -28,6 +29,9 @@ const SearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [resumeSearchInput, setResumeSearchInput] = useState(searchParams.get('query') || '');
     const [resumeSearchLevel, setResumeSearchLevel] = useState(searchParams.get('level') || 0.5);
+    const resumeSearchPage = (searchParams.get('page') || 1) < 1 ? 1 : (searchParams.get('page') || 1);
+    const [isStartChatSession, setIsStartChatSession] = useState(false);
+    const [isNoResult, setIsNoResult] = useState(false);
 
     const [resultViewMode, setResultViewMode] = useState(ViewMode.LIST)
 
@@ -39,9 +43,15 @@ const SearchPage = () => {
     // ====== Side Effects ======
     useEffect(() => {
         setSearchResults([]);
-        searchResume(resumeSearchInput, resumeSearchLevel)
+        searchResume(resumeSearchInput, resumeSearchLevel, resumeSearchPage)
             .then(res => {
-                const updatedResults = res.map(item => ({ ...item, selected: false }));
+                if (res === null) {
+                    setIsNoResult(true);
+                    setSearchResults([]);
+                    return;
+                }
+                setIsNoResult(false);
+                const updatedResults = res.map(item => ({ ...item, selected: globalContext.isItemSelected(item.id) }));
                 setSearchResults(updatedResults);
             })
     }, [searchParams]);
@@ -51,13 +61,13 @@ const SearchPage = () => {
         if (e.key === 'Enter'
             && resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`);
         }
     }
     const resumeSearchClickHandler = () => {
         if (resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&level=${resumeSearchLevel}`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`);
         }
     }
 
@@ -100,13 +110,31 @@ const SearchPage = () => {
         globalContext.popFromSelectedStack(itemId)
     }
     const startChatSessionHandler = () => {
+        if (globalContext.selectedItemsStack.length === 0) {
+            alert("Please select at least one item to start chat session");
+            return;
+        }
+
+        setIsStartChatSession(true)
         const idsString = globalContext.selectedItemsStack.map(item => item.id).join(', ')
-        startThread(idsString)
+        const timeStr = generateThreadName();
+
+        startThread(idsString, timeStr)
             .then(res => {
                 if (res !== null) {
-                    navigate(`/chat/${res.id}`)
+                    setIsStartChatSession(false);
+                    globalContext.setSelectedItemsStack([]);
+                    globalContext.setShowSelectedItemsStack(false);
+                    globalContext.setSidebarThreads([
+                        {
+                            id: res.id,
+                            name: timeStr,
+                        },
+                        ...globalContext.sidebarThreads
+                    ]);
+                    navigate(`/chat/${res.id}`);
                 }
-            })
+            });
     }
 
     const detailItemModalCloseHandler = () => {
@@ -128,7 +156,7 @@ const SearchPage = () => {
     }
 
     return (
-        <main className="my-content-wrapper flex">
+        <main className="my-content-wrapper flex no-scrollbar">
             {/* ====== Search Result Window ====== */}
             <div className={`${globalContext.showSelectedItemsStack && 'xl:mr-72'} flex-1 transition-all duration-700 ease-in-out`}>
                 {/* ====== Search Input ====== */}
@@ -142,12 +170,12 @@ const SearchPage = () => {
                 </div>
 
                 {/* ====== Search Slider ====== */}
-                <div className="my-container-small pt-3">
+                {/* <div className="my-container-small pt-3">
                     <ResumeSearchSlider
                         value={resumeSearchLevel}
                         onChange={(e) => setResumeSearchLevel(e.target.value)}
                     />
-                </div>
+                </div> */}
 
                 {/* ====== Actions Toolbar ====== */}
                 <div className="my-container-medium flex justify-between mt-3 h-10">
@@ -165,13 +193,18 @@ const SearchPage = () => {
                                 <button
                                     className="my-button my-button-outline"
                                     onClick={addResultToStackHandler}
+                                    data-tooltip-id="add-list-tooltip"
+                                    data-tooltip-content="Add selected items to List"
+                                    data-tooltip-place="bottom"
+                                    data-tooltip-delay-show={700}
                                 >Add to List</button>
+                                <Tooltip id="add-list-tooltip" className="z-50" />
                             </>
                         }
                     </div>
 
                     {/* ====== View Mode Buttons ====== */}
-                    <div className="flex items-center">
+                    {/* <div className="flex items-center">
                         <p className="mr-2">View as</p>
                         <button
                             className={`my-button my-button-outline-secondary px-3 rounded-l-full ${resultViewMode === ViewMode.LIST && 'bg-secondary-subtle hover:bg-secondary-subtle'}`}
@@ -185,25 +218,43 @@ const SearchPage = () => {
                         >
                             <FeatherIcon icon="grid" className="w-5 h-5" />
                         </button>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* ====== Search Results ====== */}
-                <div className="my-container-medium mt-4 pb-10">
-                    {(searchResults === null || searchResults.length === 0) ? (
-                        <div className="mt-6 flex flex-col items-center space-y-4">
-                            <p className="text-subtitle">Loading search result ...</p>
-                            <div className="loader"></div>
-                        </div>
-                    ) : (
-                        <SearchResultList
-                            searchResults={searchResults}
-                            viewMode={resultViewMode}
-                            onItemSelectClick={resultItemClickHandler}
-                            onItemDetailClick={resultItemDetailClickHandler}
-                            onItemDownloadClick={resultItemDownloadClickHandler}
+                <div className="my-container-medium min-h-[25rem] mt-4 pb-10">
+                    {
+                        isNoResult ? (
+                            <p className="text-subtitle text-center">No result found</p>
+                        )
+                            :
+                            (searchResults && searchResults.length === 0) ? (
+                                <div className="mt-6 flex flex-col items-center space-y-4">
+                                    <p className="text-subtitle">Loading search result ...</p>
+                                    <div className="loader"></div>
+                                </div>
+                            ) : (
+                                <SearchResultList
+                                    searchResults={searchResults}
+                                    viewMode={resultViewMode}
+                                    onItemSelectClick={resultItemClickHandler}
+                                    onItemDetailClick={resultItemDetailClickHandler}
+                                    onItemDownloadClick={resultItemDownloadClickHandler}
+                                />
+                            )
+                    }
+                </div>
+
+                {/* ====== Pagination ====== */}
+                <div className="my-container-medium pb-12 flex justify-center">
+                    {
+                        searchResults && searchResults.length > 0 &&
+                        <PageButtons
+                            curr={resumeSearchPage}
+                            query={searchParams.get('query')}
+                            level={searchParams.get('level')}
                         />
-                    )}
+                    }
                 </div>
             </div>
 
@@ -230,7 +281,7 @@ const SearchPage = () => {
                     className="my-button my-button-primary py-2"
                     onClick={startChatSessionHandler}
                     data-tooltip-id="start-chat-tooltip"
-                    data-tooltip-content="Interact with AI chatbot in just a click!"
+                    data-tooltip-content="Analyze profiles with AI Chatbot ✨"
                     data-tooltip-place="top"
                     data-tooltip-delay-show={200}>
                     Start Chat Session
@@ -264,6 +315,9 @@ const SearchPage = () => {
                 onAddToList={detailItemModalAddToListHandler}
                 onDownloadClick={detailItemModalDownloadHandler}
             />
+
+            {/* ====== Loading Modal ====== */}
+            <LoadingModal showLoadingModal={isStartChatSession} />
 
         </main>
     )

@@ -1,11 +1,9 @@
 
 import axiosInstance from "../configs";
 
-export default async function startThread(resumes) {
+export default async function startThread(resumes, timeStr) {
+    
     try {
-
-        let timeStr = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-
         let res = await axiosInstance.post(`/thread/start`, {
             ids: resumes,
             threadName: timeStr

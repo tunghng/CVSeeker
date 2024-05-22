@@ -249,27 +249,15 @@ func (ec *ElasticsearchClient) VectorSearch(ctx context.Context, indexName strin
 
 // HybridSearchWithBoost perform search combining both semantic and lexiacal search
 func (ec *ElasticsearchClient) HybridSearchWithBoost(ctx context.Context, indexName, query string, queryVector []float32, from, size int, knnBoost float32) ([]ResumeSummaryDTO, error) {
-	queryBoost := 1.0 - knnBoost
-
-	// Generate a query vector for the term, replace this with your actual model vector generation
 	res, err := ec.client.Search().
 		Index(indexName).
 		From(from).
 		Size(size).
 		Knn(types.KnnQuery{
-			Field:         "embedding", // Ensure this field matches your schema
+			Field:         "embedding",
 			QueryVector:   queryVector,
-			Boost:         &knnBoost,
-			K:             100,
-			NumCandidates: 100, // Adj	ust the number of candidates as needed
-		}).
-		Query(&types.Query{
-			Match: map[string]types.MatchQuery{
-				"content": {
-					Query: query,
-					Boost: &queryBoost,
-				},
-			},
+			K:             150,
+			NumCandidates: 200,
 		}).
 		Do(ctx)
 
@@ -299,7 +287,9 @@ func ConvertHitToElasticResponse(hit *types.Hit) (*ResumeSummaryDTO, error) {
 	}
 
 	// Extract the ID from the hit and assign it to the DTO
-	id := hit.Id_ // Assuming hit.ID contains the document's ID, adjust if your actual field name differs
+	id := hit.Id_
+
+	score := float64(hit.Score_)
 
 	// Check if the content is a JSON object and handle it directly
 	contentData, ok := source["content"].(map[string]interface{})
@@ -318,7 +308,8 @@ func ConvertHitToElasticResponse(hit *types.Hit) (*ResumeSummaryDTO, error) {
 		return nil, fmt.Errorf("an error occurred while unmarshaling resume content: %w", err)
 	}
 
-	resume.Id = id // Assigning the extracted ID to the DTO
+	resume.Id = id
+	resume.Point = score
 
 	return &resume, nil
 }

@@ -12,6 +12,8 @@ function GlobalProvider({ children }) {
         setShowSidebar(!showSidebar);
     }
 
+    const [sidebarThreads, setSidebarThreads] = useState(null); // null -> Loading, [] -> Empty, [data] -> Fetched data
+
 
     // ====== Selected Stack bar state
     const [showSelectedItemsStack, setShowSelectedItemsStack] = useState(false);
@@ -31,6 +33,10 @@ function GlobalProvider({ children }) {
         const newStack = selectedItemsStack.filter(item => item.id !== itemId);
         setSelectedItemsStack(newStack);
     }
+
+    const isItemSelected = (itemId) => {
+        return selectedItemsStack.some(item => item.id === itemId);
+    }
     
     // ====== Detailed Item Modal state
     const [showDetailItemModal, setShowDetailItemModal] = useState(false);
@@ -40,14 +46,18 @@ function GlobalProvider({ children }) {
     const value = {
         showSidebar,
         toggleSidebar,
+        sidebarThreads,
+        setSidebarThreads,
 
         showSelectedItemsStack,
+        setShowSelectedItemsStack,
         toggleSelectedItemsStack,
 
         selectedItemsStack,
         setSelectedItemsStack,
         pushToSelectedStack,
         popFromSelectedStack,
+        isItemSelected,
 
         showDetailItemModal,
         setShowDetailItemModal,

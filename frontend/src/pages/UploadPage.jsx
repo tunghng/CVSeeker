@@ -2,11 +2,18 @@
 import { useState } from "react";
 import processUploadFiles from "../services/data-processing/processUploadFiles";
 import uploadPdfFiles from "../services/data-processing/uploadPdfFiles";
+import uploadLinkedProfile from "../services/data-processing/uploadLinkedProfile";
+import getUploadedFiles from "../services/data-processing/getUploadedFiles";
+import getResume from "../services/data-processing/getResume";
+import { connectSocket, disconnect } from "../services/data-processing/connectSocket";
 
+import { toast } from 'react-toastify';
 import fileicon from '../assets/images/file.png';
-import { FileUploader } from "react-drag-drop-files";
 import FeatherIcon from 'feather-icons-react';
+import { FileUploader } from "react-drag-drop-files";
 import LinkedinUploadInput from "../components/LinkedinUploadInput/LinkedinUploadInput";
+import UploadProcessModal from "../components/UploadProcessModal/UploadProcessModal";
+import DetailItemModal from "../components/DetailItemModal/DetailItemModal";
 
 const fileTypes = ["PDF"];
 
@@ -18,16 +25,36 @@ const UploadPage = () => {
     const [files, setFiles] = useState([]);
     const [processedFiles, setProcessedFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showUploadProcessModal, setShowUploadProcessModal] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [showDetailItemModal, setShowDetailItemModal] = useState(false);
+    const [detailItem, setDetailItem] = useState(null);
 
     // ====== Event Handlers ======
     const linkedinUploadKeyDownHandler = (e) => {
         if (e.key === 'Enter' && urlInput.trim() !== '') {
-            console.log(urlInput.trim())
+            const profile = {
+                fileBytes: urlInput,
+            }
+            uploadLinkedProfile([profile])
+                .then((res) => {
+                    setUrlInput('');
+                    showUploadedToast('Profile will be processed immediately!');
+                    connectSocket(handleSocketMessage);
+                });
         }
     }
     const linkedinUploadClickHandler = () => {
         if (urlInput.trim() !== '') {
-            console.log(urlInput.trim())
+            const profile = {
+                fileBytes: urlInput,
+            }
+            uploadLinkedProfile([profile])
+                .then((res) => {
+                    setUrlInput('');
+                    showUploadedToast('Profile will be processed immediately!');
+                    connectSocket(handleSocketMessage);
+                });
         }
     }
 
@@ -69,12 +96,87 @@ const UploadPage = () => {
 
     const uploadFilesHandler = async () => {
         await uploadPdfFiles(processedFiles);
-    }
+        setFiles([]);
+        showUploadedToast('Profile will be processed immediately!');
+        connectSocket(handleSocketMessage);
+    };
+
+    const handleSocketMessage = (message) => {
+        if (message === '{"type":"notification","data":"All documents have been processed successfully."}') {
+            disconnect();
+            showFinishProcessToast('Complete profile processing!');
+            getUploadedFiles()
+                .then((res) => {
+                    setUploadedFiles(res);
+                });
+        }
+    };
+    const showFinishProcessToast = (message) => {
+        toast.success(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+        });
+    };
+    const showUploadedToast = (message) => {
+        toast.success(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+        });
+    };
+
+    const closeUploadProcessModal = () => {
+        setShowUploadProcessModal(false);
+    };
+    const openUploadProcessModal = () => {
+        setShowUploadProcessModal(true);
+        getUploadedFiles()
+            .then((res) => {
+                setUploadedFiles(res);
+            });
+    };
+
+    const detailItemModalOpenHandler = (item) => {
+        setShowDetailItemModal(true);
+        setDetailItem(null);
+        getResume(item.documentId)
+            .then((res) => {
+                setDetailItem(res);
+            });
+    };
+    const detailItemModalCloseHandler = () => {
+        setShowDetailItemModal(false);
+    };
+    const detailItemModalDownloadHandler = () => {
+        if (detailItem.url !== "") {
+            window.open(detailItem.url, '_blank');
+        }
+        else {
+            alert("No download link available")
+        }
+    };
 
     return (
         <main className="my-content-wrapper">
             <div className="my-container-medium pt-6 pb-8">
-                <h1 className="text-2xl font-bold text-title">Upload profile</h1>
+                <div className="flex justify-between items-center">
+                    <h1 className="text-2xl font-bold text-title">Upload profile</h1>
+                    <button className="my-button my-button-subtle rounded-full flex items-center py-2 px-4"
+                        onClick={openUploadProcessModal}
+                    >
+                        <FeatherIcon icon="inbox" className="w-6 h-6 mr-1" strokeWidth={2} />
+                        History
+                    </button>
+                </div>
 
                 {/* ====== Upload by link profile ====== */}
                 <h2 className="mt-4 text-lg text-text">Upload profile by Linkedin Url</h2>
@@ -95,6 +197,8 @@ const UploadPage = () => {
                     multiple={true}
                     types={fileTypes}
                     onTypeError={() => setError('Invalid file type. Please upload only PDF files.')}
+                    maxSize={1}
+                    onSizeError={() => setError('File size is too large. Maximum size is 1MB.')}
                     children={<CustomFileUploader isDragging={isDragging} />}
                     dropMessageStyle={{ display: "none" }}
                     onDraggingStateChange={dragStateChangeHandler}
@@ -109,7 +213,7 @@ const UploadPage = () => {
 
                 {/* ====== Uploaded files ====== */}
                 <div className="flex flex-col">
-                    {files.length > 0 && (
+                    {files && files.length > 0 && (
                         <>
                             {files.map((file, index) => (
                                 <div key={index} className="mt-6 px-4 py-3 flex items-center rounded-xl bg-disable-light">
@@ -138,6 +242,22 @@ const UploadPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* ====== Upload Process Modal ====== */}
+            <UploadProcessModal
+                showUploadProcessModal={showUploadProcessModal}
+                onClose={closeUploadProcessModal}
+                uploadedFiles={uploadedFiles}
+                onDetail={detailItemModalOpenHandler}
+            />
+
+            {/* ====== Detail Item Modal ====== */}
+            <DetailItemModal
+                showDetailItemModal={showDetailItemModal}
+                detailItem={detailItem}
+                onModalClose={detailItemModalCloseHandler}
+                onDownloadClick={detailItemModalDownloadHandler}
+            />
         </main>
     )
 }

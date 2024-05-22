@@ -25,6 +25,7 @@ type IChatbotService interface {
 	GetAllThreads(c *gin.Context) (*meta.BasicResponse, error)
 	GetResumesByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error)
 	UpdateThreadName(c *gin.Context, threadID string, newName string) (*meta.BasicResponse, error)
+	DeleteThreadById(c *gin.Context, threadId string) (*meta.BasicResponse, error)
 }
 
 type ChatbotService struct {
@@ -33,7 +34,6 @@ type ChatbotService struct {
 	elasticClient    elasticsearch.IElasticsearchClient
 	threadRepo       repositories.IThreadRepository
 	threadResumeRepo repositories.IThreadResumeRepository
-	//webSocketHub     *websocket.Hub
 }
 
 type ChatbotServiceArgs struct {
@@ -43,7 +43,6 @@ type ChatbotServiceArgs struct {
 	ElasticClient    elasticsearch.IElasticsearchClient
 	ThreadRepo       repositories.IThreadRepository
 	ThreadResumeRepo repositories.IThreadResumeRepository
-	//WebSocketHub     *websocket.Hub
 }
 
 func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
@@ -53,7 +52,6 @@ func NewChatbotService(args ChatbotServiceArgs) IChatbotService {
 		elasticClient:    args.ElasticClient,
 		threadRepo:       args.ThreadRepo,
 		threadResumeRepo: args.ThreadResumeRepo,
-		//webSocketHub:     args.WebSocketHub,
 	}
 }
 
@@ -72,8 +70,9 @@ func (_this *ChatbotService) StartChatSession(c *gin.Context, ids string, thread
 
 	// Format the documents' content from ResumeSummaryDTO
 	var fullTextContent strings.Builder
-	fullTextContent.WriteString("You will use these information to answer questions from the user: ")
+	fullTextContent.WriteString("You will use these information to answer questions from the user while using markdown for clarity: ")
 	for _, resume := range documents {
+		fullTextContent.WriteString(fmt.Sprintf("Name: %s", resume.BasicInfo.FullName))
 		fullTextContent.WriteString(fmt.Sprintf("Summary: %s; Skills: %v; ", resume.Summary, resume.Skills))
 		fullTextContent.WriteString(fmt.Sprintf("Education: %s, %s, GPA: %.2f; ", resume.BasicInfo.University, resume.BasicInfo.EducationLevel, resume.BasicInfo.GPA))
 		fullTextContent.WriteString("Work Experience: ")
@@ -232,6 +231,24 @@ func (_this *ChatbotService) GetAllThreads(c *gin.Context) (*meta.BasicResponse,
 	return response, nil
 }
 
+func (_this *ChatbotService) DeleteThreadById(c *gin.Context, threadId string) (*meta.BasicResponse, error) {
+	err := _this.threadRepo.Delete(_this.db, threadId)
+	if err != nil {
+		ginLogger.Gin(c).Errorf("failed to get all threads: %v", err)
+		return nil, err
+	}
+
+	response := &meta.BasicResponse{
+		Meta: meta.Meta{
+			Code:    http.StatusOK,
+			Message: "Thread deleted successfully",
+		},
+		Data: nil,
+	}
+
+	return response, nil
+}
+
 func (_this *ChatbotService) GetResumesByThreadID(c *gin.Context, threadID string) (*meta.BasicResponse, error) {
 	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 
@@ -241,11 +258,14 @@ func (_this *ChatbotService) GetResumesByThreadID(c *gin.Context, threadID strin
 		return nil, err
 	}
 
-	// Fetch documents from Elasticsearch
-	documents, err := _this.elasticClient.FetchDocumentsByIDs(c, elasticDocumentName, resumeIDs)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to fetch documents: %v", err)
-		return nil, err
+	var documents []*elasticsearch.ResumeSummaryDTO
+	for _, resumeID := range resumeIDs {
+		document, err := _this.elasticClient.GetDocumentByID(c, elasticDocumentName, resumeID)
+		if err != nil {
+			ginLogger.Gin(c).Errorf("failed to fetch document by ID: %v", err)
+			continue // or return nil, err if you prefer to fail on the first error
+		}
+		documents = append(documents, document)
 	}
 
 	response := &meta.BasicResponse{

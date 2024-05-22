@@ -19,6 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/dig"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"sync"
@@ -27,7 +28,7 @@ import (
 
 type IDataProcessingService interface {
 	ProcessData(c *gin.Context, fullText string, file string, uuid string) (*meta.BasicResponse, error)
-	ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData) (*meta.BasicResponse, error)
+	ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData, isLinkedin bool) (*meta.BasicResponse, error)
 	GetAllUploads(c *gin.Context) (*meta.BasicResponse, error)
 }
 
@@ -81,7 +82,7 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 		}
 
 		// Assume createElkResume is an existing method that prepares the data for Elasticsearch
-		elkResume, err := _this.createElkResume(c, fullText, file)
+		elkResume, err := _this.createElkResume(c, fullText, file, false)
 		if err != nil {
 			_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed"})
 			ginLogger.Gin(c).Errorf("failed to create elastic document: %v", err)
@@ -113,11 +114,24 @@ func (_this *DataProcessingService) ProcessData(c *gin.Context, fullText string,
 	return response, nil
 }
 
-func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData) (*meta.BasicResponse, error) {
+func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []dtos.ResumeData, isLinkedin bool) (*meta.BasicResponse, error) {
 	elasticDocumentName := viper.GetString(cfg.ElasticsearchDocumentIndex)
 
 	// Start processing in the background
 	go func() {
+		if isLinkedin {
+			linkedInUrls := make([]string, len(resumes))
+			for i, resume := range resumes {
+				linkedInUrls[i] = resume.FileBytes // Assuming FileBytes contains the LinkedIn URL
+			}
+
+			processedResumes, err := fetchLinkedInData(linkedInUrls)
+			if err != nil {
+				return
+			}
+			resumes = processedResumes // Replace or merge as necessary
+		}
+
 		var wg sync.WaitGroup
 		results := make(chan *dtos.ResumeProcessingResult, len(resumes))
 		errors := make(chan error, len(resumes))
@@ -130,6 +144,7 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 				// Create initial upload record for each document
 				initialUpload := &models.Upload{
 					Status: "Processing",
+					Name:   res.Name,
 				}
 
 				createdUpload, err := _this.uploadRepo.Create(_this.db, initialUpload)
@@ -138,23 +153,23 @@ func (_this *DataProcessingService) ProcessDataBatch(c *gin.Context, resumes []d
 					return
 				}
 
-				elkResume, err := _this.createElkResume(c, res.Content, res.FileBytes) // Use ctx instead of c
+				elkResume, err := _this.createElkResume(c, res.Content, res.FileBytes, isLinkedin)
 				if err != nil {
-					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed"})
+					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed", Name: res.Name})
 					ginLogger.Gin(c).Errorf("failed to create elk resume: %v", err)
 					errors <- err
 					return
 				}
 
-				documentID, err := _this.elasticClient.AddDocument(c, elasticDocumentName, elkResume) // Use ctx
+				documentID, err := _this.elasticClient.AddDocument(c, elasticDocumentName, elkResume)
 				if err != nil {
-					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed"})
+					_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, Status: "Failed", Name: res.Name})
 					ginLogger.Gin(c).Errorf("failed to upload resume data to Elasticsearch: %v", err)
 					errors <- err
 					return
 				}
 
-				_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, DocumentID: documentID, Status: "Success"})
+				_this.uploadRepo.Update(_this.db, &models.Upload{ID: createdUpload.ID, DocumentID: documentID, Status: "Success", Name: res.Name})
 			}(resume)
 		}
 
@@ -191,7 +206,7 @@ func (_this *DataProcessingService) GetAllUploads(c *gin.Context) (*meta.BasicRe
 			DocumentID: upload.DocumentID,
 			Status:     upload.Status,
 			Name:       upload.Name,
-			CreatedAt:  upload.CreatedAt.Unix(), // Format time as RFC3339
+			CreatedAt:  upload.CreatedAt.Unix(),
 			UUID:       upload.UUID,
 		}
 		uploadsDTO = append(uploadsDTO, dto)
@@ -208,17 +223,53 @@ func (_this *DataProcessingService) GetAllUploads(c *gin.Context) (*meta.BasicRe
 	return response, nil
 }
 
-func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText string, file string) (*elasticsearch.ElkResumeDTO, error) {
+func fetchLinkedInData(urls []string) ([]dtos.ResumeData, error) {
+	apiUrl := "http://crawler:8000/api/getfulltext/?list_url=" + strings.Join(urls, ",")
+	resp, err := http.Get(apiUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var linkedInResumes struct {
+		Resumes []dtos.ResumeData `json:"resumes"`
+	}
+	err = json.Unmarshal(body, &linkedInResumes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Process each resume to extract the name from the URL
+	for i, resume := range linkedInResumes.Resumes {
+		if name := extractNameFromURL(resume.FileBytes); name != "" {
+			linkedInResumes.Resumes[i].Name = name
+		}
+	}
+
+	return linkedInResumes.Resumes, nil
+}
+
+func extractNameFromURL(url string) string {
+	// Trim the trailing slash if present to ensure proper splitting
+	url = strings.TrimRight(url, "/")
+	parts := strings.Split(url, "/")
+	if len(parts) > 0 {
+		return parts[len(parts)-1] // Return the last part of the URL which is typically the username
+	}
+	return ""
+}
+
+func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText string, file string, isLinkedin bool) (*elasticsearch.ElkResumeDTO, error) {
 	prompt := generatePrompt(fullText)
+
 	model := viper.GetString(cfg.ChatGptModel)
 	textEmbeddingModel := viper.GetString(cfg.HuggingfaceModel)
 	awsBucketName := viper.GetString(cfg.AwsBucket)
-
-	fileBytes, err := base64.StdEncoding.DecodeString(file)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to decode file: %v", err)
-		return nil, err
-	}
 
 	// Parse resume text to JSON format by making request to OpenAI
 	responseText, err := _this.gptClient.AskGPT(prompt, model)
@@ -228,16 +279,25 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 	}
 
 	// Upload file to S3 and get the URL
-	key := fmt.Sprintf("%d.docx", time.Now().Unix())
+	key := fmt.Sprintf("%d.pdf", time.Now().Unix())
 
-	fileURL, err := _this.s3Client.UploadFile(c, awsBucketName, key, fileBytes)
-	if err != nil {
-		ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
-		return nil, err
+	var fileURL string
+
+	if isLinkedin == false {
+		fileBytes, err := base64.StdEncoding.DecodeString(file)
+		if err != nil {
+			ginLogger.Gin(c).Errorf("failed to decode file: %v", err)
+			return nil, err
+		}
+		fileURL, err = _this.s3Client.UploadFile(c, awsBucketName, key, fileBytes)
+		if err != nil {
+			ginLogger.Gin(c).Errorf("failed to upload file to S3: %v", err)
+			return nil, err
+		}
+	} else {
+		fileURL = file
 	}
-
 	var resumeSummary elasticsearch.ResumeSummaryDTO
-	//var resumeSummary map[string]interface{}
 	if err := json.Unmarshal([]byte(responseText), &resumeSummary); err != nil {
 		ginLogger.Gin(c).Errorf("failed to parse JSON response: %v", err)
 		return nil, err
@@ -270,11 +330,11 @@ func generatePrompt(fullText string) string {
   "summary": "[Provide a concise professional summary based on the resume. Include key skills and experiences.]",
   "skills": ["List all relevant skills derived from the resume, each as a separate element in the array."],
   "basic_info": {
-    "full_name": "[Invent a full name that sounds realistic and appropriate for the professional field]",
-    "university": "[Generate a university name that fits the education level and field of study]",
-    "education_level": "[Assign an education level, e.g., BS, MS, PhD, appropriate for the resume context]",
-    "majors": ["Create a list of majors that align with the professional background and education level]",
-    "GPA": [Generate a GPA as a number that is plausible for the given educational background, or use null if not applicable]
+    "full_name": "[Full name]",
+    "university": "[University name]",
+    "education_level": "[Education level, e.g., BS, MS, PhD, appropriate for the resume context]",
+    "majors": ["A list of majors that align with the professional background and education level]",
+    "GPA": [A GPA as a number that is plausible for the given educational background, or use null if not applicable]
   },
   "work_experience": [
     {

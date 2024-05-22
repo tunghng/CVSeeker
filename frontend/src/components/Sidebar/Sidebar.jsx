@@ -13,30 +13,23 @@ const Sidebar = () => {
     // ====== State Management ======
     const globalContext = useContext(GlobalContext);
     const location = useLocation()
-    const [threads, setThreads] = useState(null);
 
     // ====== Fetching Threads ======
     useEffect(() => {
-        setThreads(null)
         getAllThreads()
             .then(res => {
-                setThreads(res);
+                globalContext.setSidebarThreads(res);
             })
     }, [])
 
     return (
-        <div className={`${globalContext.showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 h-full mt-12 fixed top-0 left-0 flex flex-col z-10 bg-background py-2 border-r-2 border-border transition-all duration-700 ease-in-out`}>
+        <div className={`${globalContext.showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 h-full mt-12 fixed top-0 left-0 flex flex-col z-20 bg-background py-2 border-r-2 border-border transition-all duration-700 ease-in-out`}>
 
             {/* ====== Page Navigation List ====== */}
             <div className="navigation-list">
                 <Link to='/' className='navigation-item'>
                     <FeatherIcon icon="search" className="w-6 h-6" strokeWidth={1.8} />
                     <span>New Search</span>
-                </Link>
-
-                <Link to='/saved' className={`navigation-item ${location.pathname === '/saved' && 'active'}`}>
-                    <FeatherIcon icon="bookmark" className="w-6 h-6" strokeWidth={1.8} />
-                    <span>Saved CV</span>
                 </Link>
 
                 <Link to='/upload' className={`navigation-item ${location.pathname === '/upload' && 'active'}`}>
@@ -50,20 +43,25 @@ const Sidebar = () => {
             <div className="thread-list">
                 <h3 className='thread-title mt-6'>Threads</h3>
                 {
-                    (threads === null) ?
+                    (globalContext.sidebarThreads === null) ?
                         <div className="pt-4 flex justify-center items-center">
                             <div className="loader"></div>
                         </div>
                         :
-                        <>
-                            {threads.map((item, index) => (
-                                <SidebarThreadItem
-                                    key={index}
-                                    item={item}
-                                    isActive={location.pathname === `/chat/${item.id}`}
-                                />
-                            ))}
-                        </>
+                        (globalContext.sidebarThreads.length === 0) ?
+                            <div className="pt-4 text-center">
+                                <span className="text-subtitle">No threads found</span>
+                            </div>
+                            :
+                            <>
+                                {globalContext.sidebarThreads.map((item, index) => (
+                                    <SidebarThreadItem
+                                        key={index}
+                                        item={item}
+                                        isActive={location.pathname === `/chat/${item.id}`}
+                                    />
+                                ))}
+                            </>
                 }
             </div>
         </div>

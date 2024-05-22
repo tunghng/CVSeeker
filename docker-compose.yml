@@ -11,7 +11,6 @@ services:
       - MYSQL_PASSWORD=${DB_MYSQL_PASSWORD}
       - MYSQL_DATABASE=${DB_MYSQL_DATABASE}
     volumes:
-#      - mysql_data:/var/lib/mysql
       - ./init.local.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
@@ -20,7 +19,7 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    image: tunghng/cvseeker-backend:latest
     ports:
       - "8080:8080"
     env_file:
@@ -28,15 +27,18 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    # command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
+    command: ["/wait-for-it.sh", "mysql:3306", "--", "./main"]
 
   frontend:
-    build: ./frontend
+    image: tunghng/cvseeker-frontend:latest
     ports:
-      - "5173:5173"  # Ensure to adjust the port if "serve" is configured differently
+      - "5173:5173"
     depends_on:
       - backend
 
-volumes:
-  mysql_data:
-    driver: local
+  crawler:
+    image: tunghng/cvseeker-crawler:latest
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
