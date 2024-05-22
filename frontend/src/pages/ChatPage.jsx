@@ -38,6 +38,9 @@ const ChatPage = () => {
 
     useEffect(() => {
         setThreadResumes([])
+        if (globalContext.showSelectedItemsStack === false) {
+            globalContext.toggleSelectedItemsStack()
+        }
         getThreadResumes(threadId)
             .then(res => {
                 setThreadResumes(res)
@@ -199,7 +202,7 @@ const ChatPage = () => {
             <div className={`${globalContext.showSelectedItemsStack ? 'translate-x-0' : 'translate-x-full'} w-full max-w-72 h-[calc(100%-3rem)] fixed  right-0 flex flex-col bg-background px-3 pt-3 pb-5 border-l-2 border-border transition-all duration-700 ease-in-out`}>
                 <h1 className="text-lg font-semibold">Selected items ({threadResumes ? threadResumes.length : 0})</h1>
 
-                <div className="flex-1">
+                <div className="flex-1 overflow-y-auto">
                     {
                         threadResumes.length === 0 ?
                             <div className="pt-4 flex justify-center items-center">

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 
 import ResumeSearchInput from "../components/ResumeSearchInput/ResumeSearchInput"
 import ResumeSearchSlider from "../components/ResumeSearchSlider/ResumeSearchSlider"
+import home_illustration from '../assets/images/home-illustration.png'
 
 const HomePage = () => {
     // ====== State Management ======
@@ -41,6 +42,11 @@ const HomePage = () => {
                     value={resumeSearchLevel}
                     onChange={(e) => setResumeSearchLevel(e.target.value)}
                 />
+            </div> */}
+
+            {/* ====== Illustration ====== */}
+            {/* <div className="my-container-small mt-24 flex flex-col justify-center items-center">
+                <img src={home_illustration} alt="Home Illustration" className="w-full max-w-96" />
             </div> */}
         </main>
     )

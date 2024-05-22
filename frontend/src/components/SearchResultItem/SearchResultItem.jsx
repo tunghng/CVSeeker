@@ -35,7 +35,7 @@ const SearchResultItem = ({ item, viewMode, onSelectClick, onDetailClick, onDown
             <p className='w-44 my-auto text-left text-base font-semibold cursor-default truncate'>{item.basic_info.full_name}</p>
 
             <p className={`w-32 my-auto text-center text-base font-bold cursor-default truncate ${
-                item.point >= 0.8 ? 'text-green-500' : item.point >= 0.6 ? 'text-lime-500' : item.point >= 0.4 ? 'text-orange-500' : 'text-red-500'
+                item.point >= 0.8 ? 'text-green-600/90' : item.point >= 0.6 ? 'text-lime-600/65' : item.point >= 0.4 ? 'text-orange-500' : 'text-red-500'
             }`}>{(item.point * 100).toFixed(1)}%</p>
 
             <p className='flex-1 my-auto text-center text-[15px] cursor-default truncate'>{item.basic_info.education_level}</p>
