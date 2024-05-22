@@ -105,6 +105,10 @@ const UploadPage = () => {
         if (message === '{"type":"notification","data":"All documents have been processed successfully."}') {
             disconnect();
             showFinishProcessToast('Complete profile processing!');
+            getUploadedFiles()
+                .then((res) => {
+                    setUploadedFiles(res);
+                });
         }
     };
     const showFinishProcessToast = (message) => {
@@ -153,7 +157,12 @@ const UploadPage = () => {
         setShowDetailItemModal(false);
     };
     const detailItemModalDownloadHandler = () => {
-        window.open(detailItem.url, '_blank');
+        if (detailItem.url !== "") {
+            window.open(detailItem.url, '_blank');
+        }
+        else {
+            alert("No download link available")
+        }
     };
 
     return (
