@@ -193,7 +193,12 @@ const SearchPage = () => {
                                 <button
                                     className="my-button my-button-outline"
                                     onClick={addResultToStackHandler}
+                                    data-tooltip-id="add-list-tooltip"
+                                    data-tooltip-content="Add selected items to List"
+                                    data-tooltip-place="bottom"
+                                    data-tooltip-delay-show={700}
                                 >Add to List</button>
+                                <Tooltip id="add-list-tooltip" className="z-50" />
                             </>
                         }
                     </div>
@@ -276,7 +281,7 @@ const SearchPage = () => {
                     className="my-button my-button-primary py-2"
                     onClick={startChatSessionHandler}
                     data-tooltip-id="start-chat-tooltip"
-                    data-tooltip-content="Interact with AI chatbot in just a click!"
+                    data-tooltip-content="Analyze profiles with AI Chatbot ✨"
                     data-tooltip-place="top"
                     data-tooltip-delay-show={200}>
                     Start Chat Session
