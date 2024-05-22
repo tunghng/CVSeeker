@@ -279,7 +279,7 @@ func (_this *DataProcessingService) createElkResume(c *gin.Context, fullText str
 	}
 
 	// Upload file to S3 and get the URL
-	key := fmt.Sprintf("%d", time.Now().Unix())
+	key := fmt.Sprintf("%d.pdf", time.Now().Unix())
 
 	var fileURL string
 
