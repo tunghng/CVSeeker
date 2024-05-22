@@ -53,7 +53,7 @@ const SearchPage = () => {
                     return;
                 }
                 setIsNoResult(false);
-                const updatedResults = res.map(item => ({ ...item, selected: false }));
+                const updatedResults = res.map(item => ({ ...item, selected: globalContext.isItemSelected(item.id) }));
                 setSearchResults(updatedResults);
             })
     }, [searchParams]);
@@ -63,13 +63,13 @@ const SearchPage = () => {
         if (e.key === 'Enter'
             && resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=1`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`);
         }
     }
     const resumeSearchClickHandler = () => {
         if (resumeSearchInput.trim() !== ''
             && (resumeSearchInput.trim() !== searchParams.get('query') || resumeSearchLevel !== searchParams.get('level'))) {
-            navigate(`/search?query=${resumeSearchInput.trim()}&page=${resumeSearchPage}&level=1`);
+            navigate(`/search?query=${resumeSearchInput.trim()}&page=1&level=1`);
         }
     }
 
