@@ -1,12 +1,10 @@
-# CVSeeker Backend Services D
+# CVSeeker Backend Services
 
 ## Table of Contents
 - [1. Introduction](#1-introduction)
 - [2. Data Processing Service](#2-data-processing-service)
 - [3. Search Service](#3-search-service)
 - [4. Chatbot Service](#4-chatbot-service)
-- [5. API Endpoints](#5-api-endpoints)
-- [6. Implementation Specifics](#6-implementation-specifics)
 
 ## 1. Introduction
 CVSeeker is designed to streamline the talent acquisition process, enabling teams to efficiently find and engage candidates within their talent pool. This documentation outlines the backend services that support this application.
@@ -48,7 +46,7 @@ When a resume is uploaded, the data processing service initiates a background jo
 }
 ```
 
-**[Insert Data Flow Diagram Placeholder]**
+**![alt text](./statics/DataProcessingService.png)**
 
 ## 3. Search Service
 The search service allows users to perform hybrid searches combining keyword and semantic approaches:
@@ -60,7 +58,7 @@ The search service allows users to perform hybrid searches combining keyword and
 
 Results are presented in the search interface, ranked by match quality.
 
-**[Insert Search Workflow Diagram Placeholder]**
+****![alt text](./statics/SearchService.png)**
 
 ## 4. Chatbot Service
 Users can interact directly with selected resumes through a chat interface powered by OpenAI's Assistant API:
@@ -68,45 +66,5 @@ Users can interact directly with selected resumes through a chat interface power
 2. **Interaction:** User messages are processed by the Assistant API, with responses streamed back to the frontend via WebSocket.
 3. **Session Continuity:** Users can revisit previous threads to continue interactions and review associated resumes.
 
-**[Insert Chatbot Service Workflow Diagram Placeholder]**
+****![alt text](./statics/ChatbotService.png)**
 
-## 5. API Endpoints
-### Data Processing Service
-#### Upload Resumes
-- **POST** `/cvseeker/resumes/upload`
-   - **Description:** Processes uploaded resume files and associated metadata as JSON.
-   - **Request Body:** `{ "resumeData": [array of resume files and metadata] }` (required)
-   - **Responses:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `500 Internal Server Error`
-
-### Search Service
-#### Perform Hybrid Search
-- **POST** `/cvseeker/resumes/search`
-   - **Description:** Executes a search combining keyword and vector-based queries.
-   - **Request Body:** `{ "query": "search keywords", "knnBoost": 0.5 }` (required)
-   - **Responses:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `500 Internal Server Error`
-
-### Chatbot Service
-#### Start Chat Session
-- **POST** `/cvseeker/resumes/thread/start`
-   - **Description:** Starts a new chat session using specified document IDs.
-   - **Request Body:** `{ "ids": "comma-separated document IDs", "threadName": "optional name" }` (required)
-   - **Responses:** `200 OK`, `400 Bad Request`, `500 Internal Server Error`
-
-#### Get Messages from a Thread
-- **GET** `/cvseeker/resumes/thread/{threadId}/messages`
-   - **Description:** Retrieves messages from a specified chat thread.
-   - **Path Parameters:** `threadId` (required)
-   - **Query Parameters:** `limit`, `after`, `before` for pagination
-   - **Responses:** `200 OK`, `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `500 Internal Server Error`
-
-#### Send Message to a Thread
-- **POST** `/cvseeker/resumes/thread/{threadId}/send`
-   - **Description:** Sends a message to the specified thread.
-   - **Path Parameters:** `threadId` (required)
-   - **Request Body:** `{ "message": "text" }` (required)
-   - **Responses:** `200 OK`, `400 Bad Request`, `500 Internal Server Error`
-
-## 6. Implementation Specifics
-(Provide details on database connections, security considerations, performance metrics, error handling, etc.)
-
-**[Insert Additional Diagrams or Technical Specification Placeholders as Needed]**
