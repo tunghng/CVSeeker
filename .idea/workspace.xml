@@ -7,11 +7,6 @@
     <list default="true" id="fe974652-f87c-4c25-8169-8532af508f73" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/statics/ChatbotService.png" beforeDir="false" afterPath="$PROJECT_DIR$/statics/ChatbotService.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/statics/DataProcessingService.png" beforeDir="false" afterPath="$PROJECT_DIR$/statics/DataProcessingService.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/statics/PresentationSlides.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/statics/PresentationSlides.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/statics/SearchService.png" beforeDir="false" afterPath="$PROJECT_DIR$/statics/SearchService.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,9 +54,9 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/statics" />
       <recent name="$PROJECT_DIR$/SearchService" />
       <recent name="$PROJECT_DIR$/ModelFinetuning" />
-      <recent name="$PROJECT_DIR$/statics" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>

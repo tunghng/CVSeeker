@@ -23,6 +23,7 @@ CVSeeker uses advanced technology to improve the hiring process. We use AWS S3 f
 2. **Automated Labeling:** Using OpenAI's GPT models, we automatically generate labels for the collected data. This involves processing the raw text to identify and classify relevant features and attributes essential for our application.
 3. **Model Adjustment:** The labeled data is then used to fine-tune the 'mxbai-embed-large-v1' model. Adjustments are made specifically to enhance the model's performance in embedding generation.
 4. **Testing and Validation:** Post-adjustment, the model undergoes rigorous testing to ensure that it meets our precision and reliability standards.
+   **![alt text](statics/ModelFineTuning.png)**
 
 ## 3. Data Processing Service
 When a resume is uploaded, the data processing service initiates a background job to handle the file:
