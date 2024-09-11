@@ -1,23 +1,30 @@
-Certainly! Here's your complete `readme.md` in Markdown format:
-
 # CVSeeker Backend Services
 
 ## Table of Contents
 - [1. Introduction](#1-introduction)
-- [2. Model Fine-Tuning](#2-model-fine-tuning)
-- [3. Data Processing Service](#3-data-processing-service)
-- [4. Search Service](#4-search-service)
-- [5. Chatbot Service](#5-chatbot-service)
-- [6. Demo](#6-demo)
+- [2. Demo](#2-demo)
+- [3. Model Fine-Tuning](#3-model-fine-tuning)
+- [4. Data Processing Service](#4-data-processing-service)
+- [5. Search Service](#5-search-service)
+- [6. Chatbot Service](#6-chatbot-service)
 - [7. Environment Variables](#7-environment-variables)
 - [8. Deployment Instructions](#8-deployment-instructions)
 
 ## 1. Introduction
-CVSeeker uses advanced technology to improve the hiring process. We use AWS S3 for reliable file storage, Elasticsearch for powerful semantic search capabilities, and OpenAI's GPT along with Hugging Face models for understanding and natural language interaction with resumes. This guide explains how the key parts of CVSeeker work together to provide a smooth and efficient way to manage and connect with potential candidates.
+CVSeeker is a backend service designed to streamline the hiring process by leveraging advanced technology for resume analysis and candidate search.
+
+- **Automated Data Processing**: Automatically processes resumes, converting them into structured data and embedding them for efficient searching.
+- **Secure Resume Storage**: Stores all uploaded resumes safely in AWS S3, ensuring data security and reliability.
+- **Powerful Search**: Combines keyword and semantic search powered by Elasticsearch to help recruiters find the most relevant candidates quickly.
+- **AI-Powered Chatbot**: Enables recruiters to interact with resumes via a chatbot that understands and responds to queries using OpenAI’s Assistant API.
+
 - [Slides](statics/PresentationSlides.pdf)
 
+## 2. Demo
+- [Demo Video](https://drive.google.com/file/d/1vHJdc0wk0tcITZD2GSV23cpZ-r-BLrtB/view?fbclid=IwZXh0bgNhZW0CMTAAAR02DHzEFnhpDIgEV0v18G-b4bcSxGyKEhD8fyCfWyR5debmsU-t1V5uYxc_aem_AbJ6PRDlhm0-QmW1tgnVHTFOkRynqyv0QpoCc8_QQOoWNvWiTLF-ijalpVoijP4aYvV-nWLum2Cxt_N2k0oM0pLU)
+
 **![alt text](statics/Deliverables.png)**
-## 2. Model Fine-Tuning
+## 3. Model Fine-Tuning
 
 1. **Data Collection:** We gather extensive datasets from platforms such as Kaggle and LinkedIn, which provide a diverse range of professional profiles and job descriptions.
 2. **Automated Labeling:** Using OpenAI's GPT models, we automatically generate labels for the collected data. This involves processing the raw text to identify and classify relevant features and attributes essential for our application.
@@ -25,7 +32,7 @@ CVSeeker uses advanced technology to improve the hiring process. We use AWS S3 f
 4. **Testing and Validation:** Post-adjustment, the model undergoes rigorous testing to ensure that it meets our precision and reliability standards.
    **![alt text](statics/ModelFinetuning.png)**
 
-## 3. Data Processing Service
+## 4. Data Processing Service
 When a resume is uploaded, the data processing service initiates a background job to handle the file:
 1. **File Storage:** The resume is stored in AWS S3.
 2. **Data Parsing:** The full text of the resume is extracted and formatted using OpenAI's GPT into a predefined JSON structure.
@@ -61,7 +68,7 @@ When a resume is uploaded, the data processing service initiates a background jo
 
 **![alt text](statics/DataProcessingService.png)**
 
-## 4. Search Service
+## 5. Search Service
 The search service allows users to perform hybrid searches combining keyword and semantic approaches:
 1. **Query Input:** Users input a search query with a semantic threshold.
 2. **Vectorization:** The query is vectorized using the same Hugging Face model.
@@ -73,16 +80,13 @@ Results are presented in the search interface, ranked by match quality.
 
 **![alt text](statics/SearchService.png)**
 
-## 5. Chatbot Service
+## 6. Chatbot Service
 Users can interact directly with selected resumes through a chat interface powered by OpenAI's Assistant API:
 1. **Session Management:** Users start chat sessions with selected resumes. Each session creates a new thread, and all candidate information is loaded into this thread.
 2. **Interaction:** User messages are processed by the Assistant API, with responses streamed back to the frontend via WebSocket.
 3. **Session Continuity:** Users can revisit previous threads to continue interactions and review associated resumes.
 
 **![alt text](statics/ChatbotService.png)**
-
-## 6. Demo
-- [Demo Video](https://drive.google.com/file/d/1vHJdc0wk0tcITZD2GSV23cpZ-r-BLrtB/view?fbclid=IwZXh0bgNhZW0CMTAAAR02DHzEFnhpDIgEV0v18G-b4bcSxGyKEhD8fyCfWyR5debmsU-t1V5uYxc_aem_AbJ6PRDlhm0-QmW1tgnVHTFOkRynqyv0QpoCc8_QQOoWNvWiTLF-ijalpVoijP4aYvV-nWLum2Cxt_N2k0oM0pLU)
 
 ## 7. Environment Variables
 Before starting the application, configure the `.env` file with the necessary environment variables. Below is a guide on where to find or how to set these variables:
