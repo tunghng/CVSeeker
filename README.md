@@ -25,11 +25,12 @@ CVSeeker is a backend service designed to streamline the hiring process by lever
 
 **![alt text](statics/Deliverables.png)**
 ## 3. Model Fine-Tuning
+We finetune a vector embedding model to facilitate the semantic search task.
 
-1. **Data Collection:** We gather extensive datasets from platforms such as Kaggle and LinkedIn, which provide a diverse range of professional profiles and job descriptions.
-2. **Automated Labeling:** Using OpenAI's GPT models, we automatically generate labels for the collected data. This involves processing the raw text to identify and classify relevant features and attributes essential for our application.
-3. **Model Adjustment:** The labeled data is then used to fine-tune the 'mxbai-embed-large-v1' model. Adjustments are made specifically to enhance the model's performance in embedding generation.
-4. **Testing and Validation:** Post-adjustment, the model undergoes rigorous testing to ensure that it meets our precision and reliability standards.
+1. **Data Collection:** We gather extensive [datasets](https://github.com/tunghng/CVSeeker/tree/main/model/data) from platforms such as Kaggle and LinkedIn (~5000 instances), which provide a diverse range of professional profiles and job descriptions.
+2. **Automated Labeling:** Using OpenAI's GPT models, we automatically generate labels for the collected data. 
+3. **Model Fine-tuning:** The labeled data is then used to fine-tune the [mxbai-embed-large-v1](https://huggingface.co/mixedbread-ai/mxbai-embed-large-v1) model. 
+
    **![alt text](statics/ModelFinetuning.png)**
 
 ## 4. Data Processing Service
