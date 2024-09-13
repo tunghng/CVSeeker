@@ -20,7 +20,7 @@ CVSeeker is a backend service designed to streamline the hiring process by lever
 
 
 ## 2. Demo
-- [Demo Video](https://drive.google.com/file/d/1vHJdc0wk0tcITZD2GSV23cpZ-r-BLrtB/view?fbclid=IwZXh0bgNhZW0CMTAAAR02DHzEFnhpDIgEV0v18G-b4bcSxGyKEhD8fyCfWyR5debmsU-t1V5uYxc_aem_AbJ6PRDlhm0-QmW1tgnVHTFOkRynqyv0QpoCc8_QQOoWNvWiTLF-ijalpVoijP4aYvV-nWLum2Cxt_N2k0oM0pLU)
+- [Demo Video](https://drive.google.com/file/d/15TPptfknm8cgT41iiPr0pFmYVqaIHeXr/view)
 - [Slides](statics/PresentationSlides.pdf)
 
 ## 3. Model Fine-Tuning
