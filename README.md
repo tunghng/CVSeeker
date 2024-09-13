@@ -13,8 +13,8 @@
 ## 1. Introduction
 CVSeeker is a backend service designed to streamline the hiring process by leveraging advanced technology for resume analysis and candidate search.
 
-- **Automated Data Processing**: Automatically processes resumes, converting them into structured data and embedding them for efficient searching.
-- **Secure Resume Storage**: Stores all uploaded resumes safely in AWS S3, ensuring data security and reliability.
+- **Database Population**: Crawl potential LinkedIn profile using profile URL as input and populate into database.
+- **Automated Data Processing**: Automatically processes resumes, converting them into json structured data and embedding them for efficient searching.
 - **Powerful Search**: Combines keyword and semantic search powered by Elasticsearch to help recruiters find the most relevant candidates quickly.
 - **AI-Powered Chatbot**: Enables recruiters to interact with resumes via a chatbot that understands and responds to queries using OpenAI’s Assistant API.
 
@@ -23,7 +23,6 @@ CVSeeker is a backend service designed to streamline the hiring process by lever
 ## 2. Demo
 - [Demo Video](https://drive.google.com/file/d/1vHJdc0wk0tcITZD2GSV23cpZ-r-BLrtB/view?fbclid=IwZXh0bgNhZW0CMTAAAR02DHzEFnhpDIgEV0v18G-b4bcSxGyKEhD8fyCfWyR5debmsU-t1V5uYxc_aem_AbJ6PRDlhm0-QmW1tgnVHTFOkRynqyv0QpoCc8_QQOoWNvWiTLF-ijalpVoijP4aYvV-nWLum2Cxt_N2k0oM0pLU)
 
-**![alt text](statics/Deliverables.png)**
 ## 3. Model Fine-Tuning
 We finetune a vector embedding model to facilitate the semantic search task.
 
